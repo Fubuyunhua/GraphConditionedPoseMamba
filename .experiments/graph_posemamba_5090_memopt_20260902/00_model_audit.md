@@ -97,3 +97,14 @@ The formal run started from remote source commit
 raw/EMA checkpoint families present; post-evaluation process memory remained
 stable at 3,462 MiB.  The first-epoch runtime gate therefore passed and the run
 continues.
+
+## Speed-first amendment
+
+A real epoch-4 EMA checkpoint loaded in a new FP32 eager batch-1 process and
+used only 595 MiB allocated / 610 MiB reserved.  Training compile/CUDA Graph
+state is therefore not required by the saved weights.  At the user's revised
+priority, M4 (`reduce-overhead` training plus eager evaluation) passed the same
+full-model equivalence gate and was selected.  The M2 run was preserved after
+four complete epochs and stopped without resume; M4 started from a fresh seed-0
+initialization at remote source commit
+`b1d9364b3e1f9e0570b4ed37350c4ab11a57b963`.

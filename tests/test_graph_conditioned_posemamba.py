@@ -252,9 +252,10 @@ class ConfigurationAndCapacityTests(unittest.TestCase):
                 / "configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m.yaml"
             )
         )
-        for name, checkpointed in (
-            ("graph_posemamba_h36m_w64_d8_0p8m_memopt_default.yaml", False),
-            ("graph_posemamba_h36m_w64_d8_0p8m_memopt_checkpoint.yaml", True),
+        for name, checkpointed, compile_mode in (
+            ("graph_posemamba_h36m_w64_d8_0p8m_memopt_default.yaml", False, "default"),
+            ("graph_posemamba_h36m_w64_d8_0p8m_memopt_checkpoint.yaml", True, "default"),
+            ("graph_posemamba_h36m_w64_d8_0p8m_memopt_speed.yaml", False, "reduce-overhead"),
         ):
             candidate = get_config(str(REPO_ROOT / "configs/pose3d" / name))
             for field in (
@@ -276,7 +277,7 @@ class ConfigurationAndCapacityTests(unittest.TestCase):
                 "lambda_diff",
             ):
                 self.assertEqual(getattr(candidate, field), getattr(baseline, field))
-            self.assertEqual(candidate.compile_mode, "default")
+            self.assertEqual(candidate.compile_mode, compile_mode)
             self.assertTrue(candidate.eager_eval_when_compiled)
             self.assertEqual(candidate.activation_checkpoint_blocks, checkpointed)
             self.assertEqual(parameter_count(load_backbone(candidate)), 800_083)
