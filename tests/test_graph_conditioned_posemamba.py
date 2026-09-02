@@ -49,6 +49,13 @@ class RecordingSSM(nn.Module):
         return x
 
 
+class ContextAwareSSM(nn.Module):
+    """Small differentiable stand-in for checkpoint equivalence tests."""
+
+    def forward(self, x, context=None):
+        return x if context is None else x + 0.125 * context
+
+
 class GraphMixerTests(unittest.TestCase):
     def test_required_h36m_neighbors(self):
         neighbors = h36m_neighbor_names(use_symmetry_edges=True)
@@ -235,6 +242,89 @@ class ConfigurationAndCapacityTests(unittest.TestCase):
         for block in candidate.blocks:
             self.assertEqual(block.gamma_s.item(), 1.0)
             self.assertEqual(block.gamma_t.item(), 1.0)
+
+    def test_memory_optimized_configs_preserve_protocol_and_capacity(self):
+        from lib.utils.learning import load_backbone
+
+        baseline = get_config(
+            str(
+                REPO_ROOT
+                / "configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m.yaml"
+            )
+        )
+        for name, checkpointed in (
+            ("graph_posemamba_h36m_w64_d8_0p8m_memopt_default.yaml", False),
+            ("graph_posemamba_h36m_w64_d8_0p8m_memopt_checkpoint.yaml", True),
+        ):
+            candidate = get_config(str(REPO_ROOT / "configs/pose3d" / name))
+            for field in (
+                "epochs",
+                "warmup_epochs",
+                "batch_size",
+                "test_batch_size",
+                "learning_rate",
+                "weight_decay",
+                "lr_decay",
+                "use_ema",
+                "ema_decay",
+                "clip_len",
+                "data_stride",
+                "sample_stride",
+                "lambda_3d",
+                "lambda_scale",
+                "lambda_3d_velocity",
+                "lambda_diff",
+            ):
+                self.assertEqual(getattr(candidate, field), getattr(baseline, field))
+            self.assertEqual(candidate.compile_mode, "default")
+            self.assertTrue(candidate.eager_eval_when_compiled)
+            self.assertEqual(candidate.activation_checkpoint_blocks, checkpointed)
+            self.assertEqual(parameter_count(load_backbone(candidate)), 800_083)
+
+    def test_activation_checkpoint_preserves_outputs_and_gradients(self):
+        torch.manual_seed(20260902)
+        reference = GraphConditionedPoseMamba(
+            num_frame=9,
+            in_chans=3,
+            embed_dim_ratio=12,
+            depth=2,
+            mlp_ratio=1.5,
+            drop_path_rate=0.0,
+            activation_checkpoint_blocks=False,
+        ).train()
+        checkpointed = GraphConditionedPoseMamba(
+            num_frame=9,
+            in_chans=3,
+            embed_dim_ratio=12,
+            depth=2,
+            mlp_ratio=1.5,
+            drop_path_rate=0.0,
+            activation_checkpoint_blocks=True,
+        ).train()
+        for model in (reference, checkpointed):
+            for block in model.blocks:
+                block.spatial_ssm = ContextAwareSSM()
+                block.temporal_ssm = ContextAwareSSM()
+        checkpointed.load_state_dict(reference.state_dict(), strict=True)
+
+        x_reference = torch.randn(2, 9, 17, 3, requires_grad=True)
+        x_checkpointed = x_reference.detach().clone().requires_grad_(True)
+        output_reference = reference(x_reference)
+        output_reference.square().mean().backward()
+        output_checkpointed = checkpointed(x_checkpointed)
+        output_checkpointed.square().mean().backward()
+
+        torch.testing.assert_close(output_checkpointed, output_reference, rtol=0, atol=0)
+        torch.testing.assert_close(x_checkpointed.grad, x_reference.grad, rtol=0, atol=0)
+        for (_, parameter_reference), (_, parameter_checkpointed) in zip(
+            reference.named_parameters(), checkpointed.named_parameters()
+        ):
+            torch.testing.assert_close(
+                parameter_checkpointed.grad,
+                parameter_reference.grad,
+                rtol=1e-6,
+                atol=1e-8,
+            )
 
 
 @unittest.skipUnless(cuda_selective_scan_available(), "CUDA selective scan is unavailable")

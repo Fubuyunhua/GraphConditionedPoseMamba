@@ -333,10 +333,13 @@ def train_epoch(args, model_pos, train_loader, losses, optimizer, has_3d, has_gt
                 batch_gt[:,:,:,2] = batch_gt[:,:,:,2] - batch_gt[:,0:1,0:1,2] # Place the depth of first frame root to 0.
             if args.mask or args.noise:
                 batch_input = args.aug.augment2D(batch_input, noise=(args.noise and has_gt), mask=args.mask)
+        # Release the previous step's gradients before allocating the next
+        # forward activations.  This is numerically equivalent to clearing
+        # them after forward because gradients are only consumed by step().
+        optimizer.zero_grad(set_to_none=True)
         # Predict 3D poses
         predicted_3d_pos = model_pos(batch_input)    # (N, T, 17, 3)
-        
-        optimizer.zero_grad(set_to_none=True)
+
         if has_3d:
             """ 
             lambda_3d_velocity: 20.0
@@ -644,13 +647,25 @@ def train_with_config(args, opts):
                 int(torch._dynamo.config.recompile_limit),
                 64,
             )
-        log.info("INFO: Enabling torch.compile(mode='reduce-overhead')")
+        compile_mode = str(getattr(args, "compile_mode", "reduce-overhead"))
+        allowed_compile_modes = {
+            "default",
+            "reduce-overhead",
+            "max-autotune",
+            "max-autotune-no-cudagraphs",
+        }
+        if compile_mode not in allowed_compile_modes:
+            raise ValueError(
+                f"Unsupported compile_mode={compile_mode!r}; "
+                f"expected one of {sorted(allowed_compile_modes)}"
+            )
+        log.info(f"INFO: Enabling torch.compile(mode={compile_mode!r})")
         log.info(
             "INFO: The first forward/backward is compiling and may remain at "
             "0it for about 10-60 seconds; do not interrupt unless a final "
             "RuntimeError/CUDA error is printed."
         )
-        model_pos = torch.compile(model_pos, mode="reduce-overhead", fullgraph=False)
+        model_pos = torch.compile(model_pos, mode=compile_mode, fullgraph=False)
     elif cuda_graph_model:
         if not torch.cuda.is_available():
             raise RuntimeError("cuda_graph_model=True requires CUDA")
@@ -718,10 +733,16 @@ def train_with_config(args, opts):
                    losses['3d_pos'].avg))
             else:
                 def _run_eval():
+                    eval_model = (
+                        _unwrap_compiled_model(model_pos)
+                        if compile_model
+                        and bool(getattr(args, "eager_eval_when_compiled", False))
+                        else model_pos
+                    )
                     if ema_helper is not None:
                         with ema_helper.average_parameters(model_pos):
-                            return evaluate(args, model_pos, test_loader, datareader)
-                    return evaluate(args, model_pos, test_loader, datareader)
+                            return evaluate(args, eval_model, test_loader, datareader)
+                    return evaluate(args, eval_model, test_loader, datareader)
 
                 e1, e2, results_all = _run_eval()
                 log.info('[%d] time %.2f lr %f 3d_train %f e1 %f e2 %f' % (
@@ -776,7 +797,13 @@ def train_with_config(args, opts):
                     save_ema_checkpoint(chk_path_best_ema, epoch, lr, optimizer, model_pos, min_loss, ema_helper)
                 
     if opts.evaluate:
-        e1, e2, results_all = evaluate(args, model_pos, test_loader, datareader)
+        eval_model = (
+            _unwrap_compiled_model(model_pos)
+            if compile_model
+            and bool(getattr(args, "eager_eval_when_compiled", False))
+            else model_pos
+        )
+        e1, e2, results_all = evaluate(args, eval_model, test_loader, datareader)
 
 if __name__ == "__main__":
     opts = parse_args()

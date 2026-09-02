@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "graph_posemamba_5090_memopt_20260902",
+    "created_at": "2026-09-02T21:40:00+08:00"
+  },
+  "baseline": {
+    "id": "GCPM-W64-D8-UPSTREAM",
+    "model": "lib/model/PoseMamba.py::GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m.yaml",
+    "config_sha256": "8d4b6c1a583de422d2bab98eba8b6891053379467dea6080fb93e9e117334039",
+    "source_identity": "git:14216ccc8699839c3a472e32ef95071464732975",
+    "dataset": "H36M-SH h36m_sh_conf_cam_source_final.pkl",
+    "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+    "split": "S1,S5,S6,S7,S8 train; S9,S11 evaluation",
+    "metric": "EMA P1 MPJPE",
+    "direction": "min",
+    "checkpoint": null,
+    "command": "python train.py --config configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m.yaml --checkpoint <new-run> --seed 0",
+    "environment": "RTX5090; torch 2.11.0+cu128; driver 580.159.03; FP32",
+    "seed_policy": [0]
+  },
+  "audit": {
+    "verdict": "PASS",
+    "timestamp": "2026-09-02T21:40:00+08:00",
+    "report": ".experiments/graph_posemamba_5090_memopt_20260902/00_model_audit.md",
+    "accepted_risks": [
+      "PyTorch version differs from RTX5060Ti",
+      "H36M evaluation is monitored per epoch"
+    ],
+    "blocking_findings": []
+  },
+  "experiments": [
+    {
+      "id": "M0",
+      "track": "DIAGNOSTIC",
+      "status": "COMPLETED",
+      "hypothesis": "Upstream reduce-overhead mode has the highest reserved-memory watermark.",
+      "baseline_id": "GCPM-W64-D8-UPSTREAM",
+      "delta": "none",
+      "controls": "same model/config/data/seed/batch/T/FP32",
+      "seeds": [20260902],
+      "budget": "short synthetic and real-data steps",
+      "primary_metric": "peak_reserved_mib",
+      "secondary_metrics": ["peak_allocated_mib", "iterations_per_second", "loss"],
+      "acceptance": "finite diagnostic",
+      "falsification": "OOM or non-finite loss",
+      "stopping_rule": "stop after stable peak",
+      "dependencies": [],
+      "artifacts": {},
+      "result": {
+        "completion_validity": "VALID_DIAGNOSTIC",
+        "metrics": {
+          "peak_reserved_mib": 2826.0,
+          "warmup_peak_allocated_mib": 2600.9932,
+          "iterations_per_second": 13.2816,
+          "loss": 63.8003273
+        },
+        "uncertainty": null,
+        "cost": "2 warmup plus 8 measured synthetic steps",
+        "failures": [],
+        "recommendation": "REJECT_FOR_FORMAL_EVAL_POOL_RISK"
+      }
+    },
+    {
+      "id": "M1",
+      "track": "DIAGNOSTIC",
+      "status": "COMPLETED",
+      "hypothesis": "Eager execution materially reduces memory versus M0.",
+      "baseline_id": "GCPM-W64-D8-UPSTREAM",
+      "delta": "compile disabled",
+      "controls": "same model/config/data/seed/batch/T/FP32",
+      "seeds": [20260902],
+      "budget": "short synthetic and real-data steps",
+      "primary_metric": "peak_reserved_mib",
+      "secondary_metrics": ["iterations_per_second", "loss"],
+      "acceptance": "lower peak than M0",
+      "falsification": "not lower or non-finite",
+      "stopping_rule": "stop after stable peak",
+      "dependencies": ["M0"],
+      "artifacts": {},
+      "result": {
+        "completion_validity": "VALID_DIAGNOSTIC",
+        "metrics": {
+          "peak_allocated_mib": 2828.6255,
+          "peak_reserved_mib": 2954.0,
+          "iterations_per_second": 9.7074,
+          "loss": 63.9021416
+        },
+        "uncertainty": null,
+        "cost": "2 warmup plus 8 measured synthetic steps",
+        "failures": [],
+        "recommendation": "KEEP_AS_FALLBACK"
+      }
+    },
+    {
+      "id": "M2",
+      "track": "IMPROVEMENT",
+      "status": "COMPLETED",
+      "hypothesis": "Default compile preserves throughput while avoiding CUDA Graph pool overhead.",
+      "baseline_id": "GCPM-W64-D8-UPSTREAM",
+      "delta": "compile_mode=default; eager eval; early zero_grad",
+      "controls": "same model/config/data/seed/batch/T/FP32",
+      "seeds": [20260902],
+      "budget": "short synthetic and real-data steps",
+      "primary_metric": "peak_reserved_mib",
+      "secondary_metrics": ["iterations_per_second", "loss", "output_delta", "gradient_delta"],
+      "acceptance": ">=20% lower peak than M0 and no correctness failure",
+      "falsification": "material numerical mismatch or insufficient headroom",
+      "stopping_rule": "select if faster than M3 and headroom gate passes",
+      "dependencies": ["M0", "M1"],
+      "artifacts": {},
+      "result": {
+        "completion_validity": "VALID_SELECTED",
+        "metrics": {
+          "synthetic_peak_reserved_mib": 2772.0,
+          "synthetic_iterations_per_second": 11.7135,
+          "real_peak_reserved_mib": 2836.0,
+          "real_iterations_per_second": 11.6072,
+          "real_loss": 0.5230389,
+          "loss_abs_delta": 0.0,
+          "output_max_abs_delta": 1.7881393432617188e-6,
+          "input_gradient_max_abs_delta": 1.4842953532934189e-9,
+          "parameter_gradient_max_abs_delta": 5.960464477539063e-8
+        },
+        "uncertainty": null,
+        "cost": "synthetic and real-data steps plus full-model equivalence",
+        "failures": [
+          "The pre-registered 20% training-peak reduction versus M0 was not observed on RTX5090"
+        ],
+        "recommendation": "KEEP"
+      }
+    },
+    {
+      "id": "M3",
+      "track": "IMPROVEMENT",
+      "status": "COMPLETED",
+      "hypothesis": "Non-reentrant block checkpointing further lowers peak memory with acceptable throughput.",
+      "baseline_id": "GCPM-W64-D8-UPSTREAM",
+      "delta": "M2 plus activation_checkpoint_blocks=true",
+      "controls": "same model/config/data/seed/batch/T/FP32",
+      "seeds": [20260902],
+      "budget": "short synthetic and real-data steps",
+      "primary_metric": "peak_reserved_mib",
+      "secondary_metrics": ["iterations_per_second", "loss", "output_delta", "gradient_delta"],
+      "acceptance": "lower peak than M2; >=2.0 it/s; equivalence passes",
+      "falsification": "gradient mismatch, OOM, non-finite loss or excessive slowdown",
+      "stopping_rule": "reject if M2 already meets headroom with higher speed",
+      "dependencies": ["M2"],
+      "artifacts": {},
+      "result": {
+        "completion_validity": "VALID_DIAGNOSTIC",
+        "metrics": {
+          "peak_allocated_mib": 1671.8320,
+          "peak_reserved_mib": 1826.0,
+          "iterations_per_second": 9.9734,
+          "loss": 63.8003273
+        },
+        "uncertainty": null,
+        "cost": "2 warmup plus 8 measured synthetic steps",
+        "failures": [],
+        "recommendation": "KEEP_FOR_LARGER_MODELS"
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D-MEM-001",
+      "timestamp": "2026-09-02T22:05:00+08:00",
+      "decision": "Select M2 for the RTX5090 0.8M seed-0 baseline.",
+      "evidence": "M2 real-data peak reserved 2836 MiB at 11.61 it/s; full-model loss/output/gradient equivalence passed; eager evaluation avoids a persistent compiled eval graph.",
+      "rejected_alternatives": "M1 is slower; M3 saves more memory but is slower and not required for 0.8M; M0 retains the known compiled-evaluation pool risk."
+    }
+  ]
+}

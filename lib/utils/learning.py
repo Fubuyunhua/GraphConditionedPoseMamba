@@ -63,6 +63,9 @@ def load_backbone(args):
         temporal_res_scale=getattr(args, "temporal_res_scale", 1.0),
         ssm_d_state=getattr(args, "ssm_d_state", 16),
         ssm_ratio=getattr(args, "ssm_ratio", 2.0),
+        activation_checkpoint_blocks=getattr(
+            args, "activation_checkpoint_blocks", False
+        ),
     )
 
 

@@ -10,6 +10,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.utils.checkpoint as activation_checkpoint
 
 import time
 
@@ -334,6 +335,7 @@ class GraphConditionedPoseMamba(nn.Module):
         temporal_res_scale=1.0,
         ssm_d_state=16,
         ssm_ratio=2.0,
+        activation_checkpoint_blocks=False,
     ):
         super().__init__()
         if not factorized_spatial_temporal:
@@ -346,6 +348,7 @@ class GraphConditionedPoseMamba(nn.Module):
         self.num_joints = int(num_joints)
         self.embed_dim = embed_dim
         self.block_depth = int(depth)
+        self.activation_checkpoint_blocks = bool(activation_checkpoint_blocks)
 
         self.Spatial_patch_to_embedding = nn.Linear(in_chans, embed_dim)
         self.Spatial_pos_embed = nn.Parameter(torch.zeros(1, num_joints, embed_dim))
@@ -403,6 +406,19 @@ class GraphConditionedPoseMamba(nn.Module):
                     x, joint_pos, temporal_pos, return_shape_trace=True
                 )
                 trace.update(block_trace)
+            elif (
+                self.activation_checkpoint_blocks
+                and self.training
+                and torch.is_grad_enabled()
+            ):
+                x = activation_checkpoint.checkpoint(
+                    block,
+                    x,
+                    joint_pos,
+                    temporal_pos,
+                    use_reentrant=False,
+                    preserve_rng_state=True,
+                )
             else:
                 x = block(x, joint_pos, temporal_pos)
         prediction = self.head(x).reshape(b, t, j, 3)

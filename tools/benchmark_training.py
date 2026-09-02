@@ -4,10 +4,12 @@
 import argparse
 import itertools
 import json
+import random
 import sys
 import time
 from pathlib import Path
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
@@ -53,6 +55,14 @@ def parse_args():
     parser.add_argument("--steps", type=int, default=64)
     parser.add_argument("--real-data", action="store_true")
     parser.add_argument("--no-compile", action="store_true")
+    parser.add_argument(
+        "--compile-mode",
+        choices=("default", "reduce-overhead"),
+        default=None,
+    )
+    parser.add_argument("--batch-size", type=int, default=None)
+    parser.add_argument("--activation-checkpoint", action="store_true")
+    parser.add_argument("--seed", type=int, default=20260902)
     return parser.parse_args()
 
 
@@ -60,11 +70,20 @@ def main():
     options = parse_args()
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is required for this benchmark")
+    random.seed(options.seed)
+    np.random.seed(options.seed)
+    torch.manual_seed(options.seed)
+    torch.cuda.manual_seed_all(options.seed)
 
     config = get_config(options.config)
+    if options.batch_size is not None:
+        config.batch_size = int(options.batch_size)
+    if options.activation_checkpoint:
+        config.activation_checkpoint_blocks = True
     config.mask = bool(config.mask_ratio > 0 and config.mask_T_ratio > 0)
     use_compile = bool(getattr(config, "compile_model", False)) and not options.no_compile
     use_cuda_graph = bool(getattr(config, "cuda_graph_model", False))
+    compile_mode = "eager"
     if options.no_compile:
         use_compile = False
 
@@ -92,7 +111,10 @@ def main():
                 int(torch._dynamo.config.recompile_limit),
                 64,
             )
-        model = torch.compile(base_model, mode="reduce-overhead", fullgraph=False)
+        compile_mode = options.compile_mode or str(
+            getattr(config, "compile_mode", "reduce-overhead")
+        )
+        model = torch.compile(base_model, mode=compile_mode, fullgraph=False)
     elif use_cuda_graph:
         model = CudaGraphTrainModel(base_model)
     else:
@@ -104,6 +126,7 @@ def main():
     )
     ema = EMAModel(base_model, config.ema_decay)
 
+    torch.cuda.reset_peak_memory_stats()
     warmup_start = time.perf_counter()
     train_epoch(
         config,
@@ -117,8 +140,11 @@ def main():
     )
     torch.cuda.synchronize()
     warmup_seconds = time.perf_counter() - warmup_start
+    warmup_peak_allocated = torch.cuda.max_memory_allocated()
+    warmup_peak_reserved = torch.cuda.max_memory_reserved()
 
     losses = make_meters()
+    torch.cuda.reset_peak_memory_stats()
     start = time.perf_counter()
     train_epoch(
         config,
@@ -132,17 +158,31 @@ def main():
     )
     torch.cuda.synchronize()
     elapsed = time.perf_counter() - start
+    measured_peak_allocated = torch.cuda.max_memory_allocated()
+    measured_peak_reserved = torch.cuda.max_memory_reserved()
     print(
         json.dumps(
             {
                 "compiled": use_compile,
+                "compile_mode": (
+                    compile_mode if use_compile else "eager"
+                ),
                 "cuda_graph": use_cuda_graph,
                 "real_data": options.real_data,
+                "batch_size": int(config.batch_size),
+                "seed": int(options.seed),
+                "activation_checkpoint_blocks": bool(
+                    getattr(config, "activation_checkpoint_blocks", False)
+                ),
                 "warmup_seconds": warmup_seconds,
+                "warmup_peak_allocated_mib": warmup_peak_allocated / 2**20,
+                "warmup_peak_reserved_mib": warmup_peak_reserved / 2**20,
                 "steps": options.steps,
                 "elapsed_seconds": elapsed,
                 "milliseconds_per_step": elapsed * 1000 / options.steps,
                 "iterations_per_second": options.steps / elapsed,
+                "measured_peak_allocated_mib": measured_peak_allocated / 2**20,
+                "measured_peak_reserved_mib": measured_peak_reserved / 2**20,
                 "loss": losses["total"].avg,
             },
             indent=2,

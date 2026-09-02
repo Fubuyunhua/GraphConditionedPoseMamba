@@ -1,0 +1,93 @@
+# GraphConditionedPoseMamba W64/D8 — repaired MPI-INF-3DHP protocol.
+config: configs/pose3d_3dhp/graph_posemamba_3dhp_w64_d8_protocol_v2_memopt.yaml
+checkpoint: runs/graph_posemamba/3dhp/w64_d8_protocol_v2_seed0
+pretrained: runs/graph_posemamba/3dhp/w64_d8_protocol_v2_seed0
+resume: ''
+evaluate: ''
+selection: latest_epoch.bin
+seed: 0
+
+# PoseMamba MPI-INF-3DHP schedule.
+epochs: 120
+warmup_epochs: 8
+batch_size: 4
+test_batch_size: 4
+learning_rate: 0.0002
+weight_decay: 0.01
+lr_decay: 0.99
+checkpoint_frequency: 30
+use_ema: true
+ema_decay: 0.9998
+
+backbone: GraphConditionedPoseMamba
+model_type: GraphConditionedPoseMamba
+maxlen: 81
+dim_feat: 64
+depth: 8
+mlp_ratio: 1.96875
+ssm_d_state: 16
+ssm_ratio: 1.875
+dropout: 0.0
+drop_path_rate: 0.2
+use_graph_mixer: true
+use_symmetry_edges: true
+graph_hidden_ratio: 0.5
+graph_conditioned_ssm: true
+reuse_graph_context: true
+factorized_spatial_temporal: true
+spatial_ssm_conv: 1
+temporal_ssm_conv: 3
+graph_scale: 1.0
+spatial_res_scale: 1.0
+temporal_res_scale: 1.0
+
+compile_model: true
+compile_mode: default
+compile_compatible_scan: true
+cuda_graph_model: false
+eager_eval_when_compiled: true
+activation_checkpoint_blocks: false
+allow_tf32: false
+
+# Authoritative unclipped RTX5090 data reused by symlink.
+data_root: data/motion3d/data_3dhp
+subset_list: [MPI-INF-3DHP]
+dt_file: ''
+mpi3dhp_train_sha256: 313644a5330a140a78766708811b7640e1a7ab13c2dde0575adb2c69eedaaef8
+mpi3dhp_test_sha256: 78d8d90fa3f4b0f2c040e85353ad0fe75e8cdde199f63b76575f866e9933f409
+protocol_version: mpi-inf-3dhp-gt2d-f81-official-repaired-v1
+clip_len: 81
+data_stride: 9
+test_data_stride: 1
+mpi3dhp_train_tail_policy: resample
+mpi3dhp_checkpoint_selection: final_epoch
+sample_stride: 1
+num_joints: 17
+rootrel: true
+no_conf: false
+gt_2d: false
+train_2d: false
+pretrain_3d_curriculum: 0
+
+no_eval: false
+finetune: false
+partial_train: null
+lambda_3d: 1.0
+lambda_scale: 0.5
+lambda_3d_velocity: 20.0
+lambda_diff: 0.5
+lambda_lv: 0.0
+lambda_lg: 0.0
+lambda_a: 0.0
+lambda_av: 0.0
+lambda_3dw: 0.0
+lambda_attn_diag: 0.0
+lambda_attn_entropy: 0.0
+lambda_tail_aux: 0.0
+lambda_gate_sparsity: 0.0
+
+synthetic: false
+flip: true
+mask_ratio: 0.0
+mask_T_ratio: 0.0
+noise: false
