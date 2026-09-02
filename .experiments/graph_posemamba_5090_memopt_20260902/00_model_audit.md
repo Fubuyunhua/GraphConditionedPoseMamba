@@ -108,3 +108,9 @@ full-model equivalence gate and was selected.  The M2 run was preserved after
 four complete epochs and stopped without resume; M4 started from a fresh seed-0
 initialization at remote source commit
 `b1d9364b3e1f9e0570b4ed37350c4ab11a57b963`.
+
+M4 completed epoch 1, eager flip evaluation and all four raw/EMA latest/best
+checkpoint writes in 6.30 minutes.  Post-evaluation process memory was 3,734
+MiB with about 14.8 GiB still free beside the concurrent experiment.  No
+NaN/Inf, OOM, traceback or checkpoint failure was observed, so the speed-first
+first-epoch gate passed.
