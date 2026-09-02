@@ -1,5 +1,8 @@
 # GraphConditionedPoseMamba 研究交接
 
+完整研究背景、正式实验进度、显存分析和后续优先级同时维护在
+[`RESEARCH_HANDOFF.md`](RESEARCH_HANDOFF.md)。本文更偏重代码与环境交接。
+
 ## 1. 快照范围
 
 - 快照日期：2026-09-02（UTC）

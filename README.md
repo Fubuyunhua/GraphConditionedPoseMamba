@@ -26,7 +26,8 @@ Human3.6M 2D-to-3D pose lifting.
   `MPJPE 40.0475 / P-MPJPE 33.1396 mm`。这是中途快照，不是最终或多seed结果。
 - **不要把本包描述成已经优于 PoseMamba 的精度结果。**
 
-完整交接状态见 [HANDOFF.md](HANDOFF.md)，结构差异见
+面向研究接手的完整状态见[RESEARCH_HANDOFF.md](RESEARCH_HANDOFF.md)，工程交接见
+[HANDOFF.md](HANDOFF.md)，结构差异见
 [docs/POSEMAMBA_CHANGES.md](docs/POSEMAMBA_CHANGES.md)，显存、CUDA Graph和低显存推理见
 [docs/VRAM_AND_INFERENCE.md](docs/VRAM_AND_INFERENCE.md)。
 
