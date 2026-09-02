@@ -91,3 +91,9 @@ math, FP32 precision, data, batch, T, loss, EMA and evaluation semantics are
 unchanged.  The formal run must archive the first epoch checkpoint and confirm
 that post-evaluation GPU memory remains stable before being treated as a healthy
 long run.
+
+The formal run started from remote source commit
+`48d8749bdf73b5aec92954c95709014c3b759ffc`.  It completed three epochs with
+raw/EMA checkpoint families present; post-evaluation process memory remained
+stable at 3,462 MiB.  The first-epoch runtime gate therefore passed and the run
+continues.
