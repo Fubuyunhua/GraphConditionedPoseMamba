@@ -1,0 +1,13 @@
+GraphConditionedPoseMamba research snapshot
+
+This package is derived from a PoseMamba/ReliPose research codebase and keeps
+the original PoseMamba class for baseline comparison.  The selective-scan CUDA
+sources are derived from the Mamba selective-scan implementation associated
+with Albert Gu and Tri Dao; source-file copyright notices are retained where
+present.  The project-level license is provided in LICENSE.
+
+The package contains research modifications for fixed skeleton graph mixing,
+factorized bidirectional state propagation, graph-conditioned selective-state
+parameters, and a torch.compile-compatible wrapper around the existing CUDA
+kernel.  It does not include datasets, pretrained weights, experiment outputs,
+or third-party assets.

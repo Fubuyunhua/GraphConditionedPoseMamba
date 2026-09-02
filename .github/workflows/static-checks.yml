@@ -1,0 +1,21 @@
+name: static-checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  syntax-and-release-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Python syntax
+        run: python -m compileall -q train.py logger.py lib tools scripts tests
+      - name: Release audit
+        run: python tools/audit_release.py
+
+# CUDA forward/backward is intentionally not run on GitHub-hosted CPU runners.
+# Run scripts/verify_install.py on a CUDA machine after building the extension.
