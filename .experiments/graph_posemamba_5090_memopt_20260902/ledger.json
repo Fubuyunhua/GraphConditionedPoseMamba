@@ -239,7 +239,7 @@
     {
       "id": "F1-5090-0P8M-SPEED-SEED0",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "hypothesis": "The speed-first M4 runtime preserves the 0.8M model's accuracy while maximizing FP32 training throughput.",
       "baseline_id": "GCPM-W64-D8-UPSTREAM",
       "delta": "M4 runtime only; model/data/loss/training protocol unchanged",
@@ -256,21 +256,34 @@
         "remote_source_commit": "b1d9364b3e1f9e0570b4ed37350c4ab11a57b963",
         "config": "configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m_memopt_speed.yaml",
         "remote_run_dir": "/scratch/home/caiwei/GraphConditionedPoseMamba_5090_20260902/runs/graph_posemamba/h36m/w64_d8_0p8m_memopt_speed_seed0_5090_2026_09_02_T_23_07_36",
-        "remote_pid": 129997
+        "remote_pid": 129997,
+        "analysis": ".experiments/graph_posemamba_5090_memopt_20260902/results/F1-5090-0P8M-SPEED-SEED0/analysis.md"
       },
       "result": {
-        "completion_validity": "RUNNING_HEALTHY_AFTER_EPOCH1",
+        "completion_validity": "VALID_COMPLETE_TEST_MONITORED",
         "metrics": {
-          "epoch1_ema_p1_mm": 301.117744,
-          "epoch1_ema_p2_mm": 152.987292,
-          "epoch1_minutes_including_compile_and_eval": 6.30,
-          "post_eval_process_gpu_memory_mib": 3734,
-          "observed_training_iterations_per_second": 12.89
+          "best_ema_p1_epoch": 53,
+          "best_ema_p1_mm": 39.84516172662857,
+          "paired_p2_at_best_p1_mm": 33.23224035987441,
+          "independent_best_p2_epoch": 89,
+          "independent_best_p2_mm": 33.12307,
+          "epoch65_ema_p1_mm": 39.958386,
+          "epoch65_ema_p2_mm": 33.185009,
+          "final_ema_p1_mm": 40.989357096063856,
+          "final_ema_p2_mm": 33.36662589980516,
+          "best_epoch_raw_p1_mm": 41.61853340867378,
+          "best_epoch_raw_p2_mm": 34.26450820132349,
+          "final_raw_p1_mm": 42.00014208301694,
+          "final_raw_p2_mm": 33.99145566770951,
+          "final_train_loss": 0.008504,
+          "wall_hours": 7.6867,
+          "training_process_gpu_memory_mib": 3734,
+          "eager_batch1_inference_reserved_mib": 610
         },
         "uncertainty": null,
-        "cost": "running",
+        "cost": "120 epochs; 7.6867 wall hours",
         "failures": [],
-        "recommendation": "CONTINUE"
+        "recommendation": "KEEP_AS_SINGLE_SEED_TEST_MONITORED_BASELINE"
       }
     }
   ],
@@ -288,6 +301,13 @@
       "decision": "Prioritize training speed: stop and preserve F0 after four epochs, then start a fresh seed0 run with M4.",
       "evidence": "M4 was the fastest short FP32 candidate, passed full-model loss/output/gradient equivalence, and a real epoch-4 EMA checkpoint inferred eagerly at batch1 with only 610 MiB reserved.",
       "rejected_alternatives": "Do not resume F0 because its checkpoint does not archive all RNG streams; do not enable TF32/BF16 or change batch/T because those alter the numerical/training protocol."
+    },
+    {
+      "id": "D-F1-001",
+      "timestamp": "2026-09-03T09:48:00+08:00",
+      "decision": "Keep the epoch-53 EMA checkpoint as the primary 5090 baseline; keep epoch-120 EMA as the fixed endpoint and do not substitute the independent P2-best epoch.",
+      "evidence": "120/120 completed with six loadable checkpoint artifacts and no runtime errors. Strict eager re-evaluation gives epoch53 EMA 39.8452/33.2322 and epoch120 EMA 40.9894/33.3666.",
+      "rejected_alternatives": "Do not call the raw epoch-53 checkpoint the best model; it re-evaluates to 41.6185/34.2645. Do not claim multi-seed stability from seed0."
     }
   ]
 }
