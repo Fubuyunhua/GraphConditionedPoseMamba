@@ -29,7 +29,8 @@
       "test-monitored inherited protocol"
     ],
     "blocking_findings": [
-      "RTX5090 compiled real-data batch-4 smoke pending after A1/A2"
+      "RTX5090 compiled real-data batch-4 smoke pending",
+      "first post-ablation attempt stopped before smoke: 28476 MiB free < 28672 MiB registered minimum"
     ]
   },
   "experiments": [
@@ -106,6 +107,13 @@
       "decision": "Use speed-first compile with no activation checkpointing, guarded by a 28 GiB real-data smoke threshold.",
       "evidence": "The user previously prioritized training speed when inference remains low-memory; RTX5090 has 32 GiB.",
       "rejected_alternatives": "Do not silently lower batch size or enable activation checkpointing after OOM."
+    },
+    {
+      "id": "D-SCALE-003",
+      "timestamp": "2026-09-03T20:49:00+08:00",
+      "decision": "Stop the first GPU preflight before tests and training because the registered free-memory gate was not met.",
+      "evidence": "RTX5090 reported 28,476 MiB free against the locked 28,672 MiB minimum; another process occupied the remaining memory.",
+      "rejected_alternatives": "Do not lower the gate, change batch/checkpointing, or rerun while the external resource state is unchanged."
     }
   ]
 }

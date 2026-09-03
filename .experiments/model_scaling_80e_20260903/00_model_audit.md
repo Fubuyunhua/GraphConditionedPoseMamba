@@ -3,6 +3,10 @@
 Verdict: CONDITIONAL — static review passes; RTX5090 compiled real-data smoke is
 required after the active A1/A2 queue completes.
 
+First post-ablation attempt at 2026-09-03 20:49 Asia/Shanghai stopped before
+tests or smoke: only 28,476 MiB was free versus the registered 28,672 MiB
+minimum. No scale training was started and the threshold was not changed.
+
 ## Scope and immutable reference
 
 - Reference: GraphConditionedPoseMamba Full W64/D8, 800,083 parameters.
