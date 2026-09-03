@@ -193,7 +193,7 @@ def main() -> None:
             [
                 f"- External monitor latest total GPU memory/utilization: `{monitor['latest']['gpu_used_mib']:.0f} MiB / {monitor['latest']['gpu_util_percent']:.0f}%`.",
                 f"- External monitor max temperature/power: `{monitor['max']['temp_c']:.0f} C / {monitor['max']['power_w']:.1f} W`.",
-                "- External memory includes the retained `wh` process and is not a per-model peak.",
+                "- External total memory may include concurrent GPU processes; use the trainer-reserved value as the per-model metric.",
             ]
         )
 
