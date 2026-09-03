@@ -58,6 +58,7 @@
         "results": null,
         "source": "git:d30993d04fa57de57b38b55a69dc3913b90b87b0",
         "environment": "RTX5090 shared with wh PID 367341",
+        "training_log_document": ".experiments/model_scaling_80e_20260903/logs/S1_W128_D20.md",
         "queue_pid": 395234,
         "train_pid": 395265
       },
@@ -89,7 +90,8 @@
         "checkpoint": null,
         "results": null,
         "source": null,
-        "environment": null
+        "environment": null,
+        "training_log_document": ".experiments/model_scaling_80e_20260903/logs/S2_W256_D10.md"
       },
       "result": null
     }
@@ -129,6 +131,13 @@
       "decision": "Pass the staged GPU gate and start the guarded S1 W128/D20 formal 80-epoch run.",
       "evidence": "All static/CUDA/real-data gates passed; S1 compiled batch4 reserved 14092 MiB and S2 reserved 13018 MiB with finite loss and positive throughput.",
       "rejected_alternatives": "Do not stop the wh process, enable checkpointing, reduce batch size, or start S2 before valid S1 completion."
+    },
+    {
+      "id": "D-SCALE-006",
+      "timestamp": "2026-09-03T21:45:00+08:00",
+      "decision": "Maintain one Git-tracked Markdown training log per scale model and synchronize active logs to GitHub every two hours.",
+      "evidence": "The user explicitly requested independent per-model documents and two-hour synchronization while training is active.",
+      "rejected_alternatives": "Do not upload raw logs, checkpoints, data or secrets; do not create empty commits when no new epoch exists."
     }
   ]
 }
