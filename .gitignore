@@ -24,6 +24,9 @@ venv/
 *.onnx
 events.out.tfevents.*
 
+# Local copies of full remote logs. Curated ledgers and analyses are tracked.
+.experiments/**/remote_logs/
+
 .idea/
 .vscode/
 .DS_Store

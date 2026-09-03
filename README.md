@@ -17,14 +17,20 @@ Human3.6M 2D-to-3D pose lifting.
 - 主配置：W64 / D8 / 800,083 parameters / batch 4 / T=243 / J=17。
 - 输入：`[B,T,J,3]`，最后一维是 `(x,y,confidence)`。
 - 输出：`[B,T,J,3]`。
-- 本机验证：RTX 5060 Ti、Python 3.10.18、PyTorch
-  `2.10.0.dev+cu128`、CUDA toolkit 12.8。
+- 已验证环境包括RTX 5060 Ti上的Python 3.10.18/PyTorch
+  `2.10.0.dev+cu128`，以及RTX 5090上的Python 3.10.20/PyTorch
+  `2.11.0+cu128`。
 - 真实 Human3.6M 短基准完成 forward/loss/backward/AdamW/EMA；16-step 编译基准约
   `195.6 ms/step`、`5.11 it/s`。吞吐仅是本机工程数据，不是精度结果。
 - 52 项源工作区回归测试通过；本包另含聚焦测试。
-- 120 epoch 正式 seed0 训练正在进行；发布快照时已完成64次评估，最新一次为
-  `MPJPE 40.0475 / P-MPJPE 33.1396 mm`。这是中途快照，不是最终或多seed结果。
-- **不要把本包描述成已经优于 PoseMamba 的精度结果。**
+- RTX 5090 seed0已完成120轮：最佳EMA为第53轮
+  `39.8452 / 33.2322 mm`，第120轮EMA为`40.9894 / 33.3666 mm`。
+- 同数据、配方与当前评价器下，790,083参数PoseMamba W64/D6/M1最佳EMA为
+  `40.2260 / 33.5176 mm`；Graph模型最佳EMA改善`0.3809 / 0.2854 mm`，
+  但第120轮固定终点没有改善。
+- 当前结果是单seed且逐轮监测H36M测试集；不得描述成multi-seed或无偏测试集优势。
+- 完整结果、显存优化、checkpoint复评和公平性限制见
+  [RTX5090实验报告](docs/RTX5090_EXPERIMENT_RESULTS_20260903.md)。
 
 面向研究接手的完整状态见[RESEARCH_HANDOFF.md](RESEARCH_HANDOFF.md)，工程交接见
 [HANDOFF.md](HANDOFF.md)，结构差异见
@@ -59,7 +65,7 @@ scripts/verify_install.py       安装后 forward/backward 验证
 - NVIDIA GPU
 - 与所装 PyTorch 兼容的 CUDA toolkit（必须有 `nvcc`）
 - CUDA-enabled PyTorch；必须提供`torch.library.custom_op/register_autograd`。本快照只在
-  PyTorch `2.10.0.dev+cu128`完整验证；其他版本需先运行安装验证。
+  PyTorch `2.10.0.dev+cu128`和`2.11.0+cu128`完成验证；其他版本需先运行安装验证。
 
 先根据你的 GPU/CUDA 安装 PyTorch 和 torchvision（以及该PyTorch发行版匹配的Triton）。
 不要让`pip`单独升级到与PyTorch不兼容的Triton，也不要直接照搬另一台机器的wheel。
@@ -150,8 +156,8 @@ data/motion3d/MB3D_f243s81/h36m_sh_conf_cam_source_final.pkl
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python train.py \
-  --config configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m.yaml \
-  --checkpoint runs/graph_posemamba/h36m/w64_d8_0p8m_seed0 \
+  --config configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m_memopt_speed.yaml \
+  --checkpoint runs/graph_posemamba/h36m/w64_d8_0p8m_speed_seed0 \
   --seed 0
 ```
 
