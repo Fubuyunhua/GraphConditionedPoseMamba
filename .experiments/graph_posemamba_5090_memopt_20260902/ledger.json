@@ -200,6 +200,44 @@
       }
     },
     {
+      "id": "B0-POSEMAMBA-W64-D6-M1",
+      "track": "DIAGNOSTIC",
+      "status": "COMPLETED",
+      "hypothesis": "The prior 0.8M PoseMamba run is a valid same-environment matched baseline for F1.",
+      "baseline_id": "GCPM-W64-D8-UPSTREAM",
+      "delta": "replace GraphConditionedPoseMamba with frozen PoseMamba W64/D6/M1",
+      "controls": "same RTX5090, H36M-SH hash, T243/S81, seed0, 120 epochs, batch4, optimizer, LR/WD, EMA, losses and evaluator",
+      "seeds": [0],
+      "budget": "existing 120-epoch run plus current-evaluator strict replay",
+      "primary_metric": "best EMA P1 MPJPE",
+      "secondary_metrics": ["paired P2", "epoch120 P1/P2", "parameter count"],
+      "acceptance": "strict current-evaluator reproduction and matched protocol",
+      "falsification": "state incompatibility, metric drift, data/config mismatch or incomplete checkpoint",
+      "stopping_rule": "do not retrain seed0 if strict replay passes",
+      "dependencies": [],
+      "artifacts": {
+        "checkpoint_sha256": "e0b347c7837b2da8148aa84ab1e000344e740039f4bd84f38eca0a505afd3b23",
+        "config_sha256": "4c88a455bb8a92897e4433f45b941873ce882f75f1a08c2afb1a96954ce6b10e",
+        "current_eval_config": "configs/pose3d/posemamba_h36m_w64_d6_m1_current_eval.yaml",
+        "analysis": ".experiments/graph_posemamba_5090_memopt_20260902/results/B0-POSEMAMBA-W64-D6-M1/analysis.md"
+      },
+      "result": {
+        "completion_validity": "VALID_COMPLETE_CURRENT_EVALUATOR_REPLAY",
+        "metrics": {
+          "parameters": 790083,
+          "best_epoch": 60,
+          "best_ema_p1_mm": 40.22602202713938,
+          "paired_p2_mm": 33.51762634743647,
+          "epoch120_ema_p1_mm": 40.409844,
+          "epoch120_ema_p2_mm": 33.315093
+        },
+        "uncertainty": null,
+        "cost": "reused complete seed0 run; one strict replay",
+        "failures": [],
+        "recommendation": "KEEP_AS_MATCHED_SEED0_BASELINE"
+      }
+    },
+    {
       "id": "F0-5090-0P8M-SEED0",
       "track": "IMPROVEMENT",
       "status": "CANCELLED",
@@ -308,6 +346,13 @@
       "decision": "Keep the epoch-53 EMA checkpoint as the primary 5090 baseline; keep epoch-120 EMA as the fixed endpoint and do not substitute the independent P2-best epoch.",
       "evidence": "120/120 completed with six loadable checkpoint artifacts and no runtime errors. Strict eager re-evaluation gives epoch53 EMA 39.8452/33.2322 and epoch120 EMA 40.9894/33.3666.",
       "rejected_alternatives": "Do not call the raw epoch-53 checkpoint the best model; it re-evaluates to 41.6185/34.2645. Do not claim multi-seed stability from seed0."
+    },
+    {
+      "id": "D-F1-002",
+      "timestamp": "2026-09-03T10:16:00+08:00",
+      "decision": "Use the existing PoseMamba W64/D6/M1 seed0 run as the primary approximately matched 0.8M baseline; do not spend compute retraining seed0.",
+      "evidence": "Same data hash and frozen recipe; 790,083 versus 800,083 parameters; current RTX5090 evaluator reproduces the old best EMA exactly at 40.226022/33.517626 mm.",
+      "rejected_alternatives": "Do not call the parameter counts exactly equal, do not compare training speed across the two historical runs, and do not omit the epoch120 endpoint where Graph is worse."
     }
   ]
 }
