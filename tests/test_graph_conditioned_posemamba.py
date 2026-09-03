@@ -623,6 +623,107 @@ class ConfigurationAndCapacityTests(unittest.TestCase):
         self.assertTrue(all(isinstance(block.temporal_ssm, BiSTSSM) for block in model.blocks))
         self.assertTrue(all(block.graph_injection_mode == "control" for block in model.blocks))
 
+    def test_scale_configs_preserve_full_protocol(self):
+        from lib.utils.learning import load_backbone
+
+        full = get_config(
+            str(
+                REPO_ROOT
+                / "configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m_memopt_speed.yaml"
+            )
+        )
+        registered = (
+            ("graph_posemamba_h36m_w128_d20_scale_80e.yaml", 128, 20, 6_836_355),
+            ("graph_posemamba_h36m_w256_d10_scale_80e.yaml", 256, 10, 12_646_107),
+        )
+        frozen_fields = (
+            "warmup_epochs",
+            "batch_size",
+            "test_batch_size",
+            "learning_rate",
+            "weight_decay",
+            "lr_decay",
+            "checkpoint_frequency",
+            "use_ema",
+            "ema_decay",
+            "backbone",
+            "model_type",
+            "maxlen",
+            "mlp_ratio",
+            "ssm_d_state",
+            "ssm_ratio",
+            "dropout",
+            "drop_path_rate",
+            "use_graph_mixer",
+            "use_symmetry_edges",
+            "graph_hidden_ratio",
+            "graph_conditioned_ssm",
+            "reuse_graph_context",
+            "factorized_spatial_temporal",
+            "spatial_ssm_conv",
+            "temporal_ssm_conv",
+            "graph_scale",
+            "spatial_res_scale",
+            "temporal_res_scale",
+            "compile_model",
+            "compile_mode",
+            "compile_compatible_scan",
+            "cuda_graph_model",
+            "eager_eval_when_compiled",
+            "activation_checkpoint_blocks",
+            "data_root",
+            "subset_list",
+            "dt_file",
+            "clip_len",
+            "data_stride",
+            "sample_stride",
+            "num_joints",
+            "rootrel",
+            "no_conf",
+            "gt_2d",
+            "train_2d",
+            "pretrain_3d_curriculum",
+            "no_eval",
+            "finetune",
+            "partial_train",
+            "lambda_3d",
+            "lambda_scale",
+            "lambda_3d_velocity",
+            "lambda_diff",
+            "lambda_lv",
+            "lambda_lg",
+            "lambda_a",
+            "lambda_av",
+            "lambda_3dw",
+            "lambda_attn_diag",
+            "lambda_attn_entropy",
+            "lambda_tail_aux",
+            "lambda_gate_sparsity",
+            "synthetic",
+            "flip",
+            "mask_ratio",
+            "mask_T_ratio",
+            "noise",
+        )
+        for filename, width, depth, expected_parameters in registered:
+            config = get_config(str(REPO_ROOT / "configs/pose3d" / filename))
+            self.assertEqual(config.epochs, 80)
+            self.assertEqual(config.dim_feat, width)
+            self.assertEqual(config.depth, depth)
+            self.assertEqual(config.graph_injection_mode, "control")
+            for field in frozen_fields:
+                self.assertEqual(getattr(config, field), getattr(full, field), field)
+            model = load_backbone(config)
+            self.assertEqual(parameter_count(model), expected_parameters)
+            self.assertEqual(len(model.blocks), depth)
+            self.assertEqual(model.embed_dim, width)
+            self.assertTrue(
+                all(block.graph_injection_mode == "control" for block in model.blocks)
+            )
+            self.assertTrue(
+                all(block.factorized_spatial_temporal for block in model.blocks)
+            )
+
 
 @unittest.skipUnless(cuda_selective_scan_available(), "CUDA selective scan is unavailable")
 class CudaIntegrationTests(unittest.TestCase):

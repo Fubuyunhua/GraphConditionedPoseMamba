@@ -1,0 +1,5 @@
+User authorization recorded from the current thread on 2026-09-03:
+
+Generate rational W128/D20 and W256/D10 configurations and start training if
+the preceding ablation experiments complete without execution/integrity
+problems. The registered order is W128/D20 followed by W256/D10.

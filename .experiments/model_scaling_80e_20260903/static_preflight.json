@@ -1,0 +1,168 @@
+{
+  "status": "PASS",
+  "baseline": "configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m_memopt_speed.yaml",
+  "models": [
+    {
+      "config": "configs/pose3d/graph_posemamba_h36m_w128_d20_scale_80e.yaml",
+      "epochs": 80,
+      "width": 128,
+      "depth": 20,
+      "ssm_inner": 240,
+      "mlp_inner": 252,
+      "parameters": 6836355,
+      "shape_trace": {
+        "input": [
+          1,
+          9,
+          17,
+          3
+        ],
+        "embedding": [
+          1,
+          9,
+          17,
+          128
+        ],
+        "graph_injection_mode": "control",
+        "factorized_spatial_temporal": true,
+        "ssm_forward_type": "v2_1d_bidir_k2_compile",
+        "graph_feature": [
+          1,
+          9,
+          17,
+          128
+        ],
+        "spatial_context": [
+          1,
+          9,
+          17,
+          128
+        ],
+        "spatial_ssm_input": [
+          9,
+          1,
+          17,
+          128
+        ],
+        "spatial_ssm_output": [
+          1,
+          9,
+          17,
+          128
+        ],
+        "temporal_graph_feature": [
+          1,
+          9,
+          17,
+          128
+        ],
+        "temporal_context": [
+          1,
+          9,
+          17,
+          128
+        ],
+        "temporal_ssm_input": [
+          17,
+          1,
+          9,
+          128
+        ],
+        "temporal_ssm_output": [
+          1,
+          9,
+          17,
+          128
+        ],
+        "final_prediction": [
+          1,
+          9,
+          17,
+          3
+        ]
+      },
+      "status": "PASS"
+    },
+    {
+      "config": "configs/pose3d/graph_posemamba_h36m_w256_d10_scale_80e.yaml",
+      "epochs": 80,
+      "width": 256,
+      "depth": 10,
+      "ssm_inner": 480,
+      "mlp_inner": 504,
+      "parameters": 12646107,
+      "shape_trace": {
+        "input": [
+          1,
+          9,
+          17,
+          3
+        ],
+        "embedding": [
+          1,
+          9,
+          17,
+          256
+        ],
+        "graph_injection_mode": "control",
+        "factorized_spatial_temporal": true,
+        "ssm_forward_type": "v2_1d_bidir_k2_compile",
+        "graph_feature": [
+          1,
+          9,
+          17,
+          256
+        ],
+        "spatial_context": [
+          1,
+          9,
+          17,
+          256
+        ],
+        "spatial_ssm_input": [
+          9,
+          1,
+          17,
+          256
+        ],
+        "spatial_ssm_output": [
+          1,
+          9,
+          17,
+          256
+        ],
+        "temporal_graph_feature": [
+          1,
+          9,
+          17,
+          256
+        ],
+        "temporal_context": [
+          1,
+          9,
+          17,
+          256
+        ],
+        "temporal_ssm_input": [
+          17,
+          1,
+          9,
+          256
+        ],
+        "temporal_ssm_output": [
+          1,
+          9,
+          17,
+          256
+        ],
+        "final_prediction": [
+          1,
+          9,
+          17,
+          3
+        ]
+      },
+      "status": "PASS"
+    }
+  ]
+}
