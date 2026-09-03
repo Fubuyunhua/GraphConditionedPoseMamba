@@ -44,20 +44,20 @@ def verified_metrics(path: Path) -> tuple[float | None, float | None]:
 def run_row(run: Path | None, base: dict) -> dict:
     row = dict(base)
     if run is None:
-        row.update(
-            {
-                "params": "",
-                "best_epoch": "",
-                "P1": "",
-                "P2": "",
-                "raw_P1": "",
-                "raw_P2": "",
-                "peak_vram": "",
-                "it_per_sec": "",
-                "status": "PLANNED",
-                "run_dir": "",
-            }
-        )
+        defaults = {
+            "params": "",
+            "best_epoch": "",
+            "P1": "",
+            "P2": "",
+            "raw_P1": "",
+            "raw_P2": "",
+            "peak_vram": "",
+            "it_per_sec": "",
+            "status": "PLANNED",
+            "run_dir": "",
+        }
+        for key, value in defaults.items():
+            row.setdefault(key, value)
         return row
 
     log_path = run / "log.txt"
@@ -150,6 +150,7 @@ def main() -> None:
     )
     parser.add_argument("--a1-run", default="")
     parser.add_argument("--a2-run", default="")
+    parser.add_argument("--a4-run", default="")
     args = parser.parse_args()
 
     study = Path(args.study_dir)
@@ -174,10 +175,24 @@ def main() -> None:
             "topology_conditioned": 0,
         },
     )
+    a4 = run_row(
+        Path(args.a4_run).resolve() if args.a4_run else None,
+        {
+            "experiment": "Graph-Conditioned SSM w/o Factorization",
+            "factorized": 0,
+            "graph": 1,
+            "feature_fusion": 0,
+            "topology_conditioned": 1,
+            "params": 1028563,
+            "status": "AWAITING_USER_CONFIRMATION",
+        },
+    )
     if "A1" in monitor_peaks:
         a1["peak_vram"] = monitor_peaks["A1"]
     if "A2" in monitor_peaks:
         a2["peak_vram"] = monitor_peaks["A2"]
+    if "A4" in monitor_peaks:
+        a4["peak_vram"] = monitor_peaks["A4"]
 
     variants = [
         {
@@ -216,6 +231,7 @@ def main() -> None:
             "status": "COMPLETED_EXISTING",
             "run_dir": "existing GraphConditionedPoseMamba seed0",
         },
+        a4,
     ]
 
     study.mkdir(parents=True, exist_ok=True)

@@ -16,6 +16,7 @@ from lib.model.PoseMamba import (
 )
 from lib.model.graph_mixer import SkeletonGraphMixer, h36m_neighbor_names
 from lib.model.mambablocks import (
+    BiSTSSM,
     CrossMerge1DBidirectional,
     CrossScan1DBidirectional,
     FactorizedBiSSM,
@@ -42,10 +43,14 @@ class RecordingSSM(nn.Module):
         super().__init__()
         self.input_shape = None
         self.context_shape = None
+        self.input_value = None
+        self.context_value = None
 
     def forward(self, x, context=None):
         self.input_shape = tuple(x.shape)
         self.context_shape = None if context is None else tuple(context.shape)
+        self.input_value = x.detach().clone()
+        self.context_value = None if context is None else context.detach().clone()
         return x
 
 
@@ -249,6 +254,47 @@ class GraphInjectionModeTests(unittest.TestCase):
             old_style = legacy(x)
             control = explicit(x)
         torch.testing.assert_close(control, old_style, rtol=0, atol=0)
+
+    def test_nonfactorized_control_keeps_full_tensor_and_decouples_content(self):
+        model = GraphConditionedPoseMamba(
+            num_frame=9,
+            in_chans=3,
+            embed_dim_ratio=8,
+            depth=1,
+            mlp_ratio=1.5,
+            drop_path_rate=0.0,
+            graph_conditioned_ssm=True,
+            graph_injection_mode="control",
+            factorized_spatial_temporal=False,
+        ).eval()
+        block = model.blocks[0]
+        block.graph_mixer = FixedGraphMixer()
+        spatial = RecordingSSM()
+        temporal = RecordingSSM()
+        block.spatial_ssm = spatial
+        block.temporal_ssm = temporal
+        x = torch.randn(2, 9, 17, 3)
+        with torch.no_grad():
+            prediction, trace = model(x, return_shape_trace=True)
+        self.assertEqual(prediction.shape, (2, 9, 17, 3))
+        self.assertEqual(trace["spatial_ssm_input"], (2, 9, 17, 8))
+        self.assertEqual(trace["temporal_ssm_input"], (2, 9, 17, 8))
+        self.assertEqual(trace["graph_feature"], (2, 9, 17, 8))
+        self.assertEqual(trace["spatial_context"], (2, 9, 17, 8))
+        self.assertEqual(trace["temporal_context"], (2, 9, 17, 8))
+        self.assertEqual(spatial.context_shape, spatial.input_shape)
+        self.assertEqual(temporal.context_shape, temporal.input_shape)
+        torch.testing.assert_close(
+            spatial.context_value - spatial.input_value,
+            torch.full_like(spatial.input_value, 0.25),
+        )
+        torch.testing.assert_close(
+            temporal.context_value - temporal.input_value,
+            torch.full_like(temporal.input_value, 0.25),
+        )
+        self.assertEqual(trace["graph_injection_mode"], "control")
+        self.assertFalse(trace["factorized_spatial_temporal"])
+        self.assertEqual(trace["ssm_forward_type"], "v2_plus_poselimbs")
 
 
 class ConfigurationAndCapacityTests(unittest.TestCase):
@@ -481,6 +527,102 @@ class ConfigurationAndCapacityTests(unittest.TestCase):
             model = load_backbone(config)
             self.assertTrue(all(block.graph_injection_mode == mode for block in model.blocks))
 
+    def test_no_factorization_config_uses_80_epoch_frozen_protocol(self):
+        from lib.utils.learning import load_backbone
+
+        full = get_config(
+            str(
+                REPO_ROOT
+                / "configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m_memopt_speed.yaml"
+            )
+        )
+        candidate = get_config(
+            str(
+                REPO_ROOT
+                / "configs/pose3d/ablation_graph_conditioned_no_factorization.yaml"
+            )
+        )
+        frozen_fields = (
+            "warmup_epochs",
+            "batch_size",
+            "test_batch_size",
+            "learning_rate",
+            "weight_decay",
+            "lr_decay",
+            "use_ema",
+            "ema_decay",
+            "maxlen",
+            "dim_feat",
+            "depth",
+            "mlp_ratio",
+            "ssm_d_state",
+            "ssm_ratio",
+            "dropout",
+            "drop_path_rate",
+            "use_graph_mixer",
+            "use_symmetry_edges",
+            "graph_hidden_ratio",
+            "graph_conditioned_ssm",
+            "reuse_graph_context",
+            "spatial_ssm_conv",
+            "temporal_ssm_conv",
+            "graph_scale",
+            "spatial_res_scale",
+            "temporal_res_scale",
+            "compile_model",
+            "compile_mode",
+            "compile_compatible_scan",
+            "cuda_graph_model",
+            "eager_eval_when_compiled",
+            "activation_checkpoint_blocks",
+            "data_root",
+            "subset_list",
+            "dt_file",
+            "clip_len",
+            "data_stride",
+            "sample_stride",
+            "num_joints",
+            "rootrel",
+            "no_conf",
+            "gt_2d",
+            "train_2d",
+            "pretrain_3d_curriculum",
+            "no_eval",
+            "finetune",
+            "partial_train",
+            "lambda_3d",
+            "lambda_scale",
+            "lambda_3d_velocity",
+            "lambda_diff",
+            "lambda_lv",
+            "lambda_lg",
+            "lambda_a",
+            "lambda_av",
+            "lambda_3dw",
+            "lambda_attn_diag",
+            "lambda_attn_entropy",
+            "lambda_tail_aux",
+            "lambda_gate_sparsity",
+            "synthetic",
+            "flip",
+            "mask_ratio",
+            "mask_T_ratio",
+            "noise",
+        )
+        self.assertEqual(candidate.epochs, 80)
+        self.assertEqual(candidate.graph_injection_mode, "control")
+        self.assertFalse(candidate.factorized_spatial_temporal)
+        self.assertEqual(candidate.coupled_ssm_forward_type, "v2_plus_poselimbs")
+        for field in frozen_fields:
+            self.assertEqual(getattr(candidate, field), getattr(full, field), field)
+        model = load_backbone(candidate)
+        self.assertTrue(
+            all(not block.factorized_spatial_temporal for block in model.blocks)
+        )
+        self.assertTrue(all(isinstance(block.spatial_ssm, BiSTSSM) for block in model.blocks))
+        self.assertTrue(all(isinstance(block.temporal_ssm, BiSTSSM) for block in model.blocks))
+        self.assertTrue(all(block.graph_injection_mode == "control" for block in model.blocks))
+
 
 @unittest.skipUnless(cuda_selective_scan_available(), "CUDA selective scan is unavailable")
 class CudaIntegrationTests(unittest.TestCase):
@@ -510,6 +652,28 @@ class CudaIntegrationTests(unittest.TestCase):
         ).cuda().eval()
         setattr(module, "__DEBUG__", True)
         x = torch.randn(2, 1, 17, 16, device="cuda")
+        with torch.no_grad():
+            module(x, context=x)
+            first = {key: value.clone() for key, value in module.__data__.items()}
+            module(x, context=x + torch.randn_like(x))
+            second = module.__data__
+        self.assertTrue(torch.equal(first["us"], second["us"]))
+        self.assertFalse(torch.equal(first["dts"], second["dts"]))
+        self.assertFalse(torch.equal(first["Bs"], second["Bs"]))
+        self.assertFalse(torch.equal(first["Cs"], second["Cs"]))
+
+    def test_coupled_graph_context_changes_parameters_but_not_u(self):
+        module = BiSTSSM(
+            d_model=16,
+            d_state=4,
+            ssm_ratio=2.0,
+            d_conv=3,
+            conv_mode="2d",
+            forward_type="v2_plus_poselimbs",
+            k_group=4,
+        ).cuda().eval()
+        setattr(module, "__DEBUG__", True)
+        x = torch.randn(2, 9, 17, 16, device="cuda")
         with torch.no_grad():
             module(x, context=x)
             first = {key: value.clone() for key, value in module.__data__.items()}

@@ -1,0 +1,179 @@
+{
+  "status": "PASS",
+  "precision": "FP32",
+  "full": {
+    "parameters": 800083,
+    "checkpoint_epoch": 53,
+    "max_abs_error": 0.0,
+    "mean_abs_error": 0.0,
+    "shape_trace": {
+      "input": [
+        1,
+        243,
+        17,
+        3
+      ],
+      "embedding": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "graph_injection_mode": "control",
+      "factorized_spatial_temporal": true,
+      "ssm_forward_type": "v2_1d_bidir_k2_compile",
+      "graph_feature": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "spatial_context": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "spatial_ssm_input": [
+        243,
+        1,
+        17,
+        64
+      ],
+      "spatial_ssm_output": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "temporal_graph_feature": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "temporal_context": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "temporal_ssm_input": [
+        17,
+        1,
+        243,
+        64
+      ],
+      "temporal_ssm_output": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "final_prediction": [
+        1,
+        243,
+        17,
+        3
+      ]
+    }
+  },
+  "ablation": {
+    "name": "Graph-Conditioned SSM w/o Factorization",
+    "epochs": 80,
+    "parameters": 1028563,
+    "factorized_spatial_temporal": false,
+    "forward_type": "v2_plus_poselimbs",
+    "spatial_conv_mode": "2d",
+    "spatial_d_conv": 1,
+    "temporal_conv_mode": "2d",
+    "temporal_d_conv": 3,
+    "shape_trace": {
+      "input": [
+        1,
+        243,
+        17,
+        3
+      ],
+      "embedding": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "graph_injection_mode": "control",
+      "factorized_spatial_temporal": false,
+      "ssm_forward_type": "v2_plus_poselimbs",
+      "graph_feature": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "spatial_context": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "spatial_ssm_input": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "spatial_ssm_output": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "temporal_graph_feature": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "temporal_context": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "temporal_ssm_input": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "temporal_ssm_output": [
+        1,
+        243,
+        17,
+        64
+      ],
+      "final_prediction": [
+        1,
+        243,
+        17,
+        3
+      ]
+    },
+    "content_control_decoupling": {
+      "u_unchanged": true,
+      "delta_changed": true,
+      "B_changed": true,
+      "C_changed": true
+    }
+  },
+  "gates": {
+    "full_checkpoint_max_abs_error_le_1e-5": true,
+    "spatial_input_is_full_btjc": true,
+    "temporal_input_is_full_btjc": true,
+    "graph_feature_is_full_btjc": true,
+    "spatial_context_is_full_btjc": true,
+    "temporal_context_is_full_btjc": true,
+    "candidate_output_is_finite": true,
+    "content_control_decoupling": true
+  }
+}

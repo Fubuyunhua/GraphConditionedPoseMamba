@@ -1,0 +1,19 @@
+{
+  "compiled": true,
+  "compile_mode": "reduce-overhead",
+  "cuda_graph": false,
+  "real_data": true,
+  "batch_size": 4,
+  "seed": 20260902,
+  "activation_checkpoint_blocks": false,
+  "warmup_seconds": 57.42043764295522,
+  "warmup_peak_allocated_mib": 3422.56201171875,
+  "warmup_peak_reserved_mib": 3766.0,
+  "steps": 1,
+  "elapsed_seconds": 1.9421562020434067,
+  "milliseconds_per_step": 1942.1562020434067,
+  "iterations_per_second": 0.5148916441158888,
+  "measured_peak_allocated_mib": 3364.48681640625,
+  "measured_peak_reserved_mib": 3766.0,
+  "loss": 1.5444855690002441
+}

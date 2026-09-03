@@ -3,3 +3,4 @@ A0 PoseMamba,0,0,0,0,790083,60,40.22602202713938,33.51762634743647,,,,,COMPLETED
 A1 Factorized Only,1,0,0,0,749891,,,,,,,,RUNNING,/scratch/home/caiwei/GraphConditionedPoseMamba_5090_20260902/runs/minimal_ablation_80e/A1_factorized_only_seed0_2026_09_03_T_11_11_50
 A2 Graph Feature Fusion,1,1,1,0,800083,,,,,,,,QUEUED,
 A3 Full,1,1,0,1,800083,53,39.84516172662857,33.23224035987441,41.61853340867378,34.26450820132349,3734,,COMPLETED_EXISTING,existing GraphConditionedPoseMamba seed0
+Graph-Conditioned SSM w/o Factorization,0,1,0,1,1028563,,,,,,,,AWAITING_USER_CONFIRMATION,

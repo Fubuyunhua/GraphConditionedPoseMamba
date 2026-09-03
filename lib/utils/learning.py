@@ -56,6 +56,9 @@ def load_backbone(args):
         factorized_spatial_temporal=getattr(
             args, "factorized_spatial_temporal", True
         ),
+        coupled_ssm_forward_type=getattr(
+            args, "coupled_ssm_forward_type", "v2_plus_poselimbs"
+        ),
         spatial_ssm_conv=getattr(args, "spatial_ssm_conv", 1),
         temporal_ssm_conv=getattr(args, "temporal_ssm_conv", 3),
         compile_compatible_scan=getattr(args, "compile_compatible_scan", False),

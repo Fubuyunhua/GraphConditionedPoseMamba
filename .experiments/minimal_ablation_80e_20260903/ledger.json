@@ -156,6 +156,33 @@
         "failures": [],
         "recommendation": "KEEP"
       }
+    },
+    {
+      "id": "A4-GRAPH-CONDITIONED-NO-FACTORIZATION",
+      "name": "Graph-Conditioned SSM w/o Factorization",
+      "track": "ABLATION",
+      "status": "AWAITING_USER_CONFIRMATION",
+      "hypothesis": "Boundary-preserving factorization improves accuracy over coupled PoseMamba-style state propagation under identical graph-conditioned selective dynamics.",
+      "baseline_id": "A3-FULL-GCPM-SEED0",
+      "delta": "factorized_spatial_temporal=false; both branches use existing BiSTSSM v2_plus_poselimbs on full [B,T,J,C]",
+      "controls": "all A3 architecture, topology, optimizer, EMA, data, augmentation, and loss settings remain frozen",
+      "seeds": [0],
+      "budget": "80 epochs (explicit user override)",
+      "primary_metric": "best EMA P1 within epochs 1-80",
+      "secondary_metrics": ["same-checkpoint P2", "raw P1/P2", "parameters", "VRAM", "it/s"],
+      "acceptance": "all four regression gates pass and user confirms the 13-item preflight report",
+      "falsification": "A4 equals or improves on A3",
+      "stopping_rule": "do not launch before A1/A2 completion, preflight pass, and explicit user approval",
+      "dependencies": ["A1-FACTORIZED-ONLY", "A2-GRAPH-FEATURE", "USER-CONFIRMATION"],
+      "artifacts": {
+        "config": "configs/pose3d/ablation_graph_conditioned_no_factorization.yaml",
+        "preflight_report": ".experiments/minimal_ablation_80e_20260903/03_no_factorization_preflight.md",
+        "guarded_launcher": "scripts/run_graph_conditioned_no_factorization_80e.sh",
+        "preflight": ".experiments/minimal_ablation_80e_20260903/A4_PRELAUNCH_PASS.json",
+        "real_data_smoke": ".experiments/minimal_ablation_80e_20260903/preflight/A4_real_smoke.json",
+        "parameters": 1028563
+      },
+      "result": null
     }
   ],
   "decisions": [
@@ -179,6 +206,13 @@
       "decision": "Start the fail-closed serial queue with A1; keep A2 queued behind A1 completion and strict verification.",
       "evidence": "GPU idle at launch; queue PID 135536; A1 PID 135551 entered epoch 1 at about 27.85 it/s and 2,890 MiB process memory.",
       "rejected_alternatives": "No parallel A1/A2 execution and no automatic resume of failed runs."
+    },
+    {
+      "id": "D-ABL-004",
+      "timestamp": "2026-09-03T12:00:00+08:00",
+      "decision": "Register Graph-Conditioned SSM w/o Factorization at an 80-epoch budget, but do not add it to the active A1/A2 queue before review.",
+      "evidence": "The user explicitly overrode the pasted 60-epoch draft with an 80-epoch requirement; the draft requires a 13-item preflight review before long training.",
+      "rejected_alternatives": "Do not replace the block with PoseMamba, do not compensate parameter count, and do not auto-launch from implementation alone."
     }
   ]
 }

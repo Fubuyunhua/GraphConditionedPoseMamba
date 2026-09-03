@@ -8,3 +8,4 @@ All rows use the best EMA P1 within the registered budget and the P2 from the sa
 | A1 Factorized Only | ✓ | — | — | — | 749891 | — | — | RUNNING |
 | A2 Graph Feature Fusion | ✓ | ✓ | ✓ | — | 800083 | — | — | QUEUED |
 | A3 Full | ✓ | ✓ | — | ✓ | 800083 | 39.8452 | 33.2322 | COMPLETED_EXISTING |
+| Graph-Conditioned SSM w/o Factorization | — | ✓ | — | ✓ | 1028563 | — | — | AWAITING_USER_CONFIRMATION |

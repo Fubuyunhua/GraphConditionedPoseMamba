@@ -35,7 +35,7 @@ import math
 import numpy as np
 
 from lib.model.graph_mixer import SkeletonGraphMixer
-from lib.model.mambablocks import BiSTSSMBlock, FactorizedBiSSM, Mlp
+from lib.model.mambablocks import BiSTSSM, BiSTSSMBlock, FactorizedBiSSM, Mlp
 class  PoseMamba(nn.Module):
     def __init__(self, num_frame=9, num_joints=17, in_chans=2, embed_dim_ratio=256, depth=6, mlp_ratio=2., drop_rate=0., drop_path_rate=0.2,  norm_layer=None):
         """    ##########hybrid_backbone=None, representation_size=None,
@@ -143,7 +143,7 @@ class  PoseMamba(nn.Module):
 
 
 class GraphConditionedPoseBlock(nn.Module):
-    """Graph-local mixing followed by factorized spatial/temporal BiSSMs."""
+    """Graph-local mixing followed by factorized or coupled BiSSMs."""
 
     def __init__(
         self,
@@ -155,6 +155,8 @@ class GraphConditionedPoseBlock(nn.Module):
         graph_conditioned_ssm=True,
         graph_injection_mode=None,
         reuse_graph_context=True,
+        factorized_spatial_temporal=True,
+        coupled_ssm_forward_type="v2_plus_poselimbs",
         graph_scale=1.0,
         spatial_res_scale=1.0,
         temporal_res_scale=1.0,
@@ -196,6 +198,9 @@ class GraphConditionedPoseBlock(nn.Module):
         self.graph_injection_mode = graph_injection_mode
         self.graph_conditioned_ssm = expected_conditioned
         self.reuse_graph_context = bool(reuse_graph_context)
+        self.factorized_spatial_temporal = bool(factorized_spatial_temporal)
+        self.coupled_ssm_forward_type = str(coupled_ssm_forward_type)
+        self.compile_compatible_scan = bool(compile_compatible_scan)
         self.graph_scale = float(graph_scale)
 
         self.norm_spatial = norm_layer(hidden_dim)
@@ -211,22 +216,42 @@ class GraphConditionedPoseBlock(nn.Module):
             if self.use_graph_mixer
             else None
         )
-        self.spatial_ssm = FactorizedBiSSM(
-            d_model=hidden_dim,
-            d_state=ssm_d_state,
-            ssm_ratio=ssm_ratio,
-            d_conv=spatial_ssm_conv,
-            axis="spatial",
-            compile_compatible_scan=compile_compatible_scan,
-        )
-        self.temporal_ssm = FactorizedBiSSM(
-            d_model=hidden_dim,
-            d_state=ssm_d_state,
-            ssm_ratio=ssm_ratio,
-            d_conv=temporal_ssm_conv,
-            axis="temporal",
-            compile_compatible_scan=compile_compatible_scan,
-        )
+        if self.factorized_spatial_temporal:
+            self.spatial_ssm = FactorizedBiSSM(
+                d_model=hidden_dim,
+                d_state=ssm_d_state,
+                ssm_ratio=ssm_ratio,
+                d_conv=spatial_ssm_conv,
+                axis="spatial",
+                compile_compatible_scan=compile_compatible_scan,
+            )
+            self.temporal_ssm = FactorizedBiSSM(
+                d_model=hidden_dim,
+                d_state=ssm_d_state,
+                ssm_ratio=ssm_ratio,
+                d_conv=temporal_ssm_conv,
+                axis="temporal",
+                compile_compatible_scan=compile_compatible_scan,
+            )
+        else:
+            self.spatial_ssm = BiSTSSM(
+                d_model=hidden_dim,
+                d_state=ssm_d_state,
+                ssm_ratio=ssm_ratio,
+                d_conv=spatial_ssm_conv,
+                conv_mode="2d",
+                forward_type=self.coupled_ssm_forward_type,
+                k_group=4,
+            )
+            self.temporal_ssm = BiSTSSM(
+                d_model=hidden_dim,
+                d_state=ssm_d_state,
+                ssm_ratio=ssm_ratio,
+                d_conv=temporal_ssm_conv,
+                conv_mode="2d",
+                forward_type=self.coupled_ssm_forward_type,
+                k_group=4,
+            )
         mlp_hidden_dim = int(hidden_dim * mlp_ratio)
         self.mlp = Mlp(
             in_features=hidden_dim,
@@ -286,15 +311,26 @@ class GraphConditionedPoseBlock(nn.Module):
         graph_feature, spatial_ssm_feature, spatial_context = (
             self._route_graph_injection(spatial_feature)
         )
-        spatial_input = self.factorize_spatial(spatial_ssm_feature)
+        spatial_input = (
+            self.factorize_spatial(spatial_ssm_feature)
+            if self.factorized_spatial_temporal
+            else spatial_ssm_feature
+        )
         spatial_context_1d = (
-            None if spatial_context is None else self.factorize_spatial(spatial_context)
+            None
+            if spatial_context is None
+            else (
+                self.factorize_spatial(spatial_context)
+                if self.factorized_spatial_temporal
+                else spatial_context
+            )
         )
         spatial_output = self.spatial_ssm(
             spatial_input,
             context=spatial_context_1d,
         )
-        spatial_output = self.restore_spatial(spatial_output, b, t)
+        if self.factorized_spatial_temporal:
+            spatial_output = self.restore_spatial(spatial_output, b, t)
         x = x + self.gamma_s * self.drop_path(spatial_output)
 
         temporal_feature = self.norm_temporal(x) + temporal_pos
@@ -309,15 +345,26 @@ class GraphConditionedPoseBlock(nn.Module):
             temporal_graph_feature, temporal_ssm_feature, temporal_context = (
                 self._route_graph_injection(temporal_feature)
             )
-        temporal_input = self.factorize_temporal(temporal_ssm_feature)
+        temporal_input = (
+            self.factorize_temporal(temporal_ssm_feature)
+            if self.factorized_spatial_temporal
+            else temporal_ssm_feature
+        )
         temporal_context_1d = (
-            None if temporal_context is None else self.factorize_temporal(temporal_context)
+            None
+            if temporal_context is None
+            else (
+                self.factorize_temporal(temporal_context)
+                if self.factorized_spatial_temporal
+                else temporal_context
+            )
         )
         temporal_output = self.temporal_ssm(
             temporal_input,
             context=temporal_context_1d,
         )
-        temporal_output = self.restore_temporal(temporal_output, b, j)
+        if self.factorized_spatial_temporal:
+            temporal_output = self.restore_temporal(temporal_output, b, j)
         x = x + self.gamma_t * self.drop_path(temporal_output)
         x = x + self.drop_path(self.mlp(self.norm_mlp(x)))
 
@@ -325,8 +372,21 @@ class GraphConditionedPoseBlock(nn.Module):
             return x
         trace = {
             "graph_injection_mode": self.graph_injection_mode,
+            "factorized_spatial_temporal": self.factorized_spatial_temporal,
+            "ssm_forward_type": (
+                "v2_1d_bidir_k2_compile"
+                if self.factorized_spatial_temporal and self.compile_compatible_scan
+                else (
+                    "v2_1d_bidir_k2"
+                    if self.factorized_spatial_temporal
+                    else self.coupled_ssm_forward_type
+                )
+            ),
             "graph_feature": (
                 None if graph_feature is None else (b, t, j, self.hidden_dim)
+            ),
+            "spatial_context": (
+                None if spatial_context is None else tuple(spatial_context.shape)
             ),
             "spatial_ssm_input": tuple(spatial_input.shape),
             "spatial_ssm_output": tuple(spatial_output.shape),
@@ -335,6 +395,9 @@ class GraphConditionedPoseBlock(nn.Module):
                 if temporal_graph_feature is None
                 else (b, t, j, self.hidden_dim)
             ),
+            "temporal_context": (
+                None if temporal_context is None else tuple(temporal_context.shape)
+            ),
             "temporal_ssm_input": tuple(temporal_input.shape),
             "temporal_ssm_output": tuple(temporal_output.shape),
         }
@@ -342,7 +405,7 @@ class GraphConditionedPoseBlock(nn.Module):
 
 
 class GraphConditionedPoseMamba(nn.Module):
-    """Graph-conditioned, spatial/temporal-factorized PoseMamba backbone."""
+    """Graph-conditioned PoseMamba with selectable SSM boundary handling."""
 
     def __init__(
         self,
@@ -362,6 +425,7 @@ class GraphConditionedPoseMamba(nn.Module):
         graph_injection_mode=None,
         reuse_graph_context=True,
         factorized_spatial_temporal=True,
+        coupled_ssm_forward_type="v2_plus_poselimbs",
         spatial_ssm_conv=1,
         temporal_ssm_conv=3,
         compile_compatible_scan=False,
@@ -373,8 +437,6 @@ class GraphConditionedPoseMamba(nn.Module):
         activation_checkpoint_blocks=False,
     ):
         super().__init__()
-        if not factorized_spatial_temporal:
-            raise ValueError("GraphConditionedPoseMamba requires factorized_spatial_temporal=True")
         if int(num_joints) != 17:
             raise ValueError("GraphConditionedPoseMamba currently supports Human3.6M 17 joints")
         norm_layer = norm_layer or partial(nn.LayerNorm, eps=1e-6)
@@ -383,6 +445,8 @@ class GraphConditionedPoseMamba(nn.Module):
         self.num_joints = int(num_joints)
         self.embed_dim = embed_dim
         self.block_depth = int(depth)
+        self.factorized_spatial_temporal = bool(factorized_spatial_temporal)
+        self.coupled_ssm_forward_type = str(coupled_ssm_forward_type)
         self.activation_checkpoint_blocks = bool(activation_checkpoint_blocks)
 
         self.Spatial_patch_to_embedding = nn.Linear(in_chans, embed_dim)
@@ -401,6 +465,8 @@ class GraphConditionedPoseMamba(nn.Module):
                     graph_conditioned_ssm=graph_conditioned_ssm,
                     graph_injection_mode=graph_injection_mode,
                     reuse_graph_context=reuse_graph_context,
+                    factorized_spatial_temporal=factorized_spatial_temporal,
+                    coupled_ssm_forward_type=coupled_ssm_forward_type,
                     graph_scale=graph_scale,
                     spatial_res_scale=spatial_res_scale,
                     temporal_res_scale=temporal_res_scale,
