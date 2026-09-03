@@ -29,8 +29,7 @@
       "test-monitored inherited protocol"
     ],
     "blocking_findings": [
-      "RTX5090 compiled real-data batch-4 smoke pending",
-      "first post-ablation attempt stopped before smoke: 28476 MiB free < 28672 MiB registered minimum"
+      "user-authorized staged RTX5090 batch1/batch2/compiled-batch4 smoke pending"
     ]
   },
   "experiments": [
@@ -114,6 +113,13 @@
       "decision": "Stop the first GPU preflight before tests and training because the registered free-memory gate was not met.",
       "evidence": "RTX5090 reported 28,476 MiB free against the locked 28,672 MiB minimum; another process occupied the remaining memory.",
       "rejected_alternatives": "Do not lower the gate, change batch/checkpointing, or rerun while the external resource state is unchanged."
+    },
+    {
+      "id": "D-SCALE-004",
+      "timestamp": "2026-09-03T21:30:00+08:00",
+      "decision": "Amend the diagnostic gate to 24,576 MiB free and run eager batch1, eager batch2, then compiled batch4 before formal training.",
+      "evidence": "The user explicitly authorized an immediate attempt after learning that the 28 GiB figure was a conservative free-memory gate rather than model consumption.",
+      "rejected_alternatives": "Do not stop the wh process, change the formal batch size, or skip the compiled batch4 validation."
     }
   ]
 }

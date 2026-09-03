@@ -63,8 +63,8 @@ PY
 
 free_mib=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1 | tr -d ' ')
 [[ "$free_mib" =~ ^[0-9]+$ ]] || { echo "invalid free-memory reading" >&2; exit 10; }
-(( free_mib >= 28672 )) || {
-  echo "only ${free_mib} MiB GPU memory is free; require 28672" >&2
+(( free_mib >= 24576 )) || {
+  echo "only ${free_mib} MiB GPU memory is free; require 24576" >&2
   exit 11
 }
 

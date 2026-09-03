@@ -6,7 +6,7 @@ ablation_repo=$(readlink -f "${2:-/scratch/home/caiwei/GraphConditionedPoseMamba
 py=${PYTHON_BIN:-/scratch/home/caiwei/miniforge3/envs/relipose_torch211/bin/python}
 study=.experiments/model_scaling_80e_20260903
 ablation_study=.experiments/minimal_ablation_80e_20260903
-threshold_mib=28672
+threshold_mib=24576
 
 cd "$repo"
 mkdir -p "$study/preflight" "$study/runtime"
@@ -71,14 +71,25 @@ for item in \
   "S1 configs/pose3d/graph_posemamba_h36m_w128_d20_scale_80e.yaml" \
   "S2 configs/pose3d/graph_posemamba_h36m_w256_d10_scale_80e.yaml"; do
   read -r id config <<<"$item"
+  for batch in 1 2; do
+    CUDA_VISIBLE_DEVICES=0 "$py" tools/benchmark_training.py \
+      --config "$config" \
+      --warmup-steps 1 \
+      --steps 1 \
+      --real-data \
+      --batch-size "$batch" \
+      --no-compile \
+      > "$study/preflight/${id}_B${batch}_real_smoke.json" \
+      2> "$study/preflight/${id}_B${batch}_real_smoke.stderr"
+  done
   CUDA_VISIBLE_DEVICES=0 "$py" tools/benchmark_training.py \
     --config "$config" \
     --warmup-steps 1 \
     --steps 1 \
     --real-data \
     --batch-size 4 \
-    > "$study/preflight/${id}_real_smoke.json" \
-    2> "$study/preflight/${id}_real_smoke.stderr"
+    > "$study/preflight/${id}_B4_real_smoke.json" \
+    2> "$study/preflight/${id}_B4_real_smoke.stderr"
 done
 
 "$py" - "$study" "$actual" "$threshold_mib" <<'PY'
@@ -98,16 +109,27 @@ static = json.loads((study / "static_preflight.json").read_text())
 smokes = {}
 gates = {"static_preflight": static.get("status") == "PASS"}
 for key in ("S1", "S2"):
-    smoke = json.loads((study / "preflight" / f"{key}_real_smoke.json").read_text())
-    smokes[key] = smoke
-    gates[f"{key}_compiled"] = smoke.get("compiled") is True
-    gates[f"{key}_real_data"] = smoke.get("real_data") is True
-    gates[f"{key}_batch4"] = smoke.get("batch_size") == 4
-    gates[f"{key}_finite_loss"] = math.isfinite(float(smoke.get("loss", float("nan"))))
-    gates[f"{key}_memory_below_threshold"] = float(
-        smoke.get("measured_peak_reserved_mib", float("inf"))
-    ) < threshold
-    gates[f"{key}_positive_throughput"] = float(smoke.get("iterations_per_second", 0)) > 0
+    stages = {}
+    for batch in (1, 2, 4):
+        smoke = json.loads(
+            (study / "preflight" / f"{key}_B{batch}_real_smoke.json").read_text()
+        )
+        stages[f"B{batch}"] = smoke
+        gates[f"{key}_B{batch}_compile_mode"] = (
+            smoke.get("compiled") is (batch == 4)
+        )
+        gates[f"{key}_B{batch}_real_data"] = smoke.get("real_data") is True
+        gates[f"{key}_B{batch}_batch"] = smoke.get("batch_size") == batch
+        gates[f"{key}_B{batch}_finite_loss"] = math.isfinite(
+            float(smoke.get("loss", float("nan")))
+        )
+        gates[f"{key}_B{batch}_memory_below_threshold"] = float(
+            smoke.get("measured_peak_reserved_mib", float("inf"))
+        ) < threshold
+        gates[f"{key}_B{batch}_positive_throughput"] = float(
+            smoke.get("iterations_per_second", 0)
+        ) > 0
+    smokes[key] = stages
 configs = [
     Path("configs/pose3d/graph_posemamba_h36m_w128_d20_scale_80e.yaml"),
     Path("configs/pose3d/graph_posemamba_h36m_w256_d10_scale_80e.yaml"),

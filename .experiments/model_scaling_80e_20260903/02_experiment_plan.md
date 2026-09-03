@@ -24,8 +24,9 @@
    families must load, strict re-evaluation must pass, and no execution error
    may remain.
 2. Static protocol/shape/parameter audit must pass for both scale configs.
-3. Compiled real-data batch-4 smoke must produce finite loss and gradients with
-   peak reserved VRAM below 28,672 MiB.
+3. With at least 24,576 MiB initially free, run eager real-data batch 1 and 2
+   steps, then an exact compiled batch-4 step. Every stage must produce finite
+   loss with peak reserved VRAM below 24,576 MiB.
 4. Run S1, verify and re-evaluate its raw/EMA best checkpoints, then run S2.
 5. A valid negative S1 metric does not stop S2. OOM, NaN/Inf, CUDA failure,
    dataset mismatch, dirty source or invalid checkpoint stops the sequence.

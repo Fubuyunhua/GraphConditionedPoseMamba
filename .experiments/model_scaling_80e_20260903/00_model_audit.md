@@ -7,6 +7,11 @@ First post-ablation attempt at 2026-09-03 20:49 Asia/Shanghai stopped before
 tests or smoke: only 28,476 MiB was free versus the registered 28,672 MiB
 minimum. No scale training was started and the threshold was not changed.
 
+The user subsequently authorized immediate staged testing. The effective gate
+is amended to require at least 24,576 MiB free, then eager real-data batch 1
+and batch 2 steps followed by the exact compiled batch 4 step. Formal configs
+remain batch 4 and otherwise unchanged.
+
 ## Scope and immutable reference
 
 - Reference: GraphConditionedPoseMamba Full W64/D8, 800,083 parameters.
@@ -54,7 +59,8 @@ gate.
 - P1 runtime risk: compiled batch-4 memory and finite gradients are not yet
   measured for either larger model. Required diagnostic: one warmup and one
   timed real-data train step per candidate on the RTX5090. Formal training is
-  blocked until both pass with peak reserved VRAM below 28,672 MiB.
+  blocked until all staged checks pass with peak reserved VRAM below
+  24,576 MiB.
 - P2 optimization risk: the larger models reuse the W64 learning rate and only
   one seed. This is intentionally controlled, but instability would make the
   run invalid rather than trigger silent LR tuning.
