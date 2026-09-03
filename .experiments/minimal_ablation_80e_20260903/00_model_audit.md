@@ -58,8 +58,19 @@ graph-enhanced tensor replaces recurrent content.
   multi-seed stability.
 - P2: A2 must never pass an independent graph context to the SSM.
 
+## RTX5090 preflight evidence
+
+- Python and shell syntax: PASS.
+- Unit/CUDA suite: 22/22 PASS.
+- A1: 749,891 trainable parameters; no missing/non-finite gradients; real-data
+  compiled smoke 27.60 it/s and 2,280 MiB reserved.
+- A2: 800,083 trainable parameters; no missing/non-finite gradients; real-data
+  compiled smoke 26.70 it/s and 2,396 MiB reserved.
+- Explicit `control` replay against the pre-change epoch-53 EMA fixture:
+  max/mean absolute error `0.0/0.0`.
+- Dataset SHA-256 matches the frozen Full and PoseMamba runs.
+
 ## Verdict
 
-`CONDITIONAL` until unit tests, CUDA/real-data smoke, parameter/gradient audit
-and the pre-change A3 compatibility fixture all pass on RTX5090.  Only then may
-the serial A1-to-A2 queue start.
+`PASS`.  The implementation, protocol, gradient, runtime and Full compatibility
+gates permit the serial A1-to-A2 80-epoch queue to start.

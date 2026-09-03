@@ -14,13 +14,13 @@
     "metric": "best EMA P1 within first 80 epochs with same-checkpoint P2",
     "direction": "min",
     "checkpoint": "existing epoch-53 best EMA",
-    "source_identity": "implementation commit pending",
+    "source_identity": "git:a1d4fee4ae384971b55c2c21395d9fe3ddf8c784",
     "command": "serial A1 then A2 queue",
     "environment": "RTX5090; PyTorch 2.11.0+cu128; FP32",
     "seed_policy": [0]
   },
   "audit": {
-    "verdict": "CONDITIONAL",
+    "verdict": "PASS",
     "timestamp": "2026-09-03T10:50:00+08:00",
     "report": ".experiments/minimal_ablation_80e_20260903/00_model_audit.md",
     "accepted_risks": [
@@ -28,10 +28,7 @@
       "per-epoch H36M test monitoring",
       "A1 has fewer parameters because graph removal is not capacity compensated"
     ],
-    "blocking_findings": [
-      "RTX5090 preflight not yet complete",
-      "pre-change Full compatibility fixture not yet replayed"
-    ]
+    "blocking_findings": []
   },
   "experiments": [
     {
@@ -70,7 +67,7 @@
     {
       "id": "A1-FACTORIZED-ONLY",
       "track": "ABLATION",
-      "status": "PLANNED",
+      "status": "READY",
       "hypothesis": "Boundary-preserving factorization alone improves A0.",
       "baseline_id": "A3-FULL-GCPM-SEED0",
       "delta": "graph_injection_mode=none; graph removed; no capacity compensation",
@@ -84,14 +81,16 @@
       "stopping_rule": "stop only on invalid execution; A2 still follows any valid metric result",
       "dependencies": [],
       "artifacts": {
-        "config": "configs/pose3d/ablation_factorized_only.yaml"
+        "config": "configs/pose3d/ablation_factorized_only.yaml",
+        "preflight": ".experiments/minimal_ablation_80e_20260903/PRELAUNCH_PASS.json",
+        "parameters": 749891
       },
       "result": null
     },
     {
       "id": "A2-GRAPH-FEATURE",
       "track": "ABLATION",
-      "status": "PLANNED",
+      "status": "READY",
       "hypothesis": "Topology-conditioned control is better than ordinary graph feature fusion.",
       "baseline_id": "A3-FULL-GCPM-SEED0",
       "delta": "graph_injection_mode=feature; recurrent content and Delta/B/C both use X+G",
@@ -105,7 +104,9 @@
       "stopping_rule": "stop only on invalid execution",
       "dependencies": ["A1-FACTORIZED-ONLY"],
       "artifacts": {
-        "config": "configs/pose3d/ablation_graph_feature.yaml"
+        "config": "configs/pose3d/ablation_graph_feature.yaml",
+        "preflight": ".experiments/minimal_ablation_80e_20260903/PRELAUNCH_PASS.json",
+        "parameters": 800083
       },
       "result": null
     },
@@ -150,6 +151,13 @@
       "decision": "Run only A1 and A2, serially, for 80 epochs each.",
       "evidence": "User-overridden budget; A0/A3 best epochs are already within the first-80 window.",
       "rejected_alternatives": "No scale, graph, d-state, symmetry, loss, LR, robustness, MPI or multi-seed expansion in this phase."
+    },
+    {
+      "id": "D-ABL-002",
+      "timestamp": "2026-09-03T11:10:00+08:00",
+      "decision": "Pass the audit gate and authorize the serial A1-to-A2 queue.",
+      "evidence": "22/22 tests pass; A1/A2 have complete finite gradients and real-data smoke; explicit control reproduces the pre-change Full output with max_abs_error=0.0.",
+      "rejected_alternatives": "Do not add any unregistered ablation or start A2 before valid A1 completion."
     }
   ]
 }

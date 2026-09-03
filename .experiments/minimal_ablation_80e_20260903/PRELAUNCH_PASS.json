@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "timestamp": "2026-09-03T11:10:00+08:00",
+  "implementation_commit": "a1d4fee4ae384971b55c2c21395d9fe3ddf8c784",
+  "environment": {
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "pytorch": "2.11.0+cu128",
+    "precision": "FP32"
+  },
+  "hashes": {
+    "model": "4716936a71f77b70ff36ec3e3ce87385035b7df3c67b1433078c62e7d748a343",
+    "factory": "6b56d0ab69f7413c6f074102bd66f0bc80d91a3f10a9f48edf8629395daf1b78",
+    "trainer": "a7025073ef1af05f52a326c08b3cdc8b6a5e7ff6edcb3997e4b4ec19df9b6cef",
+    "a1_config": "da7f0bda55ee182d239fc140a1bd48e2c1b9dd5f8a2aaa56a1844b61d1e6dea2",
+    "a2_config": "b66d27bb4080fbfe242102a299dc5da93c1d6e610a1c618b991f5b6d7b7609a1",
+    "dataset": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175"
+  },
+  "tests": {
+    "unit_and_cuda": "22/22 PASS",
+    "shell_syntax": "PASS",
+    "python_compile": "PASS",
+    "full_control_prechange_max_abs_error": 0.0,
+    "full_control_threshold": 1e-5
+  },
+  "A1": {
+    "mode": "none",
+    "epochs": 80,
+    "parameters": 749891,
+    "missing_gradients": [],
+    "nonfinite_gradients": [],
+    "real_data_loss": 0.5407764911651611,
+    "peak_reserved_mib": 2280.0,
+    "iterations_per_second": 27.60009764452318
+  },
+  "A2": {
+    "mode": "feature",
+    "epochs": 80,
+    "parameters": 800083,
+    "missing_gradients": [],
+    "nonfinite_gradients": [],
+    "real_data_loss": 0.5227317810058594,
+    "peak_reserved_mib": 2396.0,
+    "iterations_per_second": 26.704476385384748
+  }
+}
