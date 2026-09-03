@@ -704,6 +704,8 @@ def train_with_config(args, opts):
         
         # Training
         for epoch in range(st, args.epochs):
+            if torch.cuda.is_available():
+                torch.cuda.reset_peak_memory_stats()
             log.info(f'Training epoch {epoch}.')
             start_time = time.time()
             losses = {}
@@ -764,6 +766,23 @@ def train_with_config(args, opts):
                     train_writer.add_scalar('loss_a', losses['angle'].avg, epoch + 1)
                     train_writer.add_scalar('loss_av', losses['angle_velocity'].avg, epoch + 1)
                     train_writer.add_scalar('loss_total', losses['total'].avg, epoch + 1)
+
+            train_batches = len(train_loader_3d)
+            if args.train_2d and (epoch >= args.pretrain_3d_curriculum):
+                train_batches += len(instav_loader_2d) + len(posetrack_loader_2d)
+            train_it_per_sec = train_batches / max(elapsed * 60.0, 1e-12)
+            if torch.cuda.is_available():
+                peak_allocated_mib = torch.cuda.max_memory_allocated() / 2**20
+                peak_reserved_mib = torch.cuda.max_memory_reserved() / 2**20
+            else:
+                peak_allocated_mib = 0.0
+                peak_reserved_mib = 0.0
+            log.info(
+                f'RUNTIME epoch={epoch + 1} '
+                f'train_it_per_sec={train_it_per_sec:.6f} '
+                f'peak_allocated_mib={peak_allocated_mib:.3f} '
+                f'peak_reserved_mib={peak_reserved_mib:.3f}'
+            )
                 
             # Decay learning rate exponentially
             lr *= lr_decay

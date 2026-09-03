@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "minimal_ablation_80e_20260903",
+    "created_at": "2026-09-03T10:50:00+08:00"
+  },
+  "baseline": {
+    "id": "A3-FULL-GCPM-SEED0",
+    "model": "GraphConditionedPoseMamba W64/D8",
+    "config": "configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m_memopt_speed.yaml",
+    "dataset": "H36M-SH xy+confidence T243/S81",
+    "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+    "split": "inherited train/test split",
+    "metric": "best EMA P1 within first 80 epochs with same-checkpoint P2",
+    "direction": "min",
+    "checkpoint": "existing epoch-53 best EMA",
+    "source_identity": "implementation commit pending",
+    "command": "serial A1 then A2 queue",
+    "environment": "RTX5090; PyTorch 2.11.0+cu128; FP32",
+    "seed_policy": [0]
+  },
+  "audit": {
+    "verdict": "CONDITIONAL",
+    "timestamp": "2026-09-03T10:50:00+08:00",
+    "report": ".experiments/minimal_ablation_80e_20260903/00_model_audit.md",
+    "accepted_risks": [
+      "single-seed minimal ablation",
+      "per-epoch H36M test monitoring",
+      "A1 has fewer parameters because graph removal is not capacity compensated"
+    ],
+    "blocking_findings": [
+      "RTX5090 preflight not yet complete",
+      "pre-change Full compatibility fixture not yet replayed"
+    ]
+  },
+  "experiments": [
+    {
+      "id": "A0-POSEMAMBA",
+      "track": "ABLATION",
+      "status": "COMPLETED",
+      "hypothesis": "existing controlled baseline",
+      "baseline_id": "A3-FULL-GCPM-SEED0",
+      "delta": "coupled PoseMamba W64/D6/M1",
+      "controls": "matched 0.8M protocol",
+      "seeds": [0],
+      "budget": "existing 120 epochs; selected epoch 60 lies within first 80",
+      "primary_metric": "best EMA P1",
+      "secondary_metrics": ["same-checkpoint P2"],
+      "acceptance": "strict current-evaluator replay",
+      "falsification": "metric or provenance mismatch",
+      "stopping_rule": "reuse when replay passes",
+      "dependencies": [],
+      "artifacts": {
+        "analysis": ".experiments/graph_posemamba_5090_memopt_20260902/results/B0-POSEMAMBA-W64-D6-M1/analysis.md"
+      },
+      "result": {
+        "completion_validity": "VALID_COMPLETE_TEST_MONITORED",
+        "metrics": {
+          "params": 790083,
+          "best_epoch": 60,
+          "p1_mm": 40.22602202713938,
+          "p2_mm": 33.51762634743647
+        },
+        "uncertainty": null,
+        "cost": "existing run",
+        "failures": [],
+        "recommendation": "KEEP"
+      }
+    },
+    {
+      "id": "A1-FACTORIZED-ONLY",
+      "track": "ABLATION",
+      "status": "PLANNED",
+      "hypothesis": "Boundary-preserving factorization alone improves A0.",
+      "baseline_id": "A3-FULL-GCPM-SEED0",
+      "delta": "graph_injection_mode=none; graph removed; no capacity compensation",
+      "controls": "all registered common controls",
+      "seeds": [0],
+      "budget": "80 epochs",
+      "primary_metric": "best EMA P1 within epochs 1-80",
+      "secondary_metrics": ["same-checkpoint P2", "raw P1/P2", "VRAM", "it/s"],
+      "acceptance": "valid complete run; metric interpreted without threshold tuning",
+      "falsification": "A1 fails to improve over A0",
+      "stopping_rule": "stop only on invalid execution; A2 still follows any valid metric result",
+      "dependencies": [],
+      "artifacts": {
+        "config": "configs/pose3d/ablation_factorized_only.yaml"
+      },
+      "result": null
+    },
+    {
+      "id": "A2-GRAPH-FEATURE",
+      "track": "ABLATION",
+      "status": "PLANNED",
+      "hypothesis": "Topology-conditioned control is better than ordinary graph feature fusion.",
+      "baseline_id": "A3-FULL-GCPM-SEED0",
+      "delta": "graph_injection_mode=feature; recurrent content and Delta/B/C both use X+G",
+      "controls": "all registered common controls",
+      "seeds": [0],
+      "budget": "80 epochs",
+      "primary_metric": "best EMA P1 within epochs 1-80",
+      "secondary_metrics": ["same-checkpoint P2", "raw P1/P2", "VRAM", "it/s"],
+      "acceptance": "valid complete run; compare directly with A3",
+      "falsification": "A2 equals or improves on A3",
+      "stopping_rule": "stop only on invalid execution",
+      "dependencies": ["A1-FACTORIZED-ONLY"],
+      "artifacts": {
+        "config": "configs/pose3d/ablation_graph_feature.yaml"
+      },
+      "result": null
+    },
+    {
+      "id": "A3-FULL",
+      "track": "ABLATION",
+      "status": "COMPLETED",
+      "hypothesis": "frozen Full reference",
+      "baseline_id": "A3-FULL-GCPM-SEED0",
+      "delta": "graph_injection_mode=control semantics",
+      "controls": "existing matched seed0 run",
+      "seeds": [0],
+      "budget": "existing 120 epochs; selected epoch 53 lies within first 80",
+      "primary_metric": "best EMA P1",
+      "secondary_metrics": ["same-checkpoint P2"],
+      "acceptance": "pre-change compatibility and strict checkpoint replay",
+      "falsification": "control-mode numerical incompatibility",
+      "stopping_rule": "block A1/A2 until compatibility passes",
+      "dependencies": [],
+      "artifacts": {
+        "analysis": ".experiments/graph_posemamba_5090_memopt_20260902/results/F1-5090-0P8M-SPEED-SEED0/analysis.md"
+      },
+      "result": {
+        "completion_validity": "VALID_COMPLETE_TEST_MONITORED",
+        "metrics": {
+          "params": 800083,
+          "best_epoch": 53,
+          "p1_mm": 39.84516172662857,
+          "p2_mm": 33.23224035987441
+        },
+        "uncertainty": null,
+        "cost": "existing run",
+        "failures": [],
+        "recommendation": "KEEP"
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D-ABL-001",
+      "timestamp": "2026-09-03T10:50:00+08:00",
+      "decision": "Run only A1 and A2, serially, for 80 epochs each.",
+      "evidence": "User-overridden budget; A0/A3 best epochs are already within the first-80 window.",
+      "rejected_alternatives": "No scale, graph, d-state, symmetry, loss, LR, robustness, MPI or multi-seed expansion in this phase."
+    }
+  ]
+}

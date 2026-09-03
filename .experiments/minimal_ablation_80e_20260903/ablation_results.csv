@@ -1,0 +1,5 @@
+experiment,factorized,graph,feature_fusion,topology_conditioned,params,best_epoch,P1,P2,raw_P1,raw_P2,peak_vram,it_per_sec,status,run_dir
+A0 PoseMamba,0,0,0,0,790083,60,40.22602202713938,33.51762634743647,,,,,COMPLETED_EXISTING,existing PoseMamba W64/D6/M1 seed0
+A1 Factorized Only,1,0,0,0,,,,,,,,,PLANNED,
+A2 Graph Feature Fusion,1,1,1,0,,,,,,,,,PLANNED,
+A3 Full,1,1,0,1,800083,53,39.84516172662857,33.23224035987441,41.61853340867378,34.26450820132349,3734,,COMPLETED_EXISTING,existing GraphConditionedPoseMamba seed0

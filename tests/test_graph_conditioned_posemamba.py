@@ -56,6 +56,11 @@ class ContextAwareSSM(nn.Module):
         return x if context is None else x + 0.125 * context
 
 
+class FixedGraphMixer(nn.Module):
+    def forward(self, x):
+        return torch.full_like(x, 0.25)
+
+
 class GraphMixerTests(unittest.TestCase):
     def test_required_h36m_neighbors(self):
         neighbors = h36m_neighbor_names(use_symmetry_edges=True)
@@ -164,6 +169,86 @@ class FactorizedShapeTests(unittest.TestCase):
         self.assertEqual(spatial_recorder.context_shape, (486, 1, 17, 57))
         self.assertEqual(temporal_recorder.input_shape, (34, 1, 243, 57))
         self.assertEqual(temporal_recorder.context_shape, (34, 1, 243, 57))
+
+
+class GraphInjectionModeTests(unittest.TestCase):
+    def _block(self, mode, *, use_graph=True, conditioned=False):
+        block = GraphConditionedPoseBlock(
+            hidden_dim=8,
+            num_joints=17,
+            use_graph_mixer=use_graph,
+            graph_conditioned_ssm=conditioned,
+            graph_injection_mode=mode,
+            reuse_graph_context=True,
+            drop_path=0.0,
+        )
+        if use_graph:
+            block.graph_mixer = FixedGraphMixer()
+        return block
+
+    def test_none_leaves_content_unchanged_and_has_no_context(self):
+        block = self._block("none", use_graph=False, conditioned=False)
+        x = torch.randn(2, 3, 17, 8)
+        graph, content, context = block._route_graph_injection(x)
+        self.assertIsNone(graph)
+        self.assertIs(content, x)
+        self.assertIsNone(context)
+
+    def test_feature_fuses_graph_into_content_only(self):
+        block = self._block("feature", conditioned=False)
+        x = torch.randn(2, 3, 17, 8)
+        graph, content, context = block._route_graph_injection(x)
+        torch.testing.assert_close(graph, torch.full_like(x, 0.25))
+        torch.testing.assert_close(content, x + 0.25)
+        self.assertIsNone(context)
+
+    def test_control_preserves_content_and_routes_graph_to_context(self):
+        block = self._block("control", conditioned=True)
+        x = torch.randn(2, 3, 17, 8)
+        graph, content, context = block._route_graph_injection(x)
+        torch.testing.assert_close(graph, torch.full_like(x, 0.25))
+        self.assertIs(content, x)
+        torch.testing.assert_close(context, x + 0.25)
+
+    def test_invalid_or_contradictory_modes_fail_closed(self):
+        with self.assertRaisesRegex(ValueError, "one of none, feature, control"):
+            self._block("unknown", conditioned=False)
+        with self.assertRaisesRegex(ValueError, "requires use_graph_mixer=True"):
+            self._block("feature", use_graph=False, conditioned=False)
+        with self.assertRaisesRegex(ValueError, "must agree"):
+            self._block("control", use_graph=True, conditioned=False)
+
+    def test_legacy_full_inference_matches_explicit_control(self):
+        torch.manual_seed(20260903)
+        legacy = GraphConditionedPoseMamba(
+            num_frame=9,
+            in_chans=3,
+            embed_dim_ratio=12,
+            depth=1,
+            mlp_ratio=1.5,
+            drop_path_rate=0.0,
+            graph_conditioned_ssm=True,
+            graph_injection_mode=None,
+        ).eval()
+        explicit = GraphConditionedPoseMamba(
+            num_frame=9,
+            in_chans=3,
+            embed_dim_ratio=12,
+            depth=1,
+            mlp_ratio=1.5,
+            drop_path_rate=0.0,
+            graph_conditioned_ssm=True,
+            graph_injection_mode="control",
+        ).eval()
+        explicit.load_state_dict(legacy.state_dict(), strict=True)
+        for model in (legacy, explicit):
+            model.blocks[0].spatial_ssm = ContextAwareSSM()
+            model.blocks[0].temporal_ssm = ContextAwareSSM()
+        x = torch.randn(2, 9, 17, 3)
+        with torch.no_grad():
+            old_style = legacy(x)
+            control = explicit(x)
+        torch.testing.assert_close(control, old_style, rtol=0, atol=0)
 
 
 class ConfigurationAndCapacityTests(unittest.TestCase):
@@ -326,6 +411,75 @@ class ConfigurationAndCapacityTests(unittest.TestCase):
                 rtol=1e-6,
                 atol=1e-8,
             )
+
+    def test_minimal_ablation_configs_use_80_epoch_frozen_protocol(self):
+        from lib.utils.learning import load_backbone
+
+        full = get_config(
+            str(
+                REPO_ROOT
+                / "configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m_memopt_speed.yaml"
+            )
+        )
+        registered = (
+            ("ablation_factorized_only.yaml", "none", False, False),
+            ("ablation_graph_feature.yaml", "feature", True, False),
+        )
+        frozen_fields = (
+            "warmup_epochs",
+            "batch_size",
+            "test_batch_size",
+            "learning_rate",
+            "weight_decay",
+            "lr_decay",
+            "use_ema",
+            "ema_decay",
+            "maxlen",
+            "dim_feat",
+            "depth",
+            "mlp_ratio",
+            "ssm_d_state",
+            "ssm_ratio",
+            "dropout",
+            "drop_path_rate",
+            "factorized_spatial_temporal",
+            "spatial_ssm_conv",
+            "temporal_ssm_conv",
+            "graph_scale",
+            "spatial_res_scale",
+            "temporal_res_scale",
+            "compile_model",
+            "compile_mode",
+            "compile_compatible_scan",
+            "eager_eval_when_compiled",
+            "data_root",
+            "subset_list",
+            "dt_file",
+            "clip_len",
+            "data_stride",
+            "sample_stride",
+            "num_joints",
+            "rootrel",
+            "no_conf",
+            "lambda_3d",
+            "lambda_scale",
+            "lambda_3d_velocity",
+            "lambda_diff",
+            "flip",
+            "mask_ratio",
+            "mask_T_ratio",
+            "noise",
+        )
+        for filename, mode, use_graph, conditioned in registered:
+            config = get_config(str(REPO_ROOT / "configs/pose3d" / filename))
+            self.assertEqual(config.epochs, 80)
+            self.assertEqual(config.graph_injection_mode, mode)
+            self.assertEqual(config.use_graph_mixer, use_graph)
+            self.assertEqual(config.graph_conditioned_ssm, conditioned)
+            for field in frozen_fields:
+                self.assertEqual(getattr(config, field), getattr(full, field), field)
+            model = load_backbone(config)
+            self.assertTrue(all(block.graph_injection_mode == mode for block in model.blocks))
 
 
 @unittest.skipUnless(cuda_selective_scan_available(), "CUDA selective scan is unavailable")

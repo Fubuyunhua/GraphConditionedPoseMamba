@@ -153,6 +153,7 @@ class GraphConditionedPoseBlock(nn.Module):
         use_graph_mixer=True,
         use_symmetry_edges=True,
         graph_conditioned_ssm=True,
+        graph_injection_mode=None,
         reuse_graph_context=True,
         graph_scale=1.0,
         spatial_res_scale=1.0,
@@ -167,12 +168,33 @@ class GraphConditionedPoseBlock(nn.Module):
         norm_layer=nn.LayerNorm,
     ):
         super().__init__()
-        if graph_conditioned_ssm and not use_graph_mixer:
-            raise ValueError("graph_conditioned_ssm requires use_graph_mixer=True")
+        if graph_injection_mode is None:
+            graph_injection_mode = (
+                "control" if graph_conditioned_ssm else "none"
+            )
+        graph_injection_mode = str(graph_injection_mode).lower()
+        if graph_injection_mode not in {"none", "feature", "control"}:
+            raise ValueError(
+                "graph_injection_mode must be one of none, feature, control; "
+                f"received {graph_injection_mode!r}"
+            )
+        if graph_injection_mode in {"feature", "control"} and not use_graph_mixer:
+            raise ValueError(
+                f"graph_injection_mode={graph_injection_mode!r} requires "
+                "use_graph_mixer=True"
+            )
+        expected_conditioned = graph_injection_mode == "control"
+        if bool(graph_conditioned_ssm) != expected_conditioned:
+            raise ValueError(
+                "graph_conditioned_ssm must agree with graph_injection_mode: "
+                f"mode={graph_injection_mode!r} requires "
+                f"graph_conditioned_ssm={expected_conditioned}"
+            )
         self.hidden_dim = int(hidden_dim)
         self.num_joints = int(num_joints)
         self.use_graph_mixer = bool(use_graph_mixer)
-        self.graph_conditioned_ssm = bool(graph_conditioned_ssm)
+        self.graph_injection_mode = graph_injection_mode
+        self.graph_conditioned_ssm = expected_conditioned
         self.reuse_graph_context = bool(reuse_graph_context)
         self.graph_scale = float(graph_scale)
 
@@ -217,16 +239,23 @@ class GraphConditionedPoseBlock(nn.Module):
         self.gamma_s = nn.Parameter(torch.ones(1) * float(spatial_res_scale))
         self.gamma_t = nn.Parameter(torch.ones(1) * float(temporal_res_scale))
 
-    def _graph_context(self, x):
-        if self.graph_mixer is None:
-            return None, None
-        graph_feature = self.graph_mixer(x)
-        context = (
-            x + self.graph_scale * graph_feature
-            if self.graph_conditioned_ssm
-            else None
-        )
-        return graph_feature, context
+    def _route_graph_injection(self, x, graph_feature=None):
+        """Return graph feature, recurrent content, and selective context.
+
+        ``none`` leaves both recurrent content and Delta/B/C input untouched.
+        ``feature`` feeds ``x + graph`` as recurrent content with no independent
+        context.  ``control`` preserves the released Full definition: recurrent
+        content comes from ``x`` while ``x + graph`` controls Delta/B/C.
+        """
+
+        if self.graph_injection_mode == "none":
+            return None, x, None
+        if graph_feature is None:
+            graph_feature = self.graph_mixer(x)
+        graph_enhanced = x + self.graph_scale * graph_feature
+        if self.graph_injection_mode == "feature":
+            return graph_feature, graph_enhanced, None
+        return graph_feature, x, graph_enhanced
 
     @staticmethod
     def factorize_spatial(x):
@@ -254,8 +283,10 @@ class GraphConditionedPoseBlock(nn.Module):
             )
 
         spatial_feature = self.norm_spatial(x) + joint_pos
-        graph_feature, spatial_context = self._graph_context(spatial_feature)
-        spatial_input = self.factorize_spatial(spatial_feature)
+        graph_feature, spatial_ssm_feature, spatial_context = (
+            self._route_graph_injection(spatial_feature)
+        )
+        spatial_input = self.factorize_spatial(spatial_ssm_feature)
         spatial_context_1d = (
             None if spatial_context is None else self.factorize_spatial(spatial_context)
         )
@@ -268,15 +299,17 @@ class GraphConditionedPoseBlock(nn.Module):
 
         temporal_feature = self.norm_temporal(x) + temporal_pos
         if self.reuse_graph_context and graph_feature is not None:
-            temporal_graph_feature = graph_feature
-            temporal_context = (
-                temporal_feature + self.graph_scale * graph_feature
-                if self.graph_conditioned_ssm
-                else None
+            temporal_graph_feature, temporal_ssm_feature, temporal_context = (
+                self._route_graph_injection(
+                    temporal_feature,
+                    graph_feature=graph_feature,
+                )
             )
         else:
-            temporal_graph_feature, temporal_context = self._graph_context(temporal_feature)
-        temporal_input = self.factorize_temporal(temporal_feature)
+            temporal_graph_feature, temporal_ssm_feature, temporal_context = (
+                self._route_graph_injection(temporal_feature)
+            )
+        temporal_input = self.factorize_temporal(temporal_ssm_feature)
         temporal_context_1d = (
             None if temporal_context is None else self.factorize_temporal(temporal_context)
         )
@@ -291,6 +324,7 @@ class GraphConditionedPoseBlock(nn.Module):
         if not return_shape_trace:
             return x
         trace = {
+            "graph_injection_mode": self.graph_injection_mode,
             "graph_feature": (
                 None if graph_feature is None else (b, t, j, self.hidden_dim)
             ),
@@ -325,6 +359,7 @@ class GraphConditionedPoseMamba(nn.Module):
         use_symmetry_edges=True,
         graph_hidden_ratio=0.5,
         graph_conditioned_ssm=True,
+        graph_injection_mode=None,
         reuse_graph_context=True,
         factorized_spatial_temporal=True,
         spatial_ssm_conv=1,
@@ -364,6 +399,7 @@ class GraphConditionedPoseMamba(nn.Module):
                     use_graph_mixer=use_graph_mixer,
                     use_symmetry_edges=use_symmetry_edges,
                     graph_conditioned_ssm=graph_conditioned_ssm,
+                    graph_injection_mode=graph_injection_mode,
                     reuse_graph_context=reuse_graph_context,
                     graph_scale=graph_scale,
                     spatial_res_scale=spatial_res_scale,
