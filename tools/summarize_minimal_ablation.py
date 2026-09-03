@@ -127,6 +127,21 @@ def display(value, digits=4):
     return str(value)
 
 
+def monitored_gpu_peaks(path: Path) -> dict[str, float]:
+    if not path.is_file():
+        return {}
+    peaks: dict[str, float] = {}
+    with path.open(newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            phase = str(row.get("phase", ""))
+            try:
+                used = float(row["gpu_used_mib"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            peaks[phase] = max(peaks.get(phase, 0.0), used)
+    return peaks
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -136,6 +151,33 @@ def main() -> None:
     parser.add_argument("--a1-run", default="")
     parser.add_argument("--a2-run", default="")
     args = parser.parse_args()
+
+    study = Path(args.study_dir)
+    monitor_peaks = monitored_gpu_peaks(study / "runtime/gpu_monitor.csv")
+    a1 = run_row(
+        Path(args.a1_run).resolve() if args.a1_run else None,
+        {
+            "experiment": "A1 Factorized Only",
+            "factorized": 1,
+            "graph": 0,
+            "feature_fusion": 0,
+            "topology_conditioned": 0,
+        },
+    )
+    a2 = run_row(
+        Path(args.a2_run).resolve() if args.a2_run else None,
+        {
+            "experiment": "A2 Graph Feature Fusion",
+            "factorized": 1,
+            "graph": 1,
+            "feature_fusion": 1,
+            "topology_conditioned": 0,
+        },
+    )
+    if "A1" in monitor_peaks:
+        a1["peak_vram"] = monitor_peaks["A1"]
+    if "A2" in monitor_peaks:
+        a2["peak_vram"] = monitor_peaks["A2"]
 
     variants = [
         {
@@ -155,26 +197,8 @@ def main() -> None:
             "status": "COMPLETED_EXISTING",
             "run_dir": "existing PoseMamba W64/D6/M1 seed0",
         },
-        run_row(
-            Path(args.a1_run).resolve() if args.a1_run else None,
-            {
-                "experiment": "A1 Factorized Only",
-                "factorized": 1,
-                "graph": 0,
-                "feature_fusion": 0,
-                "topology_conditioned": 0,
-            },
-        ),
-        run_row(
-            Path(args.a2_run).resolve() if args.a2_run else None,
-            {
-                "experiment": "A2 Graph Feature Fusion",
-                "factorized": 1,
-                "graph": 1,
-                "feature_fusion": 1,
-                "topology_conditioned": 0,
-            },
-        ),
+        a1,
+        a2,
         {
             "experiment": "A3 Full",
             "factorized": 1,
@@ -194,7 +218,6 @@ def main() -> None:
         },
     ]
 
-    study = Path(args.study_dir)
     study.mkdir(parents=True, exist_ok=True)
     fields = (
         "experiment",
