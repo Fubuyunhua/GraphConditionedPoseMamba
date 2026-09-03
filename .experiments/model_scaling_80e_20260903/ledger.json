@@ -20,23 +20,21 @@
     "seed_policy": [0]
   },
   "audit": {
-    "verdict": "CONDITIONAL",
-    "timestamp": "2026-09-03T14:30:00+08:00",
+    "verdict": "PASS",
+    "timestamp": "2026-09-03T21:40:00+08:00",
     "report": ".experiments/model_scaling_80e_20260903/00_model_audit.md",
     "accepted_risks": [
       "single-seed capacity study",
       "locked W64 optimizer schedule",
       "test-monitored inherited protocol"
     ],
-    "blocking_findings": [
-      "user-authorized staged RTX5090 batch1/batch2/compiled-batch4 smoke pending"
-    ]
+    "blocking_findings": []
   },
   "experiments": [
     {
       "id": "S1-W128-D20",
       "track": "IMPROVEMENT",
-      "status": "PLANNED",
+      "status": "RUNNING",
       "hypothesis": "deeper moderate-width graph-conditioned factorized SSM refinement improves P1 by at least 0.10 mm",
       "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
       "delta": "dim_feat 64->128 and depth 8->20; budget registered at 80 epochs",
@@ -53,19 +51,22 @@
         "config": "configs/pose3d/graph_posemamba_h36m_w128_d20_scale_80e.yaml",
         "parameters": 6836355,
         "static_preflight": ".experiments/model_scaling_80e_20260903/static_preflight.json",
+        "preflight": ".experiments/model_scaling_80e_20260903/PRELAUNCH_PASS.json",
         "command": "scripts/run_scale_models_80e.sh",
-        "log": null,
-        "checkpoint": null,
+        "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_SCALE_80e_20260903/launch_logs/scale_queue_20260903_134133.log",
+        "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_SCALE_80e_20260903/runs/model_scaling_80e/S1_w128_d20_seed0_2026_09_03_T_21_41_37",
         "results": null,
-        "source": null,
-        "environment": null
+        "source": "git:d30993d04fa57de57b38b55a69dc3913b90b87b0",
+        "environment": "RTX5090 shared with wh PID 367341",
+        "queue_pid": 395234,
+        "train_pid": 395265
       },
       "result": null
     },
     {
       "id": "S2-W256-D10",
       "track": "IMPROVEMENT",
-      "status": "PLANNED",
+      "status": "READY",
       "hypothesis": "wide graph-conditioned factorized SSM capacity improves P1 by at least 0.10 mm",
       "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
       "delta": "dim_feat 64->256 and depth 8->10; budget registered at 80 epochs",
@@ -82,6 +83,7 @@
         "config": "configs/pose3d/graph_posemamba_h36m_w256_d10_scale_80e.yaml",
         "parameters": 12646107,
         "static_preflight": ".experiments/model_scaling_80e_20260903/static_preflight.json",
+        "preflight": ".experiments/model_scaling_80e_20260903/PRELAUNCH_PASS.json",
         "command": "scripts/run_scale_models_80e.sh",
         "log": null,
         "checkpoint": null,
@@ -120,6 +122,13 @@
       "decision": "Amend the diagnostic gate to 24,576 MiB free and run eager batch1, eager batch2, then compiled batch4 before formal training.",
       "evidence": "The user explicitly authorized an immediate attempt after learning that the 28 GiB figure was a conservative free-memory gate rather than model consumption.",
       "rejected_alternatives": "Do not stop the wh process, change the formal batch size, or skip the compiled batch4 validation."
+    },
+    {
+      "id": "D-SCALE-005",
+      "timestamp": "2026-09-03T21:41:37+08:00",
+      "decision": "Pass the staged GPU gate and start the guarded S1 W128/D20 formal 80-epoch run.",
+      "evidence": "All static/CUDA/real-data gates passed; S1 compiled batch4 reserved 14092 MiB and S2 reserved 13018 MiB with finite loss and positive throughput.",
+      "rejected_alternatives": "Do not stop the wh process, enable checkpointing, reduce batch size, or start S2 before valid S1 completion."
     }
   ]
 }

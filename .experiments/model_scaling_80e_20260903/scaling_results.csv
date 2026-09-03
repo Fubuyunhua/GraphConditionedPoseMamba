@@ -1,4 +1,4 @@
 experiment,width,depth,parameters,best_epoch,ema_p1,ema_p2,raw_p1,raw_p2,peak_vram_mib,it_per_sec,status,run_dir
 Full W64/D8,64,8,800083,53,39.84516172662857,33.23224035987441,41.61853340867378,34.26450820132349,3734,,COMPLETED_EXISTING,existing GraphConditionedPoseMamba seed0
-S1 W128/D20,128,20,6836355,,,,,,,,PLANNED,
-S2 W256/D10,256,10,12646107,,,,,,,,PLANNED,
+S1 W128/D20,128,20,6836355,,,,,,,,RUNNING,/scratch/home/caiwei/GraphConditionedPoseMamba_SCALE_80e_20260903/runs/model_scaling_80e/S1_w128_d20_seed0_2026_09_03_T_21_41_37
+S2 W256/D10,256,10,12646107,,,,,,,,READY,

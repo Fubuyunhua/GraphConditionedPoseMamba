@@ -1,7 +1,6 @@
 # W128/D20 and W256/D10 scaling audit
 
-Verdict: CONDITIONAL — static review passes; RTX5090 compiled real-data smoke is
-required after the active A1/A2 queue completes.
+Verdict: PASS — static, CUDA, staged real-data and compiled batch-4 gates pass.
 
 First post-ablation attempt at 2026-09-03 20:49 Asia/Shanghai stopped before
 tests or smoke: only 28,476 MiB was free versus the registered 28,672 MiB
@@ -11,6 +10,12 @@ The user subsequently authorized immediate staged testing. The effective gate
 is amended to require at least 24,576 MiB free, then eager real-data batch 1
 and batch 2 steps followed by the exact compiled batch 4 step. Formal configs
 remain batch 4 and otherwise unchanged.
+
+The staged gate passed on RTX5090. W128/D20 reserved 3,734 / 7,254 /
+14,092 MiB at batch 1 / 2 / 4; W256/D10 reserved 3,936 / 7,862 /
+13,018 MiB. Both compiled batch-4 steps produced finite losses with positive
+throughput while the external `wh` process remained active. Formal S1 was
+released without changing its registered config.
 
 ## Scope and immutable reference
 
@@ -39,8 +44,7 @@ drop-path ends at 0.2 in both candidates, matching Full.
 
 Static construction reports 6,836,355 trainable parameters for W128/D20 and
 12,646,107 for W256/D10. Shape/protocol checks and all 20 non-CUDA unit tests
-pass; six CUDA-only tests are intentionally deferred to the post-ablation GPU
-gate.
+pass; the complete CUDA suite also passed during the staged GPU gate.
 
 ## Frozen optimization, loss, data, and evaluation
 
@@ -56,11 +60,9 @@ gate.
 ## Findings and gates
 
 - P0: none found in the declared configs.
-- P1 runtime risk: compiled batch-4 memory and finite gradients are not yet
-  measured for either larger model. Required diagnostic: one warmup and one
-  timed real-data train step per candidate on the RTX5090. Formal training is
-  blocked until all staged checks pass with peak reserved VRAM below
-  24,576 MiB.
+- P1 runtime risk: RESOLVED for launch. Eager batch 1/2 and compiled batch 4
+  produced finite losses for both models; their peaks remain at least 10 GiB
+  below the 24,576 MiB model-process ceiling.
 - P2 optimization risk: the larger models reuse the W64 learning rate and only
   one seed. This is intentionally controlled, but instability would make the
   run invalid rather than trigger silent LR tuning.
