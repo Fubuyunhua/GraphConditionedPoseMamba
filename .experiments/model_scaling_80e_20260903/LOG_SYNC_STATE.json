@@ -11,7 +11,7 @@
     },
     "S2-W256-D10": {
       "document": ".experiments/model_scaling_80e_20260903/logs/S2_W256_D10.md",
-      "status": "RUNNING",
+      "status": "CANCELLED",
       "last_completed_epoch": 0
     }
   }

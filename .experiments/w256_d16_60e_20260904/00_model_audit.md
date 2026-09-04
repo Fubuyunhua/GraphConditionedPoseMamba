@@ -1,7 +1,7 @@
 # W256/D16 60-epoch audit
 
-Verdict: CONDITIONAL — configuration and parameter count pass static review;
-RTX5090 staged real-data smoke is required before formal training.
+Verdict: PASS — static/CUDA and staged real-data batch1/batch2/compiled-batch4
+gates passed before formal training.
 
 ## Registered model
 
@@ -25,3 +25,7 @@ W256/D10 process exits. All losses must be finite, no gradient/runtime error may
 occur, and batch-4 model-process peak reserved memory must remain below
 28,672 MiB. Failure blocks formal training; no silent batch/LR/checkpointing
 change is permitted.
+
+Observed peak reserved memory was 6,214 MiB at eager batch 1, 12,488 MiB at
+eager batch 2 and 20,274 MiB at compiled batch 4. All losses were finite and
+throughput positive; the formal 60-epoch run was released unchanged.

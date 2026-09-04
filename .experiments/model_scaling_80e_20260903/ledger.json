@@ -85,7 +85,7 @@
     {
       "id": "S2-W256-D10",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "CANCELLED",
       "hypothesis": "wide graph-conditioned factorized SSM capacity improves P1 by at least 0.10 mm",
       "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
       "delta": "dim_feat 64->256 and depth 8->10; budget registered at 80 epochs",
@@ -114,7 +114,14 @@
         "queue_pid": 556162,
         "train_pid": 556185
       },
-      "result": null
+      "result": {
+        "completion_validity": "USER_CANCELLED_BEFORE_FIRST_EPOCH",
+        "metrics": {"completed_epochs": 0},
+        "uncertainty": "no completed epoch or evaluation metric",
+        "cost": "approximately 15 minutes including compilation and partial epoch 1",
+        "failures": [],
+        "recommendation": "PRESERVE_NOT_COMPARABLE"
+      }
     }
   ],
   "decisions": [
@@ -166,6 +173,13 @@
       "decision": "Terminate S1 at 65/80 by explicit user request, preserve all artifacts, and immediately prioritize a fresh S2 W256/D10 80-epoch run.",
       "evidence": "S1 stopped cleanly with best observed EMA 37.6593/31.8717 mm; all three target PIDs exited and S2 passed its previously registered compiled batch4 gate before launch.",
       "rejected_alternatives": "Do not delete S1, label it complete, resume it, reuse its output directory, or start S2 from S1 weights."
+    },
+    {
+      "id": "D-SCALE-008",
+      "timestamp": "2026-09-04T15:30:00+08:00",
+      "decision": "Cancel W256/D10 before its first completed epoch and replace it with the user-requested W256/D16 60-epoch study.",
+      "evidence": "The user explicitly requested the larger D16 model and a 60-epoch budget; D10 stopped cleanly with zero completed epochs and all artifacts preserved.",
+      "rejected_alternatives": "Do not run D10 and D16 concurrently, delete D10 artifacts, or report D10 as a completed experiment."
     }
   ]
 }

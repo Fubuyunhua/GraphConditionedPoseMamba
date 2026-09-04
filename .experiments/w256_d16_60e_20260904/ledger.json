@@ -14,27 +14,27 @@
     "metric": "best EMA P1 within epochs 1-60 with same-checkpoint P2",
     "direction": "min",
     "checkpoint": "existing Full epoch-53 best EMA",
-    "source_identity": "pending implementation commit",
+    "source_identity": "git:e3b89920090816b0a0a8f1b5f76db49b10800b5e",
     "command": "scripts/run_w256_d16_60e.sh",
     "environment": "RTX5090; PyTorch 2.11.0+cu128; FP32",
     "seed_policy": [0]
   },
   "audit": {
-    "verdict": "CONDITIONAL",
-    "timestamp": "2026-09-04T15:30:00+08:00",
+    "verdict": "PASS",
+    "timestamp": "2026-09-04T15:34:00+08:00",
     "report": ".experiments/w256_d16_60e_20260904/00_model_audit.md",
     "accepted_risks": [
       "single seed",
       "60-epoch user-requested budget",
       "inherited test-monitored protocol"
     ],
-    "blocking_findings": ["staged RTX5090 real-data smoke pending"]
+    "blocking_findings": []
   },
   "experiments": [
     {
       "id": "D16-W256-D16-60E",
       "track": "IMPROVEMENT",
-      "status": "PLANNED",
+      "status": "RUNNING",
       "hypothesis": "six additional W256 blocks improve accuracy through deeper iterative graph/SSM refinement",
       "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
       "delta": "width 256, depth 16, registered budget 60 epochs",
@@ -51,13 +51,15 @@
         "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_scale_60e.yaml",
         "parameters": 20192451,
         "command": "scripts/run_w256_d16_60e.sh",
-        "preflight": null,
-        "log": null,
-        "checkpoint": null,
+        "preflight": ".experiments/w256_d16_60e_20260904/PRELAUNCH_PASS.json",
+        "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_60e_20260904/launch_logs/D16_w256_d16_60e_073416.log",
+        "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_60e_20260904/runs/w256_d16_60e/D16_w256_d16_seed0_2026_09_04_T_15_34_18",
         "results": null,
-        "source": null,
-        "environment": null,
-        "training_log_document": ".experiments/w256_d16_60e_20260904/training_log.md"
+        "source": "git:e3b89920090816b0a0a8f1b5f76db49b10800b5e",
+        "environment": "RTX5090; PyTorch 2.11.0+cu128; FP32",
+        "training_log_document": ".experiments/w256_d16_60e_20260904/training_log.md",
+        "queue_pid": 561290,
+        "train_pid": 561307
       },
       "result": null
     }
@@ -69,6 +71,13 @@
       "decision": "Register and immediately gate W256/D16 for 60 epochs after preserving and cancelling W256/D10.",
       "evidence": "Explicit user request; exact static parameter count is 20,192,451.",
       "rejected_alternatives": "Do not run W256/D10 and D16 concurrently, reuse partial weights, or silently change batch/LR."
+    },
+    {
+      "id": "D-D16-002",
+      "timestamp": "2026-09-04T15:34:18+08:00",
+      "decision": "Pass all staged gates and start W256/D16 for 60 epochs.",
+      "evidence": "Compiled batch4 peak reserved 20274 MiB, finite loss 5.672654, positive throughput, dataset hash and CUDA/unit gates passed.",
+      "rejected_alternatives": "Do not reduce batch, enable checkpointing, reuse D10 weights or change optimizer settings."
     }
   ]
 }

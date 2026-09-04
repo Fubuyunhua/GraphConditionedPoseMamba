@@ -6,4 +6,4 @@ P2 is always paired with the EMA checkpoint selected by minimum P1 within 80 epo
 |---|---:|---:|---:|---:|---:|---:|---|
 | Full W64/D8 | 64 | 8 | 800083 | 53 | 39.8452 | 33.2322 | COMPLETED_EXISTING |
 | S1 W128/D20 | 128 | 20 | 6836355 | 45 | 37.6593 | 31.8717 | CANCELLED_AT_65_NOT_FINAL |
-| S2 W256/D10 | 256 | 10 | 12646107 | — | — | — | RUNNING |
+| S2 W256/D10 | 256 | 10 | 12646107 | — | — | — | CANCELLED_BEFORE_EPOCH_1 |
