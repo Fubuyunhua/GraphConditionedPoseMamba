@@ -45,3 +45,30 @@ R2 preflight confirms the effective batch-4 warmup has 35,496 steps, starts at
 approximately 5e-5 LR, reports finite pre-clip gradient norm 44.925, and uses
 20,406 MiB peak reserved memory. Eager batch1/batch2 and compiled batch4 all
 pass. The corrected run was released under source commit `2e4b804`.
+
+## R3 re-audit
+
+Verdict: **CONDITIONAL pending staged RTX5090 preflight**.
+
+R3 keeps the model graph, 20,192,451 parameters, tensor contracts, dataset,
+losses, augmentation, batch size, EMA, clipping and evaluator unchanged. The
+only effective optimization changes are a 3e-4 peak LR, a per-step cosine tail
+to 3e-5 after the existing eight-epoch warmup, and opt-in honoring of existing
+`_no_weight_decay` markers. Legacy configs retain exponential decay and the old
+single AdamW group unless they explicitly opt in.
+
+Checkpoint migration is intentionally one-way: R3 starts from random seed 0 in
+a new directory. Its two-group optimizer state must not be loaded into R1/R2,
+and R1/R2 optimizer state must not be loaded into R3. Scheduler state records
+mode, total epochs and minimum ratio for exact R3 resume.
+
+Telemetry copies approximately 80 MiB of trainable parameters to CPU once per
+epoch and computes drift after training. It does not enter the forward, loss,
+backward, optimizer or EMA graphs. Maximum pre-clip gradient and clipped-step
+fraction are observational only. Non-finite values remain hard runtime errors;
+finite metric excursions are reported without automatic termination.
+
+Open gates before PASS: full unit suite, actual optimizer-group coverage,
+cosine endpoints/resume state, real H36M eager B1/B2 and compiled B4 finite
+forward/backward, new telemetry, dataset hash, source/config identity, and
+batch-4 peak reserved memory below 28,672 MiB under the current shared GPU.

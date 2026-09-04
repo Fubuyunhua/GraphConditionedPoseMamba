@@ -26,3 +26,34 @@ confirmation.
 - Existing 0.99 epoch decay begins after warmup.
 - Log pre-clip gradient norm; clip global norm at 1.0 and fail on non-finite.
 - New run prefix; no resume or overwrite of the invalid run.
+
+## R2 late-instability evidence
+
+R2 improved monotonically through epoch 15, reaching 39.839843/32.817857 mm,
+then failed at epoch 16: MPJPE loss rose 121.5%, total loss rose 84.7%, and EMA
+P1 regressed 92.8847 mm. All four raw/EMA checkpoints load and all tensors are
+finite. LR followed the intended schedule and was 4.66e-4 at epoch 16.
+
+The event is a whole-model optimizer excursion rather than an evaluation-only
+artifact. Raw parameters moved 8.72% in relative L2 during epoch 16 and EMA
+parameters moved 4.92%. Graph-mixer parameters moved 28.7%, SSM dt-projection
+weights 19.7%, temporal positions 34.8%, and the head 12.6%; individual SSM/MLP
+matrices moved 30-73%. A-log exponent and dt-bias ranges remained bounded.
+
+The reported gradient norm was only an epoch mean. Global clipping precedes
+AdamW and does not directly bound its per-parameter normalized update. In
+addition, `A_logs` and `Ds` are marked `_no_weight_decay`, but the trainer's
+single AdamW parameter group ignored those markers. Eight-epoch warmup reduced
+the start shock but retained the original 5e-4 peak and shallow 0.99 decay.
+
+The `wh` process overlapped part of epoch 16 and explains the throughput drop,
+but separate CUDA contexts cannot directly alter this model's weights and no
+OOM/CUDA error occurred. Treat concurrency as a confounder, not the root cause.
+
+## R3 bounded modification
+
+Keep the architecture, loss, batch, EMA and clipping fixed. Lower peak LR to
+3e-4, replace post-warmup epoch steps with per-step cosine decay to 3e-5, honor
+only existing `_no_weight_decay` markers, and log maximum gradient, clipping
+fraction, and parameter movement. This directly tests the optimizer-scale
+hypothesis without adding a new architectural mechanism.

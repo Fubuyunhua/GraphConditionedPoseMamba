@@ -21,6 +21,10 @@ RUNTIME = re.compile(
     r"RUNTIME epoch=(\d+) train_it_per_sec=([0-9.]+) "
     r"peak_allocated_mib=([0-9.]+) peak_reserved_mib=([0-9.]+)"
     r"(?:\s+grad_norm_preclip=([0-9.]+))?"
+    r"(?:\s+grad_norm_max=([0-9.]+))?"
+    r"(?:\s+grad_clip_fraction=([0-9.]+))?"
+    r"(?:\s+param_update_rel_l2=([0-9.]+))?"
+    r"(?:\s+param_update_max_abs=([0-9.]+))?"
 )
 PROGRESS = re.compile(r"(\d+)it \[([^\]]+)\]")
 
@@ -52,6 +56,16 @@ REGISTRY = {
         "preflight_key": "D16",
         "epochs": 60,
         "preflight": ".experiments/w256_d16_60e_20260904/PRELAUNCH_PASS_R2.json",
+    },
+    "D16_R3": {
+        "title": "W256/D16 R3 stable optimizer",
+        "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_stable_r3_60e.yaml",
+        "width": 256,
+        "depth": 16,
+        "parameters": 20_192_451,
+        "preflight_key": "D16_R3",
+        "epochs": 60,
+        "preflight": ".experiments/w256_d16_60e_20260904/PRELAUNCH_PASS_R3.json",
     },
 }
 
@@ -142,8 +156,12 @@ def main() -> None:
                 "peak_allocated_mib": float(c),
                 "peak_reserved_mib": float(d),
                 "grad_norm": float(e) if e else None,
+                "grad_norm_max": float(f) if f else None,
+                "grad_clip_fraction": float(g) if g else None,
+                "param_update_rel_l2": float(h) if h else None,
+                "param_update_max_abs": float(i) if i else None,
             }
-            for a, b, c, d, e in RUNTIME.findall(text)
+            for a, b, c, d, e, f, g, h, i in RUNTIME.findall(text)
         ]
         progress_matches = PROGRESS.findall(text)
         progress = progress_matches[-1] if progress_matches else None
@@ -164,7 +182,7 @@ def main() -> None:
     if preflight_path.is_file():
         preflight = json.loads(preflight_path.read_text(encoding="utf-8"))
     stages = preflight.get("smokes", {}).get(spec["preflight_key"], {})
-    if not stages and args.experiment == "D16":
+    if not stages:
         stages = preflight.get("stages", {})
     monitor = monitor_summary(Path(args.monitor), args.experiment)
     best = min(epochs, key=lambda item: item["p1"]) if epochs else None
@@ -219,6 +237,18 @@ def main() -> None:
                 f"- Trainer peak reserved VRAM: `{max(item['peak_reserved_mib'] for item in runtimes):.0f} MiB`.",
             ]
         )
+        latest_runtime = runtimes[-1]
+        if latest_runtime.get("grad_norm_max") is not None:
+            lines.append(
+                f"- Latest maximum pre-clip gradient norm: `{latest_runtime['grad_norm_max']:.4f}`; "
+                f"clipped-step fraction `{latest_runtime['grad_clip_fraction']:.2%}`."
+            )
+        if latest_runtime.get("param_update_rel_l2") is not None:
+            lines.append(
+                f"- Latest raw parameter movement: relative L2 "
+                f"`{latest_runtime['param_update_rel_l2']:.4%}`, max absolute "
+                f"`{latest_runtime['param_update_max_abs']:.6f}`."
+            )
     if monitor:
         lines.extend(
             [

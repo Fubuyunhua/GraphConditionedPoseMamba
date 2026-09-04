@@ -25,6 +25,7 @@ from lib.utils.tools import get_config
 from train import (
     CudaGraphTrainModel,
     EMAModel,
+    build_adamw_parameter_groups,
     build_lr_schedule,
     train_epoch,
 )
@@ -41,6 +42,8 @@ LOSS_KEYS = (
     "angle",
     "angle_velocity",
     "grad_norm",
+    "grad_norm_max",
+    "grad_clip_fraction",
 )
 
 
@@ -125,11 +128,14 @@ def main():
         model = CudaGraphTrainModel(base_model)
     else:
         model = torch.nn.DataParallel(base_model)
-    optimizer = torch.optim.AdamW(
-        model.parameters(),
-        lr=config.learning_rate,
+    optimizer_groups = build_adamw_parameter_groups(
+        model,
         weight_decay=config.weight_decay,
+        honor_no_weight_decay=bool(
+            getattr(config, "honor_no_weight_decay", False)
+        ),
     )
+    optimizer = torch.optim.AdamW(optimizer_groups, lr=config.learning_rate)
     ema = EMAModel(base_model, config.ema_decay)
     steps_per_epoch = len(loader) if options.real_data else (
         options.warmup_steps + options.steps
@@ -192,6 +198,22 @@ def main():
                     getattr(config, "activation_checkpoint_blocks", False)
                 ),
                 "linear_warmup_enabled": lr_schedule is not None,
+                "lr_schedule_mode": (
+                    lr_schedule.decay_mode if lr_schedule is not None else "legacy"
+                ),
+                "min_lr_ratio": (
+                    lr_schedule.min_lr_ratio if lr_schedule is not None else 0.0
+                ),
+                "optimizer_groups": [
+                    {
+                        "name": group.get("group_name", "unnamed"),
+                        "parameter_count": sum(
+                            parameter.numel() for parameter in group["params"]
+                        ),
+                        "weight_decay": float(group["weight_decay"]),
+                    }
+                    for group in optimizer_groups
+                ],
                 "warmup_steps": (
                     lr_schedule.warmup_steps if lr_schedule is not None else 0
                 ),
@@ -207,6 +229,8 @@ def main():
                 "measured_peak_reserved_mib": measured_peak_reserved / 2**20,
                 "loss": losses["total"].avg,
                 "grad_norm_preclip": losses["grad_norm"].avg,
+                "grad_norm_max": losses["grad_norm_max"].avg,
+                "grad_clip_fraction": losses["grad_clip_fraction"].avg,
             },
             indent=2,
         )

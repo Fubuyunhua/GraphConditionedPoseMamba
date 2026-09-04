@@ -812,6 +812,125 @@ class ConfigurationAndCapacityTests(unittest.TestCase):
             self.assertAlmostEqual(actual, target, places=12)
         self.assertEqual(schedule.state_dict()["global_step"], 7)
 
+    def test_linear_warmup_then_cosine_schedule(self):
+        from train import LinearWarmupEpochDecay
+
+        parameter = nn.Parameter(torch.ones(()))
+        optimizer = torch.optim.AdamW([parameter], lr=1e-3)
+        schedule = LinearWarmupEpochDecay(
+            optimizer,
+            steps_per_epoch=2,
+            warmup_epochs=2,
+            start_factor=0.1,
+            lr_decay=0.5,
+            decay_mode="cosine",
+            total_epochs=4,
+            min_lr_ratio=0.1,
+        )
+        observed = []
+        for _ in range(8):
+            observed.append(schedule.prepare_step()[0])
+            schedule.complete_step()
+        expected = [
+            1e-4,
+            4e-4,
+            7e-4,
+            1e-3,
+            1e-3,
+            7.75e-4,
+            3.25e-4,
+            1e-4,
+        ]
+        for actual, target in zip(observed, expected):
+            self.assertAlmostEqual(actual, target, places=12)
+        state = schedule.state_dict()
+        self.assertEqual(state["decay_mode"], "cosine")
+        self.assertEqual(state["total_epochs"], 4)
+        self.assertEqual(state["min_lr_ratio"], 0.1)
+
+    def test_adamw_groups_honor_only_explicit_no_decay_markers(self):
+        from train import build_adamw_parameter_groups
+
+        module = FactorizedBiSSM(
+            d_model=16,
+            d_state=4,
+            ssm_ratio=2.0,
+            d_conv=1,
+            axis="spatial",
+        )
+        legacy = build_adamw_parameter_groups(
+            module,
+            weight_decay=0.012,
+            honor_no_weight_decay=False,
+        )
+        self.assertEqual(len(legacy), 1)
+        self.assertEqual(legacy[0]["weight_decay"], 0.012)
+
+        groups = build_adamw_parameter_groups(
+            module,
+            weight_decay=0.012,
+            honor_no_weight_decay=True,
+        )
+        self.assertEqual([group["group_name"] for group in groups], ["decay", "no_decay"])
+        self.assertEqual([group["weight_decay"] for group in groups], [0.012, 0.0])
+        expected_no_decay = {
+            id(parameter)
+            for parameter in module.parameters()
+            if getattr(parameter, "_no_weight_decay", False)
+        }
+        actual_no_decay = {id(parameter) for parameter in groups[1]["params"]}
+        self.assertEqual(actual_no_decay, expected_no_decay)
+        self.assertGreater(len(actual_no_decay), 0)
+
+    def test_w256_d16_r3_is_optimizer_only_delta(self):
+        from lib.utils.learning import load_backbone
+
+        r2 = get_config(
+            str(
+                REPO_ROOT
+                / "configs/pose3d/graph_posemamba_h36m_w256_d16_scale_60e.yaml"
+            )
+        )
+        r3 = get_config(
+            str(
+                REPO_ROOT
+                / "configs/pose3d/graph_posemamba_h36m_w256_d16_stable_r3_60e.yaml"
+            )
+        )
+        self.assertEqual(r3.learning_rate, 3e-4)
+        self.assertEqual(r3.lr_schedule_mode, "cosine")
+        self.assertEqual(r3.min_lr_ratio, 0.1)
+        self.assertTrue(r3.honor_no_weight_decay)
+        self.assertTrue(r3.track_parameter_update_norm)
+        for field in (
+            "epochs",
+            "warmup_epochs",
+            "warmup_start_factor",
+            "batch_size",
+            "test_batch_size",
+            "weight_decay",
+            "use_ema",
+            "ema_decay",
+            "max_grad_norm",
+            "dim_feat",
+            "depth",
+            "mlp_ratio",
+            "ssm_d_state",
+            "ssm_ratio",
+            "drop_path_rate",
+            "graph_injection_mode",
+            "reuse_graph_context",
+            "factorized_spatial_temporal",
+            "lambda_3d",
+            "lambda_scale",
+            "lambda_3d_velocity",
+            "lambda_diff",
+            "dt_file",
+        ):
+            self.assertEqual(getattr(r3, field), getattr(r2, field), field)
+        model = load_backbone(r3)
+        self.assertEqual(parameter_count(model), 20_192_451)
+
 
 @unittest.skipUnless(cuda_selective_scan_available(), "CUDA selective scan is unavailable")
 class CudaIntegrationTests(unittest.TestCase):

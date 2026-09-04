@@ -131,6 +131,35 @@
         ],
         "recommendation": "DIAGNOSE_DO_NOT_RESUME"
       }
+    },
+    {
+      "id": "D16-W256-D16-60E-R3",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "lower smooth optimizer pressure and intended SSM no-decay grouping prevent finite whole-model excursions while preserving W256/D16 accuracy capacity",
+      "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
+      "delta": "fresh W256/D16 run; peak LR 3e-4, eight-epoch linear warmup, per-step cosine decay to 3e-5, honor explicit no-weight-decay markers, add update and gradient telemetry",
+      "controls": "architecture, H36M-SH data, batch 4, seed 0, 60 epochs, losses, augmentation, EMA, clipping and evaluator unchanged from R2",
+      "seeds": [0],
+      "budget": "60 epochs",
+      "primary_metric": "best EMA P1 within epochs 1-60",
+      "secondary_metrics": ["same-checkpoint P2", "raw P1/P2", "W128 curve", "parameter update relative L2", "maximum gradient norm", "clip fraction", "VRAM", "it/s"],
+      "acceptance": "valid complete P1 <= 39.7452 mm; accuracy target P1 < 37.6593 mm",
+      "falsification": "another finite optimizer collapse or valid complete P1 > 39.8452 mm",
+      "stopping_rule": "block launch on failed preflight and stop on non-finite/runtime failure; report finite metric excursions without automatic termination",
+      "dependencies": ["D16-R3-REAUDIT", "D16-R3-STAGED-PREFLIGHT"],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_stable_r3_60e.yaml",
+        "parameters": 20192451,
+        "command": "scripts/run_w256_d16_r3_60e.sh",
+        "preflight": ".experiments/w256_d16_60e_20260904/PRELAUNCH_PASS_R3.json",
+        "log": null,
+        "checkpoint": null,
+        "results": null,
+        "source": null,
+        "environment": "RTX5090; PyTorch 2.11.0+cu128; FP32"
+      },
+      "result": null
     }
   ],
   "decisions": [
@@ -168,6 +197,13 @@
       "decision": "Invalidate and stop D16 R2 at epoch 16 under the registered fail-closed rule; preserve all four checkpoints and prohibit automatic retry.",
       "evidence": "Epoch 15-to-16 loss rose 121.5 percent and EMA P1 regressed 92.8847 mm. All raw/EMA checkpoint tensors remain finite. wh PID 691656 overlapped part of epoch 16, so causality remains unresolved.",
       "rejected_alternatives": "Do not resume epoch 16, report epoch 15 as a completed result, delete the invalid run, blame the concurrent process without a controlled diagnostic, or change configuration automatically."
+    },
+    {
+      "id": "D-D16-006",
+      "timestamp": "2026-09-05T00:30:00+08:00",
+      "decision": "Create a fresh R3 with lower cosine-decayed LR, intended SSM no-decay grouping and explicit update telemetry, then restart only after re-audit and staged preflight.",
+      "evidence": "R2 raw parameters moved 8.72 percent in one epoch at LR 4.66e-4; warmup delayed but did not remove the excursion, and the single AdamW group ignored existing no-weight-decay markers.",
+      "rejected_alternatives": "Do not resume invalid R2, alter architecture or losses before isolating optimizer scale, automatically stop finite metric movement, or overwrite prior runs."
     }
   ]
 }

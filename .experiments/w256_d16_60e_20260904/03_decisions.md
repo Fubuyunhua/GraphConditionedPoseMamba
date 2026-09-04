@@ -33,3 +33,13 @@ the epoch-15 best and epoch-16 latest raw/EMA checkpoints; all checkpoint tensor
 are finite. A `wh` process overlapped part of epoch 16 and reduced throughput,
 but this is a confounder rather than an established cause. Do not resume or
 automatically launch a replacement experiment.
+
+## D-D16-006
+
+Under the user's explicit instruction to optimize and restart, create a fresh
+R3 run rather than resume R2. Keep the architecture and accuracy losses fixed;
+reduce peak LR to 3e-4, use smooth cosine refinement to 3e-5 after the existing
+eight-epoch warmup, and honor the SSM parameters' existing no-weight-decay
+markers. Add update/gradient diagnostics, return through audit and staged
+preflight, and use a new directory. Do not automatically stop a finite run on
+metric movement without a new direct user instruction.

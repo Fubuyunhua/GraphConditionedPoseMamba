@@ -1,3 +1,6 @@
 User instruction on 2026-09-04: change W256/D16 training to 60 epochs and
 start it directly, replacing the active W256/D10 run while preserving the
 cancelled run's artifacts.
+
+User instruction on 2026-09-05: analyze the severe D16 instability, implement
+an optimized correction, and restart after the ordered audit/preflight gates.

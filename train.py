@@ -107,7 +107,12 @@ def set_random_seed(seed):
 
 
 class LinearWarmupEpochDecay:
-    """Per-step linear warmup followed by epoch-wise exponential decay."""
+    """Per-step linear warmup followed by exponential or cosine decay.
+
+    The historical exponential path remains the default so existing configs
+    keep their exact learning-rate sequence.  Accuracy-oriented large models
+    may opt into a smooth per-step cosine tail.
+    """
 
     def __init__(
         self,
@@ -117,6 +122,9 @@ class LinearWarmupEpochDecay:
         start_factor,
         lr_decay,
         start_step=0,
+        decay_mode="exponential",
+        total_epochs=None,
+        min_lr_ratio=0.0,
     ):
         self.optimizer = optimizer
         self.steps_per_epoch = int(steps_per_epoch)
@@ -125,12 +133,34 @@ class LinearWarmupEpochDecay:
         self.start_factor = float(start_factor)
         self.lr_decay = float(lr_decay)
         self.global_step = int(start_step)
+        self.decay_mode = str(decay_mode).lower()
+        self.total_epochs = (
+            None if total_epochs is None else int(total_epochs)
+        )
+        self.min_lr_ratio = float(min_lr_ratio)
         if self.steps_per_epoch <= 0:
             raise ValueError("steps_per_epoch must be positive")
         if self.warmup_epochs <= 0:
             raise ValueError("warmup_epochs must be positive when warmup is enabled")
         if not 0.0 < self.start_factor <= 1.0:
             raise ValueError("warmup_start_factor must be in (0, 1]")
+        if self.decay_mode not in {"exponential", "cosine"}:
+            raise ValueError(
+                "lr_schedule_mode must be exponential or cosine, received "
+                f"{self.decay_mode!r}"
+            )
+        if not 0.0 <= self.min_lr_ratio <= 1.0:
+            raise ValueError("min_lr_ratio must be in [0, 1]")
+        if self.decay_mode == "cosine":
+            if self.total_epochs is None:
+                raise ValueError("total_epochs is required for cosine decay")
+            if self.total_epochs <= self.warmup_epochs:
+                raise ValueError(
+                    "total_epochs must be greater than warmup_epochs for cosine decay"
+                )
+            self.total_steps = self.steps_per_epoch * self.total_epochs
+        else:
+            self.total_steps = None
         self.base_lrs = [
             float(group.get("initial_lr", group["lr"]))
             for group in optimizer.param_groups
@@ -144,6 +174,12 @@ class LinearWarmupEpochDecay:
             denominator = max(self.warmup_steps - 1, 1)
             progress = step / denominator
             return self.start_factor + (1.0 - self.start_factor) * progress
+        if self.decay_mode == "cosine":
+            decay_steps = self.total_steps - self.warmup_steps
+            progress = (step - self.warmup_steps) / max(decay_steps - 1, 1)
+            progress = min(max(progress, 0.0), 1.0)
+            cosine = 0.5 * (1.0 + math.cos(math.pi * progress))
+            return self.min_lr_ratio + (1.0 - self.min_lr_ratio) * cosine
         post_warmup_epoch = (step - self.warmup_steps) // self.steps_per_epoch
         return self.lr_decay ** post_warmup_epoch
 
@@ -166,6 +202,9 @@ class LinearWarmupEpochDecay:
             "warmup_epochs": self.warmup_epochs,
             "start_factor": self.start_factor,
             "lr_decay": self.lr_decay,
+            "decay_mode": self.decay_mode,
+            "total_epochs": self.total_epochs,
+            "min_lr_ratio": self.min_lr_ratio,
             "base_lrs": list(self.base_lrs),
         }
 
@@ -180,7 +219,85 @@ def build_lr_schedule(args, optimizer, steps_per_epoch, start_step=0):
         start_factor=float(getattr(args, "warmup_start_factor", 0.1)),
         lr_decay=float(args.lr_decay),
         start_step=start_step,
+        decay_mode=str(getattr(args, "lr_schedule_mode", "exponential")),
+        total_epochs=int(args.epochs),
+        min_lr_ratio=float(getattr(args, "min_lr_ratio", 0.0)),
     )
+
+
+def build_adamw_parameter_groups(
+    model,
+    weight_decay,
+    honor_no_weight_decay=False,
+):
+    """Build backward-compatible AdamW groups with opt-in SSM exclusions."""
+
+    parameters = [
+        parameter
+        for parameter in _unwrap_compiled_model(model).parameters()
+        if parameter.requires_grad
+    ]
+    weight_decay = float(weight_decay)
+    if not honor_no_weight_decay:
+        return [
+            {
+                "params": parameters,
+                "weight_decay": weight_decay,
+                "group_name": "decay",
+            }
+        ]
+
+    decay = []
+    no_decay = []
+    for parameter in parameters:
+        target = no_decay if getattr(parameter, "_no_weight_decay", False) else decay
+        target.append(parameter)
+    groups = []
+    if decay:
+        groups.append(
+            {
+                "params": decay,
+                "weight_decay": weight_decay,
+                "group_name": "decay",
+            }
+        )
+    if no_decay:
+        groups.append(
+            {
+                "params": no_decay,
+                "weight_decay": 0.0,
+                "group_name": "no_decay",
+            }
+        )
+    return groups
+
+
+def capture_parameter_snapshot(model):
+    """Copy trainable floating parameters to CPU for one-epoch drift telemetry."""
+
+    return {
+        name: parameter.detach().cpu().clone()
+        for name, parameter in _unwrap_compiled_model(model).named_parameters()
+        if parameter.requires_grad and parameter.is_floating_point()
+    }
+
+
+def parameter_update_stats(model, snapshot):
+    """Return relative L2 and maximum absolute movement from a CPU snapshot."""
+
+    delta_sq = 0.0
+    baseline_sq = 0.0
+    max_abs = 0.0
+    current = dict(_unwrap_compiled_model(model).named_parameters())
+    for name, before in snapshot.items():
+        after = current[name].detach().cpu().to(dtype=before.dtype)
+        delta = after - before
+        delta_sq += float(delta.square().sum(dtype=torch.float64))
+        baseline_sq += float(before.square().sum(dtype=torch.float64))
+        if delta.numel():
+            max_abs = max(max_abs, float(delta.abs().max()))
+    relative_l2 = math.sqrt(delta_sq / max(baseline_sq, 1e-300))
+    return relative_l2, max_abs
 
 def _clone_state_dict_for_save(state_dict):
     cloned = {}
@@ -399,6 +516,8 @@ def train_epoch(
     metric_keys = None
     grad_norm_sum = None
     grad_norm_count = 0
+    grad_norm_max = 0.0
+    grad_clip_count = 0
     for idx, (batch_input, batch_gt) in tqdm(enumerate(train_loader)):    
         if lr_schedule is not None:
             lr_schedule.prepare_step()
@@ -600,6 +719,9 @@ def train_epoch(
                 else grad_norm_sum + grad_norm.detach()
             )
             grad_norm_count += 1
+            grad_norm_value = float(grad_norm.detach().cpu())
+            grad_norm_max = max(grad_norm_max, grad_norm_value)
+            grad_clip_count += int(grad_norm_value > max_grad_norm)
         optimizer.step()
         if lr_schedule is not None:
             lr_schedule.complete_step()
@@ -614,6 +736,12 @@ def train_epoch(
             float((grad_norm_sum / grad_norm_count).cpu()),
             grad_norm_count,
         )
+        if "grad_norm_max" in losses:
+            losses["grad_norm_max"].update(grad_norm_max)
+        if "grad_clip_fraction" in losses:
+            losses["grad_clip_fraction"].update(
+                grad_clip_count / grad_norm_count
+            )
 def get_beijing_timestamp():
     local_offset = time.localtime().tm_gmtoff   # 当前机器utc时间偏移量
     beijing_offset = int(8 * 60*60)
@@ -789,7 +917,21 @@ def train_with_config(args, opts):
 
     if not opts.evaluate:        
         lr = args.learning_rate
-        optimizer = optim.AdamW(filter(lambda p: p.requires_grad, model_pos.parameters()), lr=lr, weight_decay=args.weight_decay)
+        optimizer_groups = build_adamw_parameter_groups(
+            model_pos,
+            weight_decay=args.weight_decay,
+            honor_no_weight_decay=bool(
+                getattr(args, "honor_no_weight_decay", False)
+            ),
+        )
+        optimizer = optim.AdamW(optimizer_groups, lr=lr)
+        group_summary = ", ".join(
+            f"{group.get('group_name', 'unnamed')}="
+            f"{sum(parameter.numel() for parameter in group['params']):,} params "
+            f"at wd={group['weight_decay']}"
+            for group in optimizer_groups
+        )
+        log.info(f"INFO: AdamW parameter groups: {group_summary}")
         lr_decay = args.lr_decay
         st = 0
         if args.train_2d:
@@ -833,7 +975,9 @@ def train_with_config(args, opts):
                 f"start_factor={lr_schedule.start_factor}, "
                 f"warmup_epochs={lr_schedule.warmup_epochs}, "
                 f"warmup_steps={lr_schedule.warmup_steps}, "
-                f"post_warmup_lr_decay={lr_schedule.lr_decay}"
+                f"decay_mode={lr_schedule.decay_mode}, "
+                f"post_warmup_lr_decay={lr_schedule.lr_decay}, "
+                f"min_lr_ratio={lr_schedule.min_lr_ratio}"
             )
                 
         args.mask = (args.mask_ratio > 0 and args.mask_T_ratio > 0)
@@ -845,7 +989,6 @@ def train_with_config(args, opts):
             if torch.cuda.is_available():
                 torch.cuda.reset_peak_memory_stats()
             log.info(f'Training epoch {epoch}.')
-            start_time = time.time()
             losses = {}
             losses['3d_pos'] = AverageMeter()
             losses['3d_scale'] = AverageMeter()
@@ -857,8 +1000,17 @@ def train_with_config(args, opts):
             losses['angle'] = AverageMeter()
             losses['angle_velocity'] = AverageMeter()
             losses['grad_norm'] = AverageMeter()
+            losses['grad_norm_max'] = AverageMeter()
+            losses['grad_clip_fraction'] = AverageMeter()
             N = 0
-                        
+
+            parameter_snapshot = (
+                capture_parameter_snapshot(model_pos)
+                if bool(getattr(args, "track_parameter_update_norm", False))
+                else None
+            )
+            start_time = time.time()
+
             # Curriculum Learning
             if args.train_2d and (epoch >= args.pretrain_3d_curriculum):
                 train_epoch(args, model_pos, posetrack_loader_2d, losses, optimizer, has_3d=False, has_gt=True, ema_helper=ema_helper, lr_schedule=lr_schedule)
@@ -866,6 +1018,12 @@ def train_with_config(args, opts):
             train_epoch(args, model_pos, train_loader_3d, losses, optimizer, has_3d=True, has_gt=True, ema_helper=ema_helper, lr_schedule=lr_schedule)
             elapsed = (time.time() - start_time) / 60
             lr = float(optimizer.param_groups[0]['lr'])
+            parameter_update_rel_l2 = None
+            parameter_update_max_abs = None
+            if parameter_snapshot is not None:
+                parameter_update_rel_l2, parameter_update_max_abs = (
+                    parameter_update_stats(model_pos, parameter_snapshot)
+                )
 
             if args.no_eval:
                 log.info('[%d] time %.2f lr %f 3d_train %f' % (
@@ -930,13 +1088,21 @@ def train_with_config(args, opts):
             else:
                 peak_allocated_mib = 0.0
                 peak_reserved_mib = 0.0
-            log.info(
+            runtime_message = (
                 f'RUNTIME epoch={epoch + 1} '
                 f'train_it_per_sec={train_it_per_sec:.6f} '
                 f'peak_allocated_mib={peak_allocated_mib:.3f} '
                 f'peak_reserved_mib={peak_reserved_mib:.3f} '
-                f'grad_norm_preclip={losses["grad_norm"].avg:.6f}'
+                f'grad_norm_preclip={losses["grad_norm"].avg:.6f} '
+                f'grad_norm_max={losses["grad_norm_max"].avg:.6f} '
+                f'grad_clip_fraction={losses["grad_clip_fraction"].avg:.6f}'
             )
+            if parameter_update_rel_l2 is not None:
+                runtime_message += (
+                    f' param_update_rel_l2={parameter_update_rel_l2:.8f} '
+                    f'param_update_max_abs={parameter_update_max_abs:.8f}'
+                )
+            log.info(runtime_message)
                 
             # Decay learning rate exponentially
             if lr_schedule is None:
