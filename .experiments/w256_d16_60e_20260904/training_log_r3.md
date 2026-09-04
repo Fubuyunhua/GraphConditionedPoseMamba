@@ -1,7 +1,7 @@
 # W256/D16 R3 stable optimizer training log
 
-- Last synchronized snapshot (UTC): `2026-09-04T18:53:05+00:00`.
-- Status: `R3_RUNNING`.
+- Last synchronized snapshot (UTC): `2026-09-04T20:54:00+00:00`.
+- Status: `R3_RUNNING_UNSTABLE`.
 - Config: `configs/pose3d/graph_posemamba_h36m_w256_d16_stable_r3_60e.yaml`.
 - Source commit: `0e23c5d01eb5e6c81c66bc17a621d38787e7c46d`.
 - Width/depth: `256/16`.
@@ -12,19 +12,19 @@
 
 ## Current summary
 
-- Completed epochs: `4/60`.
-- Latest EMA P1/P2: `67.0120/52.6453 mm` at epoch 4.
-- Best EMA P1 and paired P2: `67.0120/52.6453 mm` at epoch 4.
+- Completed epochs: `9/60`.
+- Latest EMA P1/P2: `67.6448/48.7047 mm` at epoch 9.
+- Best EMA P1 and paired P2: `51.8354/42.2794 mm` at epoch 6.
 - Current iteration trace: unavailable or waiting to start.
 - Error matches: `0`.
-- Latest pre-clip gradient norm: `12.1676` (configured max norm `1.0`).
+- Latest pre-clip gradient norm: `6.7729` (configured max norm `1.0`).
 - Latest train throughput: `3.189 it/s`.
 - Stable mean throughput: `3.190 it/s`.
 - Trainer peak reserved VRAM: `21140 MiB`.
-- Latest maximum pre-clip gradient norm: `21.9016`; clipped-step fraction `100.00%`.
-- Latest raw parameter movement: relative L2 `1.3821%`, max absolute `0.152415`.
-- External monitor latest total GPU memory/utilization: `21866 MiB / 99%`.
-- External monitor max temperature/power: `64 C / 532.3 W`.
+- Latest maximum pre-clip gradient norm: `15.6533`; clipped-step fraction `99.84%`.
+- Latest raw parameter movement: relative L2 `2.6993%`, max absolute `0.292655`.
+- External monitor latest total GPU memory/utilization: `21866 MiB / 100%`.
+- External monitor max temperature/power: `65 C / 535.0 W`.
 - External total memory may include concurrent GPU processes; use the trainer-reserved value as the per-model metric.
 
 ## Registered preflight
@@ -41,6 +41,11 @@
 | 2 | 23.18 | 0.000097 | 0.052941 | 174.9847 | 105.9645 | 13.7333 | 3.190 | 21140 |
 | 3 | 23.18 | 0.000131 | 0.043323 | 94.7903 | 70.4865 | 13.7373 | 3.190 | 21140 |
 | 4 | 23.19 | 0.000165 | 0.035579 | 67.0120 | 52.6453 | 12.1676 | 3.189 | 21140 |
+| 5 | 23.19 | 0.000199 | 0.030285 | 55.8359 | 45.2113 | 10.8843 | 3.189 | 21140 |
+| 6 | 23.19 | 0.000232 | 0.027638 | 51.8354 | 42.2794 | 9.7250 | 3.189 | 21140 |
+| 7 | 23.19 | 0.000266 | 0.032203 | 99.9209 | 62.1321 | 8.8514 | 3.189 | 21140 |
+| 8 | 23.19 | 0.000300 | 0.033854 | 154.4010 | 95.7771 | 7.2805 | 3.189 | 21140 |
+| 9 | 23.19 | 0.000300 | 0.025066 | 67.6448 | 48.7047 | 6.7729 | 3.189 | 21140 |
 
 ## Interpretation guard
 
