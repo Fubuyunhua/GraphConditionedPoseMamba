@@ -1,7 +1,7 @@
 # W256/D16 training log
 
-- Last synchronized snapshot (UTC): `2026-09-04T15:05:58+00:00`.
-- Status: `R2_RUNNING`.
+- Last synchronized snapshot (UTC): `2026-09-04T16:17:36+00:00`.
+- Status: `R2_INVALID_STOPPED`.
 - Config: `configs/pose3d/graph_posemamba_h36m_w256_d16_scale_60e.yaml`.
 - Source commit: `2e4b8040d6f94fd5c7cf330f3411484312fa4144`.
 - Width/depth: `256/16`.
@@ -12,16 +12,16 @@
 
 ## Current summary
 
-- Completed epochs: `13/60`.
-- Latest EMA P1/P2: `40.5432/33.5557 mm` at epoch 13.
-- Best EMA P1 and paired P2: `40.5432/33.5557 mm` at epoch 13.
+- Completed epochs: `16/60`.
+- Latest EMA P1/P2: `132.7245/72.7681 mm` at epoch 16.
+- Best EMA P1 and paired P2: `39.8398/32.8179 mm` at epoch 15.
 - Current iteration trace: unavailable or waiting to start.
 - Error matches: `0`.
-- Latest pre-clip gradient norm: `2.3779` (configured max norm `1.0`).
-- Latest train throughput: `3.198 it/s`.
-- Stable mean throughput: `3.198 it/s`.
+- Latest pre-clip gradient norm: `1.5060` (configured max norm `1.0`).
+- Latest train throughput: `2.996 it/s`.
+- Stable mean throughput: `3.178 it/s`.
 - Trainer peak reserved VRAM: `21070 MiB`.
-- External monitor latest total GPU memory/utilization: `21798 MiB / 100%`.
+- External monitor latest total GPU memory/utilization: `25427 MiB / 100%`.
 - External monitor max temperature/power: `65 C / 538.8 W`.
 - External total memory may include concurrent GPU processes; use the trainer-reserved value as the per-model metric.
 
@@ -48,6 +48,9 @@
 | 11 | 23.12 | 0.000490 | 0.016651 | 41.5026 | 34.6467 | 3.7970 | 3.198 | 21070 |
 | 12 | 23.13 | 0.000485 | 0.015379 | 40.9350 | 34.0159 | 3.0324 | 3.198 | 21070 |
 | 13 | 23.13 | 0.000480 | 0.014404 | 40.5432 | 33.5557 | 2.3779 | 3.197 | 21070 |
+| 14 | 23.38 | 0.000475 | 0.013396 | 40.2440 | 33.1251 | 1.7975 | 3.164 | 21070 |
+| 15 | 23.62 | 0.000471 | 0.012514 | 39.8398 | 32.8179 | 1.3690 | 3.131 | 21070 |
+| 16 | 24.68 | 0.000466 | 0.027719 | 132.7245 | 72.7681 | 1.5060 | 2.996 | 21070 |
 
 ## Interpretation guard
 

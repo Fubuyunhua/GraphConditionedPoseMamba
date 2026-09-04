@@ -83,7 +83,7 @@
     {
       "id": "D16-W256-D16-60E-R2",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "INVALID",
       "hypothesis": "actual per-step warmup and bounded gradients stabilize W256/D16 while preserving its accuracy capacity",
       "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
       "delta": "same D16 model and 60-epoch protocol; enable true 8-epoch linear warmup and max_grad_norm=1.0",
@@ -105,10 +105,32 @@
         "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_60e_20260904/runs/w256_d16_60e/D16_w256_d16_warmup_clip_seed0_2026_09_04_T_17_20_26",
         "source": "git:2e4b8040d6f94fd5c7cf330f3411484312fa4144",
         "training_log_document": ".experiments/w256_d16_60e_20260904/training_log.md",
+        "results": ".experiments/w256_d16_60e_20260904/results/D16-W256-D16-60E-R2/analysis.md",
         "queue_pid": 595849,
         "train_pid": 595869
       },
-      "result": null
+      "result": {
+        "completion_validity": "INVALID_REPEATED_OPTIMIZATION_INSTABILITY_STOP_RULE",
+        "metrics": {
+          "completed_epochs": 16,
+          "best_epoch": 15,
+          "best_ema_p1_mm": 39.839843,
+          "paired_ema_p2_mm": 32.817857,
+          "epoch16_ema_p1_mm": 132.724546,
+          "epoch16_ema_p2_mm": 72.768075,
+          "epoch15_loss": 0.012514,
+          "epoch16_loss": 0.027719,
+          "epoch16_grad_norm_preclip": 1.50598
+        },
+        "uncertainty": "wh PID 691656 overlapped part of epoch 16 and reduced throughput, but no evidence establishes it as the cause of the finite metric collapse",
+        "cost": "16 completed epochs and approximately 6 hours 55 minutes wall time",
+        "failures": [
+          "epoch 15-to-16 loss increased by 121.5 percent",
+          "epoch 15-to-16 EMA P1 worsened by 92.8847 mm",
+          "registered fail-closed stopping condition triggered"
+        ],
+        "recommendation": "DIAGNOSE_DO_NOT_RESUME"
+      }
     }
   ],
   "decisions": [
@@ -139,6 +161,13 @@
       "decision": "Pass R2 preflight and restart W256/D16 from random initialization with true warmup and gradient clipping.",
       "evidence": "All staged gates pass; batch4 uses 35496 warmup steps, starts near 5e-5 LR, has finite pre-clip grad norm 44.925 and reserves 20406 MiB.",
       "rejected_alternatives": "Do not reuse R1 checkpoint, overwrite its directory, disable clipping, or modify legacy configs."
+    },
+    {
+      "id": "D-D16-005",
+      "timestamp": "2026-09-05T00:15:30+08:00",
+      "decision": "Invalidate and stop D16 R2 at epoch 16 under the registered fail-closed rule; preserve all four checkpoints and prohibit automatic retry.",
+      "evidence": "Epoch 15-to-16 loss rose 121.5 percent and EMA P1 regressed 92.8847 mm. All raw/EMA checkpoint tensors remain finite. wh PID 691656 overlapped part of epoch 16, so causality remains unresolved.",
+      "rejected_alternatives": "Do not resume epoch 16, report epoch 15 as a completed result, delete the invalid run, blame the concurrent process without a controlled diagnostic, or change configuration automatically."
     }
   ]
 }
