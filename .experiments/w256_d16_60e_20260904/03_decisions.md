@@ -43,3 +43,9 @@ eight-epoch warmup, and honor the SSM parameters' existing no-weight-decay
 markers. Add update/gradient diagnostics, return through audit and staged
 preflight, and use a new directory. Do not automatically stop a finite run on
 metric movement without a new direct user instruction.
+
+## D-D16-007
+
+Release R3 after every unit, source/config/data, optimizer-group, schedule,
+finite-gradient and staged real-data GPU gate passes. Start from random seed 0
+in a new remote repository and run directory; preserve all R1/R2 artifacts.

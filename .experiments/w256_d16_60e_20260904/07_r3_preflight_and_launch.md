@@ -26,4 +26,12 @@ gate is below 28,672 MiB.
 
 ## Launch
 
-Pending immediate launch after the PASS artifact is synchronized.
+- Started at `2026-09-05T00:48:30+08:00` in the new remote directory
+  `/scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_R3_60e_20260905`.
+- Queue PID: `713220`; training PID: `713242`.
+- Main log:
+  `/scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_R3_60e_20260905/launch_logs/D16_R3_stable_164830.log`.
+- Run directory:
+  `/scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_R3_60e_20260905/runs/w256_d16_r3_60e/D16_w256_d16_stable_r3_seed0_2026_09_05_T_00_48_32`.
+- Initial sustained trace: `3.20 it/s`, approximately 21,040 MiB total GPU
+  memory, 95-100% utilization, finite execution and no competing process.

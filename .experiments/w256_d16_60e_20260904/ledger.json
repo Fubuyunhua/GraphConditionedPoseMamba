@@ -135,7 +135,7 @@
     {
       "id": "D16-W256-D16-60E-R3",
       "track": "IMPROVEMENT",
-      "status": "READY",
+      "status": "RUNNING",
       "hypothesis": "lower smooth optimizer pressure and intended SSM no-decay grouping prevent finite whole-model excursions while preserving W256/D16 accuracy capacity",
       "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
       "delta": "fresh W256/D16 run; peak LR 3e-4, eight-epoch linear warmup, per-step cosine decay to 3e-5, honor explicit no-weight-decay markers, add update and gradient telemetry",
@@ -153,11 +153,14 @@
         "parameters": 20192451,
         "command": "scripts/run_w256_d16_r3_60e.sh",
         "preflight": ".experiments/w256_d16_60e_20260904/PRELAUNCH_PASS_R3.json",
-        "log": null,
-        "checkpoint": null,
+        "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_R3_60e_20260905/launch_logs/D16_R3_stable_164830.log",
+        "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_R3_60e_20260905/runs/w256_d16_r3_60e/D16_w256_d16_stable_r3_seed0_2026_09_05_T_00_48_32",
         "results": null,
         "source": "git:0e23c5d01eb5e6c81c66bc17a621d38787e7c46d",
-        "environment": "RTX5090; PyTorch 2.11.0+cu128; FP32"
+        "environment": "RTX5090; PyTorch 2.11.0+cu128; FP32",
+        "training_log_document": ".experiments/w256_d16_60e_20260904/training_log_r3.md",
+        "queue_pid": 713220,
+        "train_pid": 713242
       },
       "result": null
     }
@@ -204,6 +207,13 @@
       "decision": "Create a fresh R3 with lower cosine-decayed LR, intended SSM no-decay grouping and explicit update telemetry, then restart only after re-audit and staged preflight.",
       "evidence": "R2 raw parameters moved 8.72 percent in one epoch at LR 4.66e-4; warmup delayed but did not remove the excursion, and the single AdamW group ignored existing no-weight-decay markers.",
       "rejected_alternatives": "Do not resume invalid R2, alter architecture or losses before isolating optimizer scale, automatically stop finite metric movement, or overwrite prior runs."
+    },
+    {
+      "id": "D-D16-007",
+      "timestamp": "2026-09-05T00:48:30+08:00",
+      "decision": "Release and start the fresh D16 R3 run after every staged gate passes.",
+      "evidence": "31 tests passed; all static and real-data B1/B2/B4 gates passed; compiled B4 reserved 20,404 MiB with finite loss/gradient; GPU was otherwise idle.",
+      "rejected_alternatives": "Do not resume R2, reuse its run directory, bypass the preflight, or launch a second D16 process."
     }
   ]
 }
