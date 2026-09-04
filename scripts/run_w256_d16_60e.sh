@@ -29,8 +29,8 @@ dataset=data/motion3d/MB3D_f243s81/h36m_sh_conf_cam_source_final.pkl
 expected=73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175
 actual=$(sha256sum "$dataset" | awk '{print $1}')
 [[ "$actual" == "$expected" ]] || { echo "dataset hash mismatch" >&2; exit 9; }
-printf 'source_commit=%s\nstarted=%s\npython=%s\ndataset_sha256=%s\n' "$(git rev-parse HEAD)" "$(date --iso-8601=seconds)" "$py" "$actual" > "$study/runtime/identity.txt"
-printf 'config=%s\nstarted=%s\n' "$config" "$(date --iso-8601=seconds)" > "$study/runtime/RUNNING.txt"
+printf 'source_commit=%s\nstarted=%s\npython=%s\ndataset_sha256=%s\n' "$(git rev-parse HEAD)" "$(date --iso-8601=seconds)" "$py" "$actual" > "$study/runtime/R2_identity.txt"
+printf 'config=%s\nstarted=%s\n' "$config" "$(date --iso-8601=seconds)" > "$study/runtime/R2_RUNNING.txt"
 parent_pid=$$
 (
   echo timestamp,phase,gpu_used_mib,gpu_free_mib,gpu_util_percent,temp_c,power_w
@@ -39,9 +39,9 @@ parent_pid=$$
     echo "$(date --iso-8601=seconds),D16,$values"
     sleep 5
   done
-) > "$study/runtime/gpu_monitor.csv" 2> "$study/runtime/gpu_monitor.stderr" &
+) > "$study/runtime/R2_gpu_monitor.csv" 2> "$study/runtime/R2_gpu_monitor.stderr" &
 monitor_pid=$!
-echo "$monitor_pid" > "$study/runtime/gpu_monitor.pid"
+echo "$monitor_pid" > "$study/runtime/R2_gpu_monitor.pid"
 trap 'kill "$monitor_pid" 2>/dev/null || true' EXIT
 
 CUDA_VISIBLE_DEVICES=0 "$py" train.py --config "$config" --checkpoint "$prefix" --seed 0
@@ -59,4 +59,4 @@ for checkpoint_name in best_epoch.bin best_ema_epoch.bin; do
   label=${checkpoint_name%.bin}
   CUDA_VISIBLE_DEVICES=0 "$py" train.py --config "$config" --evaluate "$run_dir/$checkpoint_name" --checkpoint "$verification/$label" --seed 0 > "$run_dir/verification_${label}.stdout" 2>&1
 done
-printf 'run_dir=%s\ncompleted=%s\n' "$run_dir" "$(date --iso-8601=seconds)" > "$study/runtime/COMPLETE.txt"
+printf 'run_dir=%s\ncompleted=%s\n' "$run_dir" "$(date --iso-8601=seconds)" > "$study/runtime/R2_COMPLETE.txt"

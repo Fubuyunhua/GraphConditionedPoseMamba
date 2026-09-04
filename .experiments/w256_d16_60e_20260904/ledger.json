@@ -20,15 +20,15 @@
     "seed_policy": [0]
   },
   "audit": {
-    "verdict": "CONDITIONAL",
-    "timestamp": "2026-09-04T17:15:00+08:00",
+    "verdict": "PASS",
+    "timestamp": "2026-09-04T17:20:00+08:00",
     "report": ".experiments/w256_d16_60e_20260904/00_model_audit.md",
     "accepted_risks": [
       "single seed",
       "60-epoch user-requested budget",
       "inherited test-monitored protocol"
     ],
-    "blocking_findings": ["revised warmup and gradient-clipping preflight pending"]
+    "blocking_findings": []
   },
   "experiments": [
     {
@@ -82,7 +82,7 @@
     {
       "id": "D16-W256-D16-60E-R2",
       "track": "IMPROVEMENT",
-      "status": "PLANNED",
+      "status": "RUNNING",
       "hypothesis": "actual per-step warmup and bounded gradients stabilize W256/D16 while preserving its accuracy capacity",
       "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
       "delta": "same D16 model and 60-epoch protocol; enable true 8-epoch linear warmup and max_grad_norm=1.0",
@@ -100,10 +100,12 @@
         "parameters": 20192451,
         "command": "scripts/run_w256_d16_60e.sh",
         "preflight": ".experiments/w256_d16_60e_20260904/PRELAUNCH_PASS_R2.json",
-        "log": null,
-        "checkpoint": null,
-        "source": null,
-        "training_log_document": ".experiments/w256_d16_60e_20260904/training_log.md"
+        "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_60e_20260904/launch_logs/D16_R2_warmup_clip_092024.log",
+        "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_60e_20260904/runs/w256_d16_60e/D16_w256_d16_warmup_clip_seed0_2026_09_04_T_17_20_26",
+        "source": "git:2e4b8040d6f94fd5c7cf330f3411484312fa4144",
+        "training_log_document": ".experiments/w256_d16_60e_20260904/training_log.md",
+        "queue_pid": 595849,
+        "train_pid": 595869
       },
       "result": null
     }
@@ -129,6 +131,13 @@
       "decision": "Invalidate and stop the first D16 run, implement opt-in true linear warmup plus gradient clipping, and restart only after re-audit.",
       "evidence": "Epoch2-to-3 loss increased 12.62% and P1 regressed 104.24 mm; configured warmup was unused, while checkpoint tensors remained finite.",
       "rejected_alternatives": "Do not continue an optimizer-unstable run, resume its checkpoint, silently change legacy experiments, or attribute the spike to corruption without evidence."
+    },
+    {
+      "id": "D-D16-004",
+      "timestamp": "2026-09-04T17:20:24+08:00",
+      "decision": "Pass R2 preflight and restart W256/D16 from random initialization with true warmup and gradient clipping.",
+      "evidence": "All staged gates pass; batch4 uses 35496 warmup steps, starts near 5e-5 LR, has finite pre-clip grad norm 44.925 and reserves 20406 MiB.",
+      "rejected_alternatives": "Do not reuse R1 checkpoint, overwrite its directory, disable clipping, or modify legacy configs."
     }
   ]
 }

@@ -1,8 +1,7 @@
 # W256/D16 60-epoch audit
 
-Verdict: CONDITIONAL — first run exposed an ineffective declared warmup and
-finite early optimization instability; revised scheduler/clipping preflight is
-required before restart.
+Verdict: PASS — the first run remains invalid; revised opt-in warmup/clipping
+implementation passed unit, CUDA and staged real-data gates before restart.
 
 ## Registered model
 
@@ -41,3 +40,8 @@ The revised path is opt-in and does not alter legacy configs: per-step linear
 warmup from 0.1x to 1.0x LR across 35,496 steps, followed by the existing
 epoch-wise 0.99 decay; pre-clip gradient norm logging; and max-norm 1.0 with
 non-finite gradients raising an error. It must use a new run prefix.
+
+R2 preflight confirms the effective batch-4 warmup has 35,496 steps, starts at
+approximately 5e-5 LR, reports finite pre-clip gradient norm 44.925, and uses
+20,406 MiB peak reserved memory. Eager batch1/batch2 and compiled batch4 all
+pass. The corrected run was released under source commit `2e4b804`.
