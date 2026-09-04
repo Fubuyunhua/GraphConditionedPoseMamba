@@ -30,6 +30,7 @@ REGISTRY = {
         "depth": 20,
         "parameters": 6_836_355,
         "preflight_key": "S1",
+        "epochs": 80,
     },
     "S2": {
         "title": "S2 W256/D10",
@@ -38,6 +39,16 @@ REGISTRY = {
         "depth": 10,
         "parameters": 12_646_107,
         "preflight_key": "S2",
+        "epochs": 80,
+    },
+    "D16": {
+        "title": "W256/D16",
+        "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_scale_60e.yaml",
+        "width": 256,
+        "depth": 16,
+        "parameters": 20_192_451,
+        "preflight_key": "D16",
+        "epochs": 60,
     },
 }
 
@@ -146,7 +157,9 @@ def main() -> None:
     best = min(epochs, key=lambda item: item["p1"]) if epochs else None
     latest = epochs[-1] if epochs else None
     status = args.status or (
-        "COMPLETED" if len(epochs) == 80 else ("RUNNING" if run else "READY")
+        "COMPLETED"
+        if len(epochs) == spec["epochs"]
+        else ("RUNNING" if run else "READY")
     )
     now = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
@@ -159,13 +172,13 @@ def main() -> None:
         f"- Source commit: `{args.source_commit or preflight.get('source_commit', 'unknown')}`.",
         f"- Width/depth: `{spec['width']}/{spec['depth']}`.",
         f"- Trainable parameters: `{spec['parameters']:,}`.",
-        "- Protocol: H36M-SH, T243/S81, batch 4, FP32 compiled, seed 0, 80 epochs.",
+        f"- Protocol: H36M-SH, T243/S81, batch 4, FP32 compiled, seed 0, {spec['epochs']} epochs.",
         f"- Run directory: `{str(run) if run else 'not created'}`.",
         f"- Queue/train PID at snapshot: `{args.queue_pid or 'n/a'}` / `{args.train_pid or 'n/a'}`.",
         "",
         "## Current summary",
         "",
-        f"- Completed epochs: `{len(epochs)}/80`.",
+        f"- Completed epochs: `{len(epochs)}/{spec['epochs']}`.",
         f"- Latest EMA P1/P2: `{latest['p1']:.4f}/{latest['p2']:.4f} mm` at epoch {latest['epoch']}."
         if latest
         else "- Latest EMA P1/P2: pending first completed epoch.",
@@ -235,7 +248,7 @@ def main() -> None:
             "",
             "## Interpretation guard",
             "",
-            "Training-time results are provisional. The paper result is the minimum EMA P1 within epochs 1-80 and the P2 from that same checkpoint; raw/EMA checkpoints are strictly replayed after completion.",
+            f"Training-time results are provisional. The paper result is the minimum EMA P1 within epochs 1-{spec['epochs']} and the P2 from that same checkpoint; raw/EMA checkpoints are strictly replayed after completion.",
         ]
     )
     output = Path(args.output)

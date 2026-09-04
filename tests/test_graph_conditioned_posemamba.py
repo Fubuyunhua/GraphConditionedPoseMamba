@@ -724,6 +724,69 @@ class ConfigurationAndCapacityTests(unittest.TestCase):
                 all(block.factorized_spatial_temporal for block in model.blocks)
             )
 
+    def test_w256_d16_60e_config_is_a_controlled_depth_scale(self):
+        from lib.utils.learning import load_backbone
+
+        reference = get_config(
+            str(
+                REPO_ROOT
+                / "configs/pose3d/graph_posemamba_h36m_w256_d10_scale_80e.yaml"
+            )
+        )
+        candidate = get_config(
+            str(
+                REPO_ROOT
+                / "configs/pose3d/graph_posemamba_h36m_w256_d16_scale_60e.yaml"
+            )
+        )
+        self.assertEqual(candidate.epochs, 60)
+        self.assertEqual(candidate.dim_feat, 256)
+        self.assertEqual(candidate.depth, 16)
+        for field in (
+            "warmup_epochs",
+            "batch_size",
+            "test_batch_size",
+            "learning_rate",
+            "weight_decay",
+            "lr_decay",
+            "use_ema",
+            "ema_decay",
+            "mlp_ratio",
+            "ssm_d_state",
+            "ssm_ratio",
+            "dropout",
+            "drop_path_rate",
+            "use_graph_mixer",
+            "use_symmetry_edges",
+            "graph_hidden_ratio",
+            "graph_conditioned_ssm",
+            "graph_injection_mode",
+            "reuse_graph_context",
+            "factorized_spatial_temporal",
+            "spatial_ssm_conv",
+            "temporal_ssm_conv",
+            "graph_scale",
+            "compile_model",
+            "compile_mode",
+            "compile_compatible_scan",
+            "eager_eval_when_compiled",
+            "activation_checkpoint_blocks",
+            "dt_file",
+            "clip_len",
+            "data_stride",
+            "rootrel",
+            "no_conf",
+            "lambda_3d",
+            "lambda_scale",
+            "lambda_3d_velocity",
+            "lambda_diff",
+            "flip",
+        ):
+            self.assertEqual(getattr(candidate, field), getattr(reference, field), field)
+        model = load_backbone(candidate)
+        self.assertEqual(parameter_count(model), 20_192_451)
+        self.assertEqual(len(model.blocks), 16)
+
 
 @unittest.skipUnless(cuda_selective_scan_available(), "CUDA selective scan is unavailable")
 class CudaIntegrationTests(unittest.TestCase):

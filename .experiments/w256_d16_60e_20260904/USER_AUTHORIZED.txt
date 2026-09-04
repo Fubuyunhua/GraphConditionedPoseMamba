@@ -1,0 +1,3 @@
+User instruction on 2026-09-04: change W256/D16 training to 60 epochs and
+start it directly, replacing the active W256/D10 run while preserving the
+cancelled run's artifacts.
