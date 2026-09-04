@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "cadence_hours": 2,
-  "last_sync_utc": "2026-09-04T00:05:40+00:00",
+  "last_sync_utc": "2026-09-04T02:05:47+00:00",
   "branch": "codex/minimal-ablation-80e-20260903",
   "models": {
     "S1-W128-D20": {
       "document": ".experiments/model_scaling_80e_20260903/logs/S1_W128_D20.md",
       "status": "RUNNING",
-      "last_completed_epoch": 38
+      "last_completed_epoch": 46
     },
     "S2-W256-D10": {
       "document": ".experiments/model_scaling_80e_20260903/logs/S2_W256_D10.md",
