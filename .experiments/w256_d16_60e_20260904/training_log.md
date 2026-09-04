@@ -1,6 +1,6 @@
 # W256/D16 training log
 
-- Last synchronized snapshot (UTC): `2026-09-04T12:14:20+00:00`.
+- Last synchronized snapshot (UTC): `2026-09-04T13:07:38+00:00`.
 - Status: `R2_RUNNING`.
 - Config: `configs/pose3d/graph_posemamba_h36m_w256_d16_scale_60e.yaml`.
 - Source commit: `2e4b8040d6f94fd5c7cf330f3411484312fa4144`.
@@ -12,17 +12,17 @@
 
 ## Current summary
 
-- Completed epochs: `6/60`.
-- Latest EMA P1/P2: `53.9646/41.1362 mm` at epoch 6.
-- Best EMA P1 and paired P2: `53.9646/41.1362 mm` at epoch 6.
+- Completed epochs: `9/60`.
+- Latest EMA P1/P2: `44.4675/36.6327 mm` at epoch 9.
+- Best EMA P1 and paired P2: `44.4675/36.6327 mm` at epoch 9.
 - Current iteration trace: unavailable or waiting to start.
 - Error matches: `0`.
-- Latest pre-clip gradient norm: `8.3657` (configured max norm `1.0`).
+- Latest pre-clip gradient norm: `5.5314` (configured max norm `1.0`).
 - Latest train throughput: `3.198 it/s`.
 - Stable mean throughput: `3.198 it/s`.
 - Trainer peak reserved VRAM: `21070 MiB`.
 - External monitor latest total GPU memory/utilization: `21798 MiB / 95%`.
-- External monitor max temperature/power: `65 C / 537.5 W`.
+- External monitor max temperature/power: `65 C / 537.9 W`.
 - External total memory may include concurrent GPU processes; use the trainer-reserved value as the per-model metric.
 
 ## Registered preflight
@@ -41,6 +41,9 @@
 | 4 | 23.12 | 0.000275 | 0.032367 | 65.0296 | 51.0919 | 10.8883 | 3.198 | 21070 |
 | 5 | 23.12 | 0.000331 | 0.027455 | 55.0944 | 43.5533 | 9.4930 | 3.198 | 21070 |
 | 6 | 23.12 | 0.000387 | 0.026702 | 53.9646 | 41.1362 | 8.3657 | 3.198 | 21070 |
+| 7 | 23.12 | 0.000444 | 0.023974 | 51.4814 | 39.5553 | 7.3263 | 3.198 | 21070 |
+| 8 | 23.12 | 0.000500 | 0.021805 | 47.3153 | 38.1225 | 6.4437 | 3.198 | 21070 |
+| 9 | 23.13 | 0.000500 | 0.019922 | 44.4675 | 36.6327 | 5.5314 | 3.198 | 21070 |
 
 ## Interpretation guard
 

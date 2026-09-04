@@ -11,6 +11,7 @@
     "dataset": "H36M-SH xy+confidence T243/S81",
     "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
     "split": "inherited train/test split",
+    "primary_metric": "best EMA P1 within epochs 1-60 with same-checkpoint P2",
     "metric": "best EMA P1 within epochs 1-60 with same-checkpoint P2",
     "direction": "min",
     "checkpoint": "existing Full epoch-53 best EMA",
