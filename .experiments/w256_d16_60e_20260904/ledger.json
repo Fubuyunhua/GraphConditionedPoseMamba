@@ -146,7 +146,7 @@
       "secondary_metrics": ["same-checkpoint P2", "raw P1/P2", "W128 curve", "parameter update relative L2", "maximum gradient norm", "clip fraction", "VRAM", "it/s"],
       "acceptance": "valid complete P1 <= 39.7452 mm; accuracy target P1 < 37.6593 mm",
       "falsification": "another finite optimizer collapse or valid complete P1 > 39.8452 mm",
-      "stopping_rule": "block launch on failed preflight and stop on non-finite/runtime failure; report finite metric excursions without automatic termination",
+      "stopping_rule": "no agent-initiated interruption under the user's explicit instruction; monitor and report only, and do not retry if the program exits on its own",
       "dependencies": ["D16-R3-REAUDIT", "D16-R3-STAGED-PREFLIGHT"],
       "artifacts": {
         "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_stable_r3_60e.yaml",
@@ -214,6 +214,13 @@
       "decision": "Release and start the fresh D16 R3 run after every staged gate passes.",
       "evidence": "31 tests passed; all static and real-data B1/B2/B4 gates passed; compiled B4 reserved 20,404 MiB with finite loss/gradient; GPU was otherwise idle.",
       "rejected_alternatives": "Do not resume R2, reuse its run directory, bypass the preflight, or launch a second D16 process."
+    },
+    {
+      "id": "D-D16-008",
+      "timestamp": "2026-09-05T01:06:00+08:00",
+      "decision": "Make all R3 monitoring observation-only and prohibit any autonomous process interruption, restart or configuration change.",
+      "evidence": "The user explicitly instructed that this experiment must not be autonomously interrupted.",
+      "rejected_alternatives": "Do not translate metric, gradient, OOM or runtime observations into agent-issued process signals; only report a natural program exit."
     }
   ]
 }

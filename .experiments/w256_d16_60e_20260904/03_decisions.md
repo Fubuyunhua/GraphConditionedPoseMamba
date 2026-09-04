@@ -49,3 +49,10 @@ metric movement without a new direct user instruction.
 Release R3 after every unit, source/config/data, optimizer-group, schedule,
 finite-gradient and staged real-data GPU gate passes. Start from random seed 0
 in a new remote repository and run directory; preserve all R1/R2 artifacts.
+
+## D-D16-008
+
+The user explicitly prohibited autonomous interruption of R3. Monitoring is
+observation-only: record, synchronize and alert, but never send a process
+signal, pause, restart or change configuration without a new direct user
+instruction. A program that exits on its own is reported and not retried.

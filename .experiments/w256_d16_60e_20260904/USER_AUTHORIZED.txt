@@ -4,3 +4,7 @@ cancelled run's artifacts.
 
 User instruction on 2026-09-05: analyze the severe D16 instability, implement
 an optimized correction, and restart after the ordered audit/preflight gates.
+
+User instruction on 2026-09-05: do not autonomously interrupt the R3 experiment.
+Monitoring may observe, record, synchronize and alert only; any agent-initiated
+stop, pause, restart or configuration change requires a new direct instruction.
