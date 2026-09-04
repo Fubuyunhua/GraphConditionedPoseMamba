@@ -135,7 +135,7 @@
     {
       "id": "D16-W256-D16-60E-R3",
       "track": "IMPROVEMENT",
-      "status": "PLANNED",
+      "status": "READY",
       "hypothesis": "lower smooth optimizer pressure and intended SSM no-decay grouping prevent finite whole-model excursions while preserving W256/D16 accuracy capacity",
       "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
       "delta": "fresh W256/D16 run; peak LR 3e-4, eight-epoch linear warmup, per-step cosine decay to 3e-5, honor explicit no-weight-decay markers, add update and gradient telemetry",
@@ -156,7 +156,7 @@
         "log": null,
         "checkpoint": null,
         "results": null,
-        "source": null,
+        "source": "git:0e23c5d01eb5e6c81c66bc17a621d38787e7c46d",
         "environment": "RTX5090; PyTorch 2.11.0+cu128; FP32"
       },
       "result": null

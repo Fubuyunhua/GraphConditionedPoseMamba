@@ -48,7 +48,7 @@ pass. The corrected run was released under source commit `2e4b804`.
 
 ## R3 re-audit
 
-Verdict: **CONDITIONAL pending staged RTX5090 preflight**.
+Verdict: **PASS** for a fresh R3 run under source `0e23c5d`.
 
 R3 keeps the model graph, 20,192,451 parameters, tensor contracts, dataset,
 losses, augmentation, batch size, EMA, clipping and evaluator unchanged. The
@@ -68,7 +68,8 @@ backward, optimizer or EMA graphs. Maximum pre-clip gradient and clipped-step
 fraction are observational only. Non-finite values remain hard runtime errors;
 finite metric excursions are reported without automatic termination.
 
-Open gates before PASS: full unit suite, actual optimizer-group coverage,
+All gates passed on the RTX5090: 31 tests, actual optimizer-group coverage,
 cosine endpoints/resume state, real H36M eager B1/B2 and compiled B4 finite
-forward/backward, new telemetry, dataset hash, source/config identity, and
-batch-4 peak reserved memory below 28,672 MiB under the current shared GPU.
+forward/backward, new gradient telemetry, dataset/source/config identity, and
+batch-4 peak reserved memory 20,404 MiB below the 28,672 MiB limit. The GPU had
+32,109 MiB free and no competing process at the gate.
