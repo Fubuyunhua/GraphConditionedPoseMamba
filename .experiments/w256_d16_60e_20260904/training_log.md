@@ -1,6 +1,6 @@
 # W256/D16 training log
 
-- Last synchronized snapshot (UTC): `2026-09-04T13:07:38+00:00`.
+- Last synchronized snapshot (UTC): `2026-09-04T15:05:58+00:00`.
 - Status: `R2_RUNNING`.
 - Config: `configs/pose3d/graph_posemamba_h36m_w256_d16_scale_60e.yaml`.
 - Source commit: `2e4b8040d6f94fd5c7cf330f3411484312fa4144`.
@@ -12,17 +12,17 @@
 
 ## Current summary
 
-- Completed epochs: `9/60`.
-- Latest EMA P1/P2: `44.4675/36.6327 mm` at epoch 9.
-- Best EMA P1 and paired P2: `44.4675/36.6327 mm` at epoch 9.
+- Completed epochs: `13/60`.
+- Latest EMA P1/P2: `40.5432/33.5557 mm` at epoch 13.
+- Best EMA P1 and paired P2: `40.5432/33.5557 mm` at epoch 13.
 - Current iteration trace: unavailable or waiting to start.
 - Error matches: `0`.
-- Latest pre-clip gradient norm: `5.5314` (configured max norm `1.0`).
+- Latest pre-clip gradient norm: `2.3779` (configured max norm `1.0`).
 - Latest train throughput: `3.198 it/s`.
 - Stable mean throughput: `3.198 it/s`.
 - Trainer peak reserved VRAM: `21070 MiB`.
-- External monitor latest total GPU memory/utilization: `21798 MiB / 95%`.
-- External monitor max temperature/power: `65 C / 537.9 W`.
+- External monitor latest total GPU memory/utilization: `21798 MiB / 100%`.
+- External monitor max temperature/power: `65 C / 538.8 W`.
 - External total memory may include concurrent GPU processes; use the trainer-reserved value as the per-model metric.
 
 ## Registered preflight
@@ -44,6 +44,10 @@
 | 7 | 23.12 | 0.000444 | 0.023974 | 51.4814 | 39.5553 | 7.3263 | 3.198 | 21070 |
 | 8 | 23.12 | 0.000500 | 0.021805 | 47.3153 | 38.1225 | 6.4437 | 3.198 | 21070 |
 | 9 | 23.13 | 0.000500 | 0.019922 | 44.4675 | 36.6327 | 5.5314 | 3.198 | 21070 |
+| 10 | 23.12 | 0.000495 | 0.018135 | 42.5357 | 35.4336 | 4.6547 | 3.198 | 21070 |
+| 11 | 23.12 | 0.000490 | 0.016651 | 41.5026 | 34.6467 | 3.7970 | 3.198 | 21070 |
+| 12 | 23.13 | 0.000485 | 0.015379 | 40.9350 | 34.0159 | 3.0324 | 3.198 | 21070 |
+| 13 | 23.13 | 0.000480 | 0.014404 | 40.5432 | 33.5557 | 2.3779 | 3.197 | 21070 |
 
 ## Interpretation guard
 
