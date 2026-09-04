@@ -5,7 +5,7 @@ repo=$(readlink -f "${1:-.}")
 py=${PYTHON_BIN:-/scratch/home/caiwei/miniforge3/envs/relipose_torch211/bin/python}
 study=.experiments/w256_d16_60e_20260904
 config=configs/pose3d/graph_posemamba_h36m_w256_d16_scale_60e.yaml
-prefix=runs/w256_d16_60e/D16_w256_d16_seed0
+prefix=runs/w256_d16_60e/D16_w256_d16_warmup_clip_seed0
 verification=verification/w256_d16_60e
 
 cd "$repo"
@@ -13,7 +13,7 @@ mkdir -p "$study/runtime" "$(dirname "$prefix")" "$verification" launch_logs
 exec 9>"$study/queue.lock"
 flock -n 9 || { echo "D16 queue lock is held" >&2; exit 3; }
 [[ -f "$study/USER_AUTHORIZED.txt" ]] || { echo "authorization missing" >&2; exit 4; }
-[[ -f "$study/PRELAUNCH_PASS.json" ]] || { echo "preflight missing" >&2; exit 5; }
+[[ -f "$study/PRELAUNCH_PASS_R2.json" ]] || { echo "revised preflight missing" >&2; exit 5; }
 if ! git diff --quiet -- lib/model/PoseMamba.py lib/model/mambablocks.py lib/utils/learning.py train.py "$config"; then
   echo "tracked D16 source is dirty" >&2; exit 6
 fi

@@ -1,7 +1,7 @@
 # GraphConditionedPoseMamba W256/D16 — 60-epoch accuracy-oriented scale run.
 config: configs/pose3d/graph_posemamba_h36m_w256_d16_scale_60e.yaml
-checkpoint: runs/graph_posemamba/h36m/w256_d16_scale_60e_seed0
-pretrained: runs/graph_posemamba/h36m/w256_d16_scale_60e_seed0
+checkpoint: runs/w256_d16_60e/D16_w256_d16_warmup_clip_seed0
+pretrained: runs/w256_d16_60e/D16_w256_d16_warmup_clip_seed0
 resume: ''
 evaluate: ''
 selection: latest_epoch.bin
@@ -9,6 +9,8 @@ seed: 0
 
 epochs: 60
 warmup_epochs: 8
+enable_linear_warmup: true
+warmup_start_factor: 0.1
 batch_size: 4
 test_batch_size: 4
 learning_rate: 0.0005
@@ -47,6 +49,8 @@ compile_compatible_scan: true
 cuda_graph_model: false
 eager_eval_when_compiled: true
 activation_checkpoint_blocks: false
+max_grad_norm: 1.0
+grad_clip_error_if_nonfinite: true
 
 data_root: data/motion3d/MB3D_f243s81/
 subset_list: [H36M-SH]

@@ -740,6 +740,10 @@ class ConfigurationAndCapacityTests(unittest.TestCase):
             )
         )
         self.assertEqual(candidate.epochs, 60)
+        self.assertTrue(candidate.enable_linear_warmup)
+        self.assertEqual(candidate.warmup_start_factor, 0.1)
+        self.assertEqual(candidate.max_grad_norm, 1.0)
+        self.assertTrue(candidate.grad_clip_error_if_nonfinite)
         self.assertEqual(candidate.dim_feat, 256)
         self.assertEqual(candidate.depth, 16)
         for field in (
@@ -786,6 +790,27 @@ class ConfigurationAndCapacityTests(unittest.TestCase):
         model = load_backbone(candidate)
         self.assertEqual(parameter_count(model), 20_192_451)
         self.assertEqual(len(model.blocks), 16)
+
+    def test_linear_warmup_then_epoch_decay_schedule(self):
+        from train import LinearWarmupEpochDecay
+
+        parameter = nn.Parameter(torch.ones(()))
+        optimizer = torch.optim.AdamW([parameter], lr=1e-3)
+        schedule = LinearWarmupEpochDecay(
+            optimizer,
+            steps_per_epoch=2,
+            warmup_epochs=2,
+            start_factor=0.1,
+            lr_decay=0.5,
+        )
+        observed = []
+        for _ in range(7):
+            observed.append(schedule.prepare_step()[0])
+            schedule.complete_step()
+        expected = [1e-4, 4e-4, 7e-4, 1e-3, 1e-3, 1e-3, 5e-4]
+        for actual, target in zip(observed, expected):
+            self.assertAlmostEqual(actual, target, places=12)
+        self.assertEqual(schedule.state_dict()["global_step"], 7)
 
 
 @unittest.skipUnless(cuda_selective_scan_available(), "CUDA selective scan is unavailable")

@@ -22,7 +22,12 @@ sys.path.insert(0, str(RELEASE_ROOT))
 from lib.data.dataset_motion_3d import MotionDataset3D
 from lib.utils.learning import AverageMeter, load_backbone
 from lib.utils.tools import get_config
-from train import CudaGraphTrainModel, EMAModel, train_epoch
+from train import (
+    CudaGraphTrainModel,
+    EMAModel,
+    build_lr_schedule,
+    train_epoch,
+)
 
 
 LOSS_KEYS = (
@@ -35,6 +40,7 @@ LOSS_KEYS = (
     "3d_velocity",
     "angle",
     "angle_velocity",
+    "grad_norm",
 )
 
 
@@ -125,6 +131,15 @@ def main():
         weight_decay=config.weight_decay,
     )
     ema = EMAModel(base_model, config.ema_decay)
+    steps_per_epoch = len(loader) if options.real_data else (
+        options.warmup_steps + options.steps
+    )
+    lr_schedule = build_lr_schedule(
+        config,
+        optimizer,
+        steps_per_epoch=steps_per_epoch,
+        start_step=0,
+    )
 
     torch.cuda.reset_peak_memory_stats()
     warmup_start = time.perf_counter()
@@ -137,6 +152,7 @@ def main():
         has_3d=True,
         has_gt=True,
         ema_helper=ema,
+        lr_schedule=lr_schedule,
     )
     torch.cuda.synchronize()
     warmup_seconds = time.perf_counter() - warmup_start
@@ -155,6 +171,7 @@ def main():
         has_3d=True,
         has_gt=True,
         ema_helper=ema,
+        lr_schedule=lr_schedule,
     )
     torch.cuda.synchronize()
     elapsed = time.perf_counter() - start
@@ -174,6 +191,11 @@ def main():
                 "activation_checkpoint_blocks": bool(
                     getattr(config, "activation_checkpoint_blocks", False)
                 ),
+                "linear_warmup_enabled": lr_schedule is not None,
+                "warmup_steps": (
+                    lr_schedule.warmup_steps if lr_schedule is not None else 0
+                ),
+                "optimizer_lr_after_steps": float(optimizer.param_groups[0]["lr"]),
                 "warmup_seconds": warmup_seconds,
                 "warmup_peak_allocated_mib": warmup_peak_allocated / 2**20,
                 "warmup_peak_reserved_mib": warmup_peak_reserved / 2**20,
@@ -184,6 +206,7 @@ def main():
                 "measured_peak_allocated_mib": measured_peak_allocated / 2**20,
                 "measured_peak_reserved_mib": measured_peak_reserved / 2**20,
                 "loss": losses["total"].avg,
+                "grad_norm_preclip": losses["grad_norm"].avg,
             },
             indent=2,
         )

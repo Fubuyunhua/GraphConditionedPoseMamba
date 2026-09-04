@@ -105,6 +105,83 @@ def set_random_seed(seed):
     np.random.seed(seed)
     torch.manual_seed(seed)
 
+
+class LinearWarmupEpochDecay:
+    """Per-step linear warmup followed by epoch-wise exponential decay."""
+
+    def __init__(
+        self,
+        optimizer,
+        steps_per_epoch,
+        warmup_epochs,
+        start_factor,
+        lr_decay,
+        start_step=0,
+    ):
+        self.optimizer = optimizer
+        self.steps_per_epoch = int(steps_per_epoch)
+        self.warmup_epochs = int(warmup_epochs)
+        self.warmup_steps = self.steps_per_epoch * self.warmup_epochs
+        self.start_factor = float(start_factor)
+        self.lr_decay = float(lr_decay)
+        self.global_step = int(start_step)
+        if self.steps_per_epoch <= 0:
+            raise ValueError("steps_per_epoch must be positive")
+        if self.warmup_epochs <= 0:
+            raise ValueError("warmup_epochs must be positive when warmup is enabled")
+        if not 0.0 < self.start_factor <= 1.0:
+            raise ValueError("warmup_start_factor must be in (0, 1]")
+        self.base_lrs = [
+            float(group.get("initial_lr", group["lr"]))
+            for group in optimizer.param_groups
+        ]
+        for group, base_lr in zip(optimizer.param_groups, self.base_lrs):
+            group["initial_lr"] = base_lr
+
+    def scale_at(self, step):
+        step = int(step)
+        if step < self.warmup_steps:
+            denominator = max(self.warmup_steps - 1, 1)
+            progress = step / denominator
+            return self.start_factor + (1.0 - self.start_factor) * progress
+        post_warmup_epoch = (step - self.warmup_steps) // self.steps_per_epoch
+        return self.lr_decay ** post_warmup_epoch
+
+    def prepare_step(self):
+        scale = self.scale_at(self.global_step)
+        lrs = []
+        for group, base_lr in zip(self.optimizer.param_groups, self.base_lrs):
+            lr = base_lr * scale
+            group["lr"] = lr
+            lrs.append(lr)
+        return lrs
+
+    def complete_step(self):
+        self.global_step += 1
+
+    def state_dict(self):
+        return {
+            "global_step": self.global_step,
+            "steps_per_epoch": self.steps_per_epoch,
+            "warmup_epochs": self.warmup_epochs,
+            "start_factor": self.start_factor,
+            "lr_decay": self.lr_decay,
+            "base_lrs": list(self.base_lrs),
+        }
+
+
+def build_lr_schedule(args, optimizer, steps_per_epoch, start_step=0):
+    if not bool(getattr(args, "enable_linear_warmup", False)):
+        return None
+    return LinearWarmupEpochDecay(
+        optimizer=optimizer,
+        steps_per_epoch=steps_per_epoch,
+        warmup_epochs=int(args.warmup_epochs),
+        start_factor=float(getattr(args, "warmup_start_factor", 0.1)),
+        lr_decay=float(args.lr_decay),
+        start_step=start_step,
+    )
+
 def _clone_state_dict_for_save(state_dict):
     cloned = {}
     for k, v in state_dict.items():
@@ -305,12 +382,26 @@ def evaluate(args, model_pos, test_loader, datareader):
     log.info('----------')
     return e1, e2, results_all
         
-def train_epoch(args, model_pos, train_loader, losses, optimizer, has_3d, has_gt, ema_helper=None):
+def train_epoch(
+    args,
+    model_pos,
+    train_loader,
+    losses,
+    optimizer,
+    has_3d,
+    has_gt,
+    ema_helper=None,
+    lr_schedule=None,
+):
     model_pos.train()
     metric_sums = None
     metric_count = 0
     metric_keys = None
+    grad_norm_sum = None
+    grad_norm_count = 0
     for idx, (batch_input, batch_gt) in tqdm(enumerate(train_loader)):    
+        if lr_schedule is not None:
+            lr_schedule.prepare_step()
         if (
             bool(getattr(args, "compile_model", False))
             and hasattr(torch, "compiler")
@@ -494,13 +585,35 @@ def train_epoch(args, model_pos, train_loader, losses, optimizer, has_3d, has_gt
         )
         metric_count += batch_size
         loss_total.backward()
+        max_grad_norm = float(getattr(args, "max_grad_norm", 0.0))
+        if max_grad_norm > 0.0:
+            grad_norm = torch.nn.utils.clip_grad_norm_(
+                model_pos.parameters(),
+                max_norm=max_grad_norm,
+                error_if_nonfinite=bool(
+                    getattr(args, "grad_clip_error_if_nonfinite", True)
+                ),
+            )
+            grad_norm_sum = (
+                grad_norm.detach()
+                if grad_norm_sum is None
+                else grad_norm_sum + grad_norm.detach()
+            )
+            grad_norm_count += 1
         optimizer.step()
+        if lr_schedule is not None:
+            lr_schedule.complete_step()
         if ema_helper is not None:
             ema_helper.update(model_pos)
     if metric_sums is not None:
         metric_averages = (metric_sums / metric_count).cpu().tolist()
         for key, value in zip(metric_keys, metric_averages):
             losses[key].update(value, metric_count)
+    if grad_norm_sum is not None and grad_norm_count > 0:
+        losses["grad_norm"].update(
+            float((grad_norm_sum / grad_norm_count).cpu()),
+            grad_norm_count,
+        )
 def get_beijing_timestamp():
     local_offset = time.localtime().tm_gmtoff   # 当前机器utc时间偏移量
     beijing_offset = int(8 * 60*60)
@@ -697,6 +810,31 @@ def train_with_config(args, opts):
             if 'min_loss' in checkpoint and checkpoint['min_loss'] is not None:
                 min_loss = checkpoint['min_loss']
             log.info(f'INFO: Resumed from epoch {st} with lr={lr:.10f}, min_loss={min_loss}')
+
+        steps_per_epoch = len(train_loader_3d)
+        if args.train_2d:
+            steps_per_epoch += len(instav_loader_2d) + len(posetrack_loader_2d)
+        schedule_start_step = st * steps_per_epoch
+        if checkpoint is not None and checkpoint.get("lr_schedule_state") is not None:
+            schedule_start_step = int(
+                checkpoint["lr_schedule_state"].get(
+                    "global_step", schedule_start_step
+                )
+            )
+        lr_schedule = build_lr_schedule(
+            args,
+            optimizer,
+            steps_per_epoch=steps_per_epoch,
+            start_step=schedule_start_step,
+        )
+        if lr_schedule is not None:
+            log.info(
+                "INFO: Enabling per-step linear warmup: "
+                f"start_factor={lr_schedule.start_factor}, "
+                f"warmup_epochs={lr_schedule.warmup_epochs}, "
+                f"warmup_steps={lr_schedule.warmup_steps}, "
+                f"post_warmup_lr_decay={lr_schedule.lr_decay}"
+            )
                 
         args.mask = (args.mask_ratio > 0 and args.mask_T_ratio > 0)
         if args.mask or args.noise:
@@ -718,14 +856,16 @@ def train_with_config(args, opts):
             losses['3d_velocity'] = AverageMeter()
             losses['angle'] = AverageMeter()
             losses['angle_velocity'] = AverageMeter()
+            losses['grad_norm'] = AverageMeter()
             N = 0
                         
             # Curriculum Learning
             if args.train_2d and (epoch >= args.pretrain_3d_curriculum):
-                train_epoch(args, model_pos, posetrack_loader_2d, losses, optimizer, has_3d=False, has_gt=True, ema_helper=ema_helper)
-                train_epoch(args, model_pos, instav_loader_2d, losses, optimizer, has_3d=False, has_gt=False, ema_helper=ema_helper)
-            train_epoch(args, model_pos, train_loader_3d, losses, optimizer, has_3d=True, has_gt=True, ema_helper=ema_helper) 
+                train_epoch(args, model_pos, posetrack_loader_2d, losses, optimizer, has_3d=False, has_gt=True, ema_helper=ema_helper, lr_schedule=lr_schedule)
+                train_epoch(args, model_pos, instav_loader_2d, losses, optimizer, has_3d=False, has_gt=False, ema_helper=ema_helper, lr_schedule=lr_schedule)
+            train_epoch(args, model_pos, train_loader_3d, losses, optimizer, has_3d=True, has_gt=True, ema_helper=ema_helper, lr_schedule=lr_schedule)
             elapsed = (time.time() - start_time) / 60
+            lr = float(optimizer.param_groups[0]['lr'])
 
             if args.no_eval:
                 log.info('[%d] time %.2f lr %f 3d_train %f' % (
@@ -747,12 +887,25 @@ def train_with_config(args, opts):
                     return evaluate(args, eval_model, test_loader, datareader)
 
                 e1, e2, results_all = _run_eval()
-                log.info('[%d] time %.2f lr %f 3d_train %f e1 %f e2 %f' % (
-                    epoch + 1,
-                    elapsed,
-                    lr,
-                    losses['3d_pos'].avg,
-                    e1, e2))
+                if float(getattr(args, "max_grad_norm", 0.0)) > 0.0:
+                    log.info(
+                        '[%d] time %.2f lr %f 3d_train %f e1 %f e2 %f grad_norm %f' % (
+                            epoch + 1,
+                            elapsed,
+                            lr,
+                            losses['3d_pos'].avg,
+                            e1,
+                            e2,
+                            losses['grad_norm'].avg,
+                        )
+                    )
+                else:
+                    log.info('[%d] time %.2f lr %f 3d_train %f e1 %f e2 %f' % (
+                        epoch + 1,
+                        elapsed,
+                        lr,
+                        losses['3d_pos'].avg,
+                        e1, e2))
                 log.info(f'Remaining training time: {datetime.timedelta(seconds=time.time() - start_time) * (args.epochs - epoch)}')
                 if train_writer is not None:
                     train_writer.add_scalar('Error P1', e1, epoch + 1)
@@ -781,13 +934,15 @@ def train_with_config(args, opts):
                 f'RUNTIME epoch={epoch + 1} '
                 f'train_it_per_sec={train_it_per_sec:.6f} '
                 f'peak_allocated_mib={peak_allocated_mib:.3f} '
-                f'peak_reserved_mib={peak_reserved_mib:.3f}'
+                f'peak_reserved_mib={peak_reserved_mib:.3f} '
+                f'grad_norm_preclip={losses["grad_norm"].avg:.6f}'
             )
                 
             # Decay learning rate exponentially
-            lr *= lr_decay
-            for param_group in optimizer.param_groups:
-                param_group['lr'] *= lr_decay
+            if lr_schedule is None:
+                lr *= lr_decay
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] *= lr_decay
 
             # Save checkpoints
             chk_path = os.path.join(opts.checkpoint, 'epoch_{}.bin'.format(epoch))
@@ -801,6 +956,8 @@ def train_with_config(args, opts):
             if ema_helper is not None:
                 raw_extra_state['ema_shadow'] = _clone_state_dict_for_save(ema_helper.shadow)
                 raw_extra_state['ema_decay'] = ema_helper.decay
+            if lr_schedule is not None:
+                raw_extra_state['lr_schedule_state'] = lr_schedule.state_dict()
 
             save_checkpoint(chk_path_latest, epoch, lr, optimizer, model_pos, min_loss, extra_state=raw_extra_state)
             if ema_helper is not None:

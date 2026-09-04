@@ -20,21 +20,21 @@
     "seed_policy": [0]
   },
   "audit": {
-    "verdict": "PASS",
-    "timestamp": "2026-09-04T15:34:00+08:00",
+    "verdict": "CONDITIONAL",
+    "timestamp": "2026-09-04T17:15:00+08:00",
     "report": ".experiments/w256_d16_60e_20260904/00_model_audit.md",
     "accepted_risks": [
       "single seed",
       "60-epoch user-requested budget",
       "inherited test-monitored protocol"
     ],
-    "blocking_findings": []
+    "blocking_findings": ["revised warmup and gradient-clipping preflight pending"]
   },
   "experiments": [
     {
       "id": "D16-W256-D16-60E",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "INVALID",
       "hypothesis": "six additional W256 blocks improve accuracy through deeper iterative graph/SSM refinement",
       "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
       "delta": "width 256, depth 16, registered budget 60 epochs",
@@ -61,6 +61,50 @@
         "queue_pid": 561290,
         "train_pid": 561307
       },
+      "result": {
+        "completion_validity": "INVALID_INEFFECTIVE_DECLARED_WARMUP_AND_EARLY_OPTIMIZER_INSTABILITY",
+        "metrics": {
+          "completed_epochs": 3,
+          "best_epoch": 2,
+          "best_ema_p1_mm": 117.488052,
+          "paired_ema_p2_mm": 77.392961,
+          "epoch3_ema_p1_mm": 221.730884,
+          "epoch3_ema_p2_mm": 127.19945,
+          "epoch2_loss": 0.03498,
+          "epoch3_loss": 0.039396
+        },
+        "uncertainty": "causal attribution to warmup requires revised-run evidence",
+        "cost": "three completed diagnostic epochs",
+        "failures": ["configured warmup was inactive", "finite early optimization overshoot"],
+        "recommendation": "MODIFY_AND_RESTART_NEW_RUN"
+      }
+    },
+    {
+      "id": "D16-W256-D16-60E-R2",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "actual per-step warmup and bounded gradients stabilize W256/D16 while preserving its accuracy capacity",
+      "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
+      "delta": "same D16 model and 60-epoch protocol; enable true 8-epoch linear warmup and max_grad_norm=1.0",
+      "controls": "model, data, batch, target LR, losses, EMA, augmentation and evaluator unchanged",
+      "seeds": [0],
+      "budget": "60 epochs",
+      "primary_metric": "best EMA P1 within epochs 1-60",
+      "secondary_metrics": ["same-checkpoint P2", "raw P1/P2", "pre-clip grad norm", "VRAM", "it/s"],
+      "acceptance": "finite staged smoke and valid complete P1 <= 39.7452 mm",
+      "falsification": "repeated early loss/P1 overshoot or valid complete P1 > 39.8452 mm",
+      "stopping_rule": "stop on non-finite gradient, OOM, runtime error or repeated diagnosed early instability",
+      "dependencies": ["D16-R2-PREFLIGHT"],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_scale_60e.yaml",
+        "parameters": 20192451,
+        "command": "scripts/run_w256_d16_60e.sh",
+        "preflight": ".experiments/w256_d16_60e_20260904/PRELAUNCH_PASS_R2.json",
+        "log": null,
+        "checkpoint": null,
+        "source": null,
+        "training_log_document": ".experiments/w256_d16_60e_20260904/training_log.md"
+      },
       "result": null
     }
   ],
@@ -78,6 +122,13 @@
       "decision": "Pass all staged gates and start W256/D16 for 60 epochs.",
       "evidence": "Compiled batch4 peak reserved 20274 MiB, finite loss 5.672654, positive throughput, dataset hash and CUDA/unit gates passed.",
       "rejected_alternatives": "Do not reduce batch, enable checkpointing, reuse D10 weights or change optimizer settings."
+    },
+    {
+      "id": "D-D16-003",
+      "timestamp": "2026-09-04T17:15:00+08:00",
+      "decision": "Invalidate and stop the first D16 run, implement opt-in true linear warmup plus gradient clipping, and restart only after re-audit.",
+      "evidence": "Epoch2-to-3 loss increased 12.62% and P1 regressed 104.24 mm; configured warmup was unused, while checkpoint tensors remained finite.",
+      "rejected_alternatives": "Do not continue an optimizer-unstable run, resume its checkpoint, silently change legacy experiments, or attribute the spike to corruption without evidence."
     }
   ]
 }

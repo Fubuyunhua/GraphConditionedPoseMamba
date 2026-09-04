@@ -1,7 +1,8 @@
 # W256/D16 60-epoch audit
 
-Verdict: PASS — static/CUDA and staged real-data batch1/batch2/compiled-batch4
-gates passed before formal training.
+Verdict: CONDITIONAL — first run exposed an ineffective declared warmup and
+finite early optimization instability; revised scheduler/clipping preflight is
+required before restart.
 
 ## Registered model
 
@@ -29,3 +30,14 @@ change is permitted.
 Observed peak reserved memory was 6,214 MiB at eager batch 1, 12,488 MiB at
 eager batch 2 and 20,274 MiB at compiled batch 4. All losses were finite and
 throughput positive; the formal 60-epoch run was released unchanged.
+
+That first run is INVALID for the intended optimizer protocol. The configuration
+declared eight warmup epochs but old `train.py` never consumed the field. At
+epoch 2 to 3, training loss increased 12.62%, P1 regressed 104.24 mm and P2
+regressed 49.81 mm. Model and optimizer tensors remained finite, excluding
+NaN/checkpoint corruption.
+
+The revised path is opt-in and does not alter legacy configs: per-step linear
+warmup from 0.1x to 1.0x LR across 35,496 steps, followed by the existing
+epoch-wise 0.99 decay; pre-clip gradient norm logging; and max-norm 1.0 with
+non-finite gradients raising an error. It must use a new run prefix.
