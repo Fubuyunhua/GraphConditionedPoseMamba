@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import math
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -45,6 +46,15 @@ def sha256(path: Path) -> str:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def git_output(*arguments: str) -> str:
+    try:
+        return subprocess.check_output(
+            ["git", *arguments], cwd=ROOT, text=True, stderr=subprocess.DEVNULL
+        ).strip()
+    except Exception:
+        return ""
 
 
 def parameter_signature(model) -> list[tuple[str, tuple[int, ...]]]:
@@ -241,7 +251,8 @@ def main() -> None:
     ]
     payload = {
         "status": "PASS" if not blocking else "BLOCKED",
-        "source_head": "UNCOMMITTED_ISOLATED_WORKTREE",
+        "source_head": git_output("rev-parse", "HEAD"),
+        "source_status_short": git_output("status", "--short"),
         "checks": checks,
         "dataset": dataset_status,
         "frozen_h36m_protocol": protocol,

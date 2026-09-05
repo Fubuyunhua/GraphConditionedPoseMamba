@@ -1,0 +1,74 @@
+study: paper_remaining_evidence
+scientific_implementation_commit: ad4e2fa66492737a3fcd88d9142a88731724f30b
+long_training_authorized: false
+
+h36m:
+  dataset: H36M-SH_xy_confidence_T243_S81
+  dataset_sha256: 73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175
+  input: xy_plus_confidence
+  train_samples: 17748
+  batch_size: 4
+  steps_per_epoch: 4437
+  epochs: 80
+  optimizer_steps: 354960
+  ema_updates: 354960
+  optimizer: AdamW
+  learning_rate: 0.0005
+  weight_decay: 0.012
+  lr_decay_per_epoch: 0.99
+  declared_warmup_epochs: 8
+  effective_linear_warmup: false
+  learning_rate_epoch80: 0.0002260218251332377
+  checkpoint_lr_after_epoch80: 0.0002237616068819053
+  ema_decay_per_step: 0.9998
+  losses:
+    position: 1.0
+    scale: 0.5
+    velocity: 20.0
+    difference: 0.5
+  best_rule: best_ema_test_monitored_first80
+  fixed_rule: ema_fixed_epoch80
+  disclosure: per_epoch_H36M_test_monitoring_is_not_unbiased_validation
+  checkpoint_pairing: P1_and_P2_from_same_checkpoint
+
+graph_conditioned_variants:
+  model: GraphConditionedPoseMamba
+  dim_feat: 64
+  depth: 8
+  mlp_ratio: 1.96875
+  ssm_ratio: 1.875
+  ssm_d_state: 16
+  graph_hidden_ratio: 0.5
+  spatial_ssm_conv: 1
+  temporal_ssm_conv: 3
+  graph_scale: 1.0
+  factorized_scan_k: 2
+  compile_model: true
+  compile_mode: reduce-overhead
+  eager_eval_when_compiled: true
+
+posemamba_variants:
+  model: PoseMamba
+  dim_feat: 64
+  depth: 6
+  mlp_ratio: 1.0
+  released_backward_mode: legacy
+  corrected_backward_mode: exact
+  compile_model: false
+
+mpi_inf_3dhp:
+  protocol: mpi-inf-3dhp-gt2d-f81-official-repaired-v1
+  baseline_predeclared: PoseMamba_W64_D6_M1_released_legacy
+  full: GraphConditionedPoseMamba_W64_D8
+  clip_len: 81
+  train_stride: 9
+  test_stride: 1
+  train_tail_policy: resample
+  train_windows: 117024
+  test_valid_centres: 2875
+  train_sha256: 313644a5330a140a78766708811b7640e1a7ab13c2dde0575adb2c69eedaaef8
+  test_sha256: 78d8d90fa3f4b0f2c040e85353ad0fe75e8cdde199f63b76575f866e9933f409
+  epochs: 120
+  checkpoint_rule: ema_fixed_epoch120
+  test_monitoring: false
+

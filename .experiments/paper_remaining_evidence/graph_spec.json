@@ -1,0 +1,24 @@
+{
+  "mode": "degree_preserving_rewired",
+  "graph_rewire_seed": 3407,
+  "generator": "private_python_rng_double_edge_swap_v1",
+  "joint_names": [
+    "root", "rhip", "rknee", "rankle", "lhip", "lknee", "lankle",
+    "belly", "neck", "nose", "head", "lshoulder", "lelbow", "lwrist",
+    "rshoulder", "relbow", "rwrist"
+  ],
+  "bone_edges": [
+    [0, 6], [0, 7], [0, 8], [1, 9], [1, 11], [2, 9], [2, 14],
+    [3, 15], [4, 8], [4, 16], [5, 8], [5, 12], [7, 15], [8, 11],
+    [10, 12], [13, 14]
+  ],
+  "symmetry_edges": [
+    [1, 13], [2, 15], [3, 5], [4, 14], [6, 12], [11, 16]
+  ],
+  "bone_degrees": [3, 2, 2, 1, 2, 2, 1, 2, 4, 2, 1, 2, 2, 1, 2, 2, 1],
+  "symmetry_degrees": [0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+  "bone_connected": true,
+  "bone_edge_overlap_with_anatomical": 0.125,
+  "symmetry_edge_overlap_with_anatomical": 0.0,
+  "sha256": "f9037c7265d94ba73c5941fc3070dec76cd022e8c302d141543e94c85627efad"
+}
