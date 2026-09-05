@@ -18,7 +18,11 @@
     "source_identity": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b",
     "command": "one explicitly confirmed run at a time",
     "environment": "RTX5090; PyTorch 2.11.0+cu128; FP32",
-    "seed_policy": [0, 1, 2]
+    "seed_policy": [
+      0,
+      1,
+      2
+    ]
   },
   "audit": {
     "verdict": "PASS",
@@ -35,20 +39,44 @@
     {
       "id": "E-RWG-0",
       "track": "ABLATION",
-      "status": "PLANNED",
+      "status": "RUNNING",
       "hypothesis": "anatomical topology is more useful than a fixed degree-preserving non-anatomical graph",
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "graph_topology_mode anatomical to degree_preserving_rewired with graph seed 3407",
       "controls": "Full parameters, K2 scan, independent recurrence, control injection, data, losses, optimizer, EMA and evaluator",
-      "seeds": [0],
+      "seeds": [
+        0
+      ],
       "budget": "80 epochs",
       "primary_metric": "best EMA P1 within epochs 1-80",
-      "secondary_metrics": ["same-checkpoint P2", "EMA fixed epoch80", "per-action", "per-joint", "memory", "throughput"],
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "EMA fixed epoch80",
+        "per-action",
+        "per-joint",
+        "memory",
+        "throughput"
+      ],
       "acceptance": "valid completed run under the frozen protocol",
       "falsification": "rewired equals or improves on Full",
       "stopping_rule": "technical invalidity only; valid unfavorable results are retained",
-      "dependencies": ["USER_CONFIRMATION"],
-      "artifacts": {"config": "configs/pose3d/ablation_full_rewired_graph.yaml", "graph": ".experiments/paper_remaining_evidence/graph_spec.json", "preflight": ".experiments/paper_remaining_evidence/preflight_results.json", "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"},
+      "dependencies": [
+        "USER_AUTHORIZATION_20260906",
+        "REWIRED_B4_PASS_20260906"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/ablation_full_rewired_graph.yaml",
+        "graph": ".experiments/paper_remaining_evidence/graph_spec.json",
+        "preflight": ".experiments/paper_remaining_evidence/results/E-RWG-0/PREFLIGHT_PASS.json",
+        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_REWIRED_20260906",
+        "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_REWIRED_20260906/runs/paper_remaining_evidence/full_rewired_graph_seed0_2026_09_06_T_00_52_50",
+        "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_REWIRED_20260906/launch_logs/rewired_seed0.log",
+        "train_pid": 1096370,
+        "launcher_pid": 1096349,
+        "launch_time": "2026-09-06T00:52:50+08:00",
+        "deployment_source": "git:1bb0a15b5308c440fcbd9952e485f59e983a089b"
+      },
       "result": null
     },
     {
@@ -59,15 +87,31 @@
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "recurrence_scope independent to joined after identical local projection and Conv1D",
       "controls": "all Full parameters, K2 directions, graph, control injection, local preprocessing, data and training protocol",
-      "seeds": [0],
+      "seeds": [
+        0
+      ],
       "budget": "80 epochs",
       "primary_metric": "best EMA P1 within epochs 1-80",
-      "secondary_metrics": ["same-checkpoint P2", "EMA fixed epoch80", "per-action", "per-joint", "memory", "throughput"],
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "EMA fixed epoch80",
+        "per-action",
+        "per-joint",
+        "memory",
+        "throughput"
+      ],
       "acceptance": "valid completed run under the frozen protocol",
       "falsification": "joined equals or improves on Full",
       "stopping_rule": "technical invalidity only; valid unfavorable results are retained",
-      "dependencies": ["E-RWG-0", "USER_CONFIRMATION"],
-      "artifacts": {"config": "configs/pose3d/ablation_full_no_recurrence_reset_matched.yaml", "preflight": ".experiments/paper_remaining_evidence/preflight_results.json", "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"},
+      "dependencies": [
+        "E-RWG-0",
+        "USER_CONFIRMATION"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/ablation_full_no_recurrence_reset_matched.yaml",
+        "preflight": ".experiments/paper_remaining_evidence/preflight_results.json",
+        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
+      },
       "result": null
     },
     {
@@ -78,15 +122,29 @@
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "PoseMamba W64/D6/M1 legacy to exact indexed-path derivative only",
       "controls": "released forward, K4, CrossMerge, selective scan, data, losses, optimizer and EMA",
-      "seeds": [0],
+      "seeds": [
+        0
+      ],
       "budget": "80 epochs",
       "primary_metric": "best EMA P1 within epochs 1-80",
-      "secondary_metrics": ["same-checkpoint P2", "EMA fixed epoch80", "forward equality", "gradient equality"],
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "EMA fixed epoch80",
+        "forward equality",
+        "gradient equality"
+      ],
       "acceptance": "forward, FP64 gradcheck, reference gradient, checkpoint inference and real step pass",
       "falsification": "corrected and released training are statistically indistinguishable",
       "stopping_rule": "technical invalidity only",
-      "dependencies": ["E-NR-0", "USER_CONFIRMATION"],
-      "artifacts": {"config": "configs/pose3d/diagnostic_posemamba_corrected_backward.yaml", "preflight": ".experiments/paper_remaining_evidence/preflight_results.json", "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"},
+      "dependencies": [
+        "E-NR-0",
+        "USER_CONFIRMATION"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/diagnostic_posemamba_corrected_backward.yaml",
+        "preflight": ".experiments/paper_remaining_evidence/preflight_results.json",
+        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
+      },
       "result": null
     },
     {
@@ -97,15 +155,32 @@
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "released PoseMamba seeds 1 and 2",
       "controls": "A0 W64/D6/M1 legacy implementation and frozen H36M protocol",
-      "seeds": [1, 2],
+      "seeds": [
+        1,
+        2
+      ],
       "budget": "two 80-epoch runs",
       "primary_metric": "paired seed P1(A0)-P1(Full)",
-      "secondary_metrics": ["paired P2", "EMA fixed epoch80", "mean", "standard deviation"],
+      "secondary_metrics": [
+        "paired P2",
+        "EMA fixed epoch80",
+        "mean",
+        "standard deviation"
+      ],
       "acceptance": "both predeclared seeds complete with one checkpoint rule",
       "falsification": "paired direction is inconsistent across seeds",
       "stopping_rule": "do not select or replace seeds",
-      "dependencies": ["D-PM-BWD-0", "USER_CONFIRMATION"],
-      "artifacts": {"configs": ["configs/pose3d/repro_a0_posemamba_seed1_80e.yaml", "configs/pose3d/repro_a0_posemamba_seed2_80e.yaml"], "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"},
+      "dependencies": [
+        "D-PM-BWD-0",
+        "USER_CONFIRMATION"
+      ],
+      "artifacts": {
+        "configs": [
+          "configs/pose3d/repro_a0_posemamba_seed1_80e.yaml",
+          "configs/pose3d/repro_a0_posemamba_seed2_80e.yaml"
+        ],
+        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
+      },
       "result": null
     },
     {
@@ -116,15 +191,32 @@
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "Graph Feature Fusion seeds 1 and 2",
       "controls": "A2 architecture and frozen H36M protocol",
-      "seeds": [1, 2],
+      "seeds": [
+        1,
+        2
+      ],
       "budget": "two 80-epoch runs",
       "primary_metric": "paired seed P1(A2)-P1(Full)",
-      "secondary_metrics": ["paired P2", "EMA fixed epoch80", "mean", "standard deviation"],
+      "secondary_metrics": [
+        "paired P2",
+        "EMA fixed epoch80",
+        "mean",
+        "standard deviation"
+      ],
       "acceptance": "both predeclared seeds complete with one checkpoint rule",
       "falsification": "paired direction is inconsistent across seeds",
       "stopping_rule": "do not select or replace seeds",
-      "dependencies": ["D-PM-BWD-0", "USER_CONFIRMATION"],
-      "artifacts": {"configs": ["configs/pose3d/repro_a2_graph_feature_seed1_80e.yaml", "configs/pose3d/repro_a2_graph_feature_seed2_80e.yaml"], "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"},
+      "dependencies": [
+        "D-PM-BWD-0",
+        "USER_CONFIRMATION"
+      ],
+      "artifacts": {
+        "configs": [
+          "configs/pose3d/repro_a2_graph_feature_seed1_80e.yaml",
+          "configs/pose3d/repro_a2_graph_feature_seed2_80e.yaml"
+        ],
+        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
+      },
       "result": null
     },
     {
@@ -135,15 +227,32 @@
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "Full seeds 1 and 2",
       "controls": "Full architecture and frozen H36M protocol",
-      "seeds": [1, 2],
+      "seeds": [
+        1,
+        2
+      ],
       "budget": "two 80-epoch runs",
       "primary_metric": "best EMA P1 within epochs 1-80",
-      "secondary_metrics": ["same-checkpoint P2", "EMA fixed epoch80", "mean", "standard deviation"],
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "EMA fixed epoch80",
+        "mean",
+        "standard deviation"
+      ],
       "acceptance": "both predeclared seeds complete with one checkpoint rule",
       "falsification": "seed uncertainty dominates the claimed effects",
       "stopping_rule": "do not select or replace seeds",
-      "dependencies": ["D-PM-BWD-0", "USER_CONFIRMATION"],
-      "artifacts": {"configs": ["configs/pose3d/repro_full_seed1_80e.yaml", "configs/pose3d/repro_full_seed2_80e.yaml"], "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"},
+      "dependencies": [
+        "D-PM-BWD-0",
+        "USER_CONFIRMATION"
+      ],
+      "artifacts": {
+        "configs": [
+          "configs/pose3d/repro_full_seed1_80e.yaml",
+          "configs/pose3d/repro_full_seed2_80e.yaml"
+        ],
+        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
+      },
       "result": null
     },
     {
@@ -154,15 +263,30 @@
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "train released A0 on MPI-INF-3DHP repaired protocol",
       "controls": "T81 protocol, joint mapping, data, loss, optimizer and fixed endpoint shared with M-FULL",
-      "seeds": [0],
+      "seeds": [
+        0
+      ],
       "budget": "120 epochs",
       "primary_metric": "EMA fixed epoch120 MPJPE",
-      "secondary_metrics": ["P-MPJPE", "PCK150", "AUC", "per-sequence"],
+      "secondary_metrics": [
+        "P-MPJPE",
+        "PCK150",
+        "AUC",
+        "per-sequence"
+      ],
       "acceptance": "valid locked endpoint",
       "falsification": "protocol or source mismatch",
       "stopping_rule": "technical invalidity only",
-      "dependencies": ["R-A0", "R-A2", "R-FULL", "USER_CONFIRMATION"],
-      "artifacts": {"config": "configs/pose3d_3dhp/posemamba_3dhp_w64_d6_m1_released_protocol_v2.yaml", "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"},
+      "dependencies": [
+        "R-A0",
+        "R-A2",
+        "R-FULL",
+        "USER_CONFIRMATION"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d_3dhp/posemamba_3dhp_w64_d6_m1_released_protocol_v2.yaml",
+        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
+      },
       "result": null
     },
     {
@@ -173,15 +297,28 @@
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "train Full on MPI-INF-3DHP repaired protocol",
       "controls": "T81 protocol, joint mapping, data, loss, optimizer and fixed endpoint shared with M-A0",
-      "seeds": [0],
+      "seeds": [
+        0
+      ],
       "budget": "120 epochs",
       "primary_metric": "EMA fixed epoch120 MPJPE",
-      "secondary_metrics": ["P-MPJPE", "PCK150", "AUC", "per-sequence"],
+      "secondary_metrics": [
+        "P-MPJPE",
+        "PCK150",
+        "AUC",
+        "per-sequence"
+      ],
       "acceptance": "valid locked endpoint",
       "falsification": "Full equals or underperforms released A0",
       "stopping_rule": "technical invalidity only",
-      "dependencies": ["M-A0", "USER_CONFIRMATION"],
-      "artifacts": {"config": "configs/pose3d_3dhp/graph_posemamba_3dhp_w64_d8_protocol_v2_memopt.yaml", "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"},
+      "dependencies": [
+        "M-A0",
+        "USER_CONFIRMATION"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d_3dhp/graph_posemamba_3dhp_w64_d8_protocol_v2_memopt.yaml",
+        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
+      },
       "result": null
     }
   ],
@@ -192,6 +329,16 @@
       "decision": "Implement only the two structural ablations, corrected backward diagnostic, paired repeats and two MPI configs in an isolated worktree; launch nothing and push nothing.",
       "evidence": "Explicit user prompt and successful code/CUDA/protocol preflight.",
       "rejected_alternatives": "No V2, hyperparameter search, graph search, extra losses, automatic queue or reinterpretation of existing results."
+    },
+    {
+      "id": "D-PAPER-20260906-LAUNCH",
+      "timestamp": "2026-09-06T00:52:50+08:00",
+      "decision": "Launch only E-RWG-0 now after R3 user stop and exclusive B4 preflight; remaining authorized queue stays serial.",
+      "evidence": "Dataset/source hashes verified, 800083 params, batch4 compiled finite loss, 2806 MiB reserved, frozen legacy optimizer confirmed."
     }
-  ]
+  ],
+  "execution_authorization": {
+    "time": "2026-09-06T00:49:26+08:00",
+    "scope": "Stop R3 immediately; start registered ablations, then continue authorized serial queue and GitHub synchronization. Overrides prior per-run confirmation requirements."
+  }
 }

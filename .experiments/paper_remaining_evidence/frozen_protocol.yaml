@@ -1,6 +1,6 @@
 study: paper_remaining_evidence
 scientific_implementation_commit: ad4e2fa66492737a3fcd88d9142a88731724f30b
-long_training_authorized: false
+long_training_authorized: true
 
 h36m:
   dataset: H36M-SH_xy_confidence_T243_S81

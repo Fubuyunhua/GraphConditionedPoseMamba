@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "source_commit": "1bb0a15b5308c440fcbd9952e485f59e983a089b",
+  "scientific_implementation": "ad4e2fa66492737a3fcd88d9142a88731724f30b",
+  "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+  "benchmark": {
+    "compiled": true,
+    "compile_mode": "reduce-overhead",
+    "cuda_graph": false,
+    "real_data": true,
+    "batch_size": 4,
+    "seed": 0,
+    "activation_checkpoint_blocks": false,
+    "linear_warmup_enabled": false,
+    "lr_schedule_mode": "legacy",
+    "min_lr_ratio": 0.0,
+    "optimizer_groups": [
+      {
+        "name": "decay",
+        "parameter_count": 800083,
+        "weight_decay": 0.012
+      }
+    ],
+    "warmup_steps": 0,
+    "optimizer_lr_after_steps": 0.0005,
+    "warmup_seconds": 30.04866431490518,
+    "warmup_peak_allocated_mib": 2596.99462890625,
+    "warmup_peak_reserved_mib": 2806.0,
+    "steps": 16,
+    "elapsed_seconds": 0.6260396561119705,
+    "milliseconds_per_step": 39.12747850699816,
+    "iterations_per_second": 25.55748640488409,
+    "measured_peak_allocated_mib": 16.11572265625,
+    "measured_peak_reserved_mib": 2806.0,
+    "loss": 0.4160293936729431,
+    "grad_norm_preclip": 0,
+    "grad_norm_max": 0,
+    "grad_clip_fraction": 0
+  },
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "time": "2026-09-05T16:52:48.317399+00:00",
+  "command": "python train.py --config configs/pose3d/ablation_full_rewired_graph.yaml --checkpoint runs/paper_remaining_evidence/full_rewired_graph_seed0 --seed 0"
+}

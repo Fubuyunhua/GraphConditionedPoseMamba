@@ -1,5 +1,5 @@
 run_id,track,question,config,seed,graph_seed,params,graph_mode,recurrence_scope,backward_mode,epochs,best_rule,fixed_rule,status,dependency
-E-RWG-0,ABLATION,Q2 topology,configs/pose3d/ablation_full_rewired_graph.yaml,0,3407,800083,degree_preserving_rewired,independent,n/a,80,best_ema_test_monitored_first80,ema_fixed_epoch80,PLANNED,USER_CONFIRMATION
+E-RWG-0,ABLATION,Q2 topology,configs/pose3d/ablation_full_rewired_graph.yaml,0,3407,800083,degree_preserving_rewired,independent,n/a,80,best_ema_test_monitored_first80,ema_fixed_epoch80,RUNNING,USER_CONFIRMATION
 E-NR-0,ABLATION,Q3 recurrence boundary,configs/pose3d/ablation_full_no_recurrence_reset_matched.yaml,0,,800083,anatomical,joined,n/a,80,best_ema_test_monitored_first80,ema_fixed_epoch80,PLANNED,USER_CONFIRMATION
 D-PM-BWD-0,DIAGNOSTIC,PoseMamba backward,configs/pose3d/diagnostic_posemamba_corrected_backward.yaml,0,,790083,n/a,n/a,exact,80,best_ema_test_monitored_first80,ema_fixed_epoch80,PLANNED,E-RWG-0;E-NR-0;USER_CONFIRMATION
 R-A0-1,DIAGNOSTIC,A0 repeatability,configs/pose3d/repro_a0_posemamba_seed1_80e.yaml,1,,790083,n/a,n/a,legacy,80,best_ema_test_monitored_first80,ema_fixed_epoch80,PLANNED,D-PM-BWD-0;USER_CONFIRMATION

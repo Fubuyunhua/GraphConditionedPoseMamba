@@ -1,3 +1,5 @@
+> **2026-09-06 update:** R3 stopped by user at 54/60; E-RWG-0 is RUNNING. The serial experiment queue and GitHub sync are authorized. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](../.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md). Earlier running-status and confirmation statements below are historical.
+
 # 论文大纲与主要创新点
 
 ## 论文题目

@@ -1,3 +1,5 @@
+> **2026-09-06 update:** R3 stopped by user at 54/60; E-RWG-0 is RUNNING. The serial experiment queue and GitHub sync are authorized. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md). Earlier running-status and confirmation statements below are historical.
+
 # GraphConditionedPoseMamba 研究交接
 
 > 2026-09-05更新：本文保留工程构建与核心代码交接。最新论文论点、A0/A1/A2/Full结果、

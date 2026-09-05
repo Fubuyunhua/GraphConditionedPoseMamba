@@ -3,7 +3,7 @@ A0-0,PoseMamba released,0,790083,60,40.22602202713938,33.51762634743647,80,,,COM
 A1-0,Factorized Only,0,749891,47,40.060496195688216,33.35652074135017,80,,,COMPLETED_EXISTING,fixed-80 checkpoint exists remotely but has not been replayed
 A2-0,Graph Feature Fusion,0,800083,52,40.05882593176248,33.287296461890385,80,,,COMPLETED_EXISTING,fixed-80 checkpoint exists remotely but has not been replayed
 A3-0,Full,0,800083,53,39.84516172662857,33.23224035987441,80,,,COMPLETED_EXISTING,fixed-80 checkpoint not saved; single seed and test monitored
-E-RWG-0,Full with Rewired Graph,0,800083,,,,80,,,NOT_RUN,
+E-RWG-0,Full with Rewired Graph,0,800083,,,,80,,,RUNNING,
 E-NR-0,Full w/o Recurrence Reset matched,0,800083,,,,80,,,NOT_RUN,
 D-PM-BWD-0,PoseMamba corrected backward,0,790083,,,,80,,,NOT_RUN,separate diagnostic; never merge with released A0 seeds
 R-A0-1,PoseMamba released,1,790083,,,,80,,,NOT_RUN,
