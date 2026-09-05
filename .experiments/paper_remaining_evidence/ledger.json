@@ -105,7 +105,7 @@
     {
       "id": "E-NR-0",
       "track": "ABLATION",
-      "status": "PLANNED",
+      "status": "RUNNING",
       "hypothesis": "resetting recurrence at frame and joint-trajectory boundaries improves accuracy",
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "recurrence_scope independent to joined after identical local projection and Conv1D",
@@ -134,7 +134,14 @@
       "artifacts": {
         "config": "configs/pose3d/ablation_full_no_recurrence_reset_matched.yaml",
         "preflight": ".experiments/paper_remaining_evidence/results/E-NR-0/PREFLIGHT_PASS.json",
-        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
+        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b",
+        "deployment_source": "git:e537128ffde548b8d2232d4b49165d5095868527",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_NORESET_20260906",
+        "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_NORESET_20260906/runs/paper_remaining_evidence/full_no_recurrence_reset_matched_seed0_2026_09_06_T_05_46_15",
+        "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_NORESET_20260906/launch_logs/no_reset_seed0.log",
+        "train_pid": 1100140,
+        "launcher_pid": 1100118,
+        "launch_time": "2026-09-06T05:46:15+08:00"
       },
       "result": null
     },

@@ -1,4 +1,4 @@
-> **2026-09-06 update:** R3 stopped by user at 54/60. E-RWG-0 completed with best EMA `40.416912/33.822350 mm`, `+0.571750 mm` P1 worse than anatomical Full for seed0. E-NR-0 passed its real-data B4 gate and is next in the authorized serial queue. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](../.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md). Earlier status statements below are historical.
+> **2026-09-06 update:** R3 stopped by user at 54/60. E-RWG-0 completed with best EMA `40.416912/33.822350 mm`, `+0.571750 mm` P1 worse than anatomical Full for seed0. E-NR-0 passed its real-data B4 gate and began formal 80-epoch training at 05:46:15. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](../.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md). Earlier status statements below are historical.
 
 # 论文大纲与主要创新点
 
@@ -239,7 +239,7 @@ W256/D16 R1/R2因优化震荡无效；R3按用户要求在54/60停止，部分�
 |---|---|---|---|
 | 条件化注入优于普通融合 | A2 vs Full，seed0/1/2 | seed0已有 | 降低核心机制精度主张 |
 | 真实拓扑有价值 | Full vs Rewired | seed0支持：Rewired P1差0.5718 mm；仍是单seed | 改称一般关系上下文 |
-| reset边界有价值 | Full vs matched no-reset | B4门禁通过，等待/进入正式训练 | 降为组织方式 |
+| reset边界有价值 | Full vs matched no-reset | B4门禁通过；E-NR-0正式训练中 | 降为组织方式 |
 | 整体优于PoseMamba | released A0、corrected诊断、多seed | seed0及诊断预检已有 | 限定适用设置 |
 | 不限于H36M | MPI released A0 vs Full | 协议/CUDA预检通过 | 不写第二数据集提升 |
 | 更高运行效率 | 独占GPU同条件测量 | 未完成 | 只说紧凑/参数效率 |

@@ -1,4 +1,4 @@
-> **2026-09-06 update:** R3 was stopped by user at 54/60. E-RWG-0 completed 80/80 with best EMA `40.416912/33.822350 mm`; the rewired graph is `+0.571750 mm` P1 worse than anatomical Full for seed0. E-NR-0 passed its joined-length-4,131 B4 gate and is next in the authorized serial queue. GitHub sync is authorized. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md). Earlier running-status and confirmation statements below are historical.
+> **2026-09-06 update:** R3 was stopped by user at 54/60. E-RWG-0 completed 80/80 with best EMA `40.416912/33.822350 mm`; the rewired graph is `+0.571750 mm` P1 worse than anatomical Full for seed0. E-NR-0 passed its joined-length-4,131 B4 gate and began formal 80-epoch training at 05:46:15. GitHub sync and the remaining serial queue are authorized. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md). Earlier running-status and confirmation statements below are historical.
 
 # GraphConditionedPoseMamba 研究接手文档
 

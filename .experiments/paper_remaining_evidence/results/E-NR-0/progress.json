@@ -1,0 +1,12 @@
+{
+  "status": "RUNNING",
+  "completed_epochs": 0,
+  "budget": 80,
+  "launch_time": "2026-09-06T05:46:15+08:00",
+  "launcher_pid": 1100118,
+  "train_pid": 1100140,
+  "run_directory": "/scratch/home/caiwei/GraphConditionedPoseMamba_NORESET_20260906/runs/paper_remaining_evidence/full_no_recurrence_reset_matched_seed0_2026_09_06_T_05_46_15",
+  "first_trace_iterations_per_second": 34.3,
+  "immediate_error_matches": 0,
+  "interpretation": "Compilation completed and formal epoch 1 is running; no accuracy conclusion."
+}
