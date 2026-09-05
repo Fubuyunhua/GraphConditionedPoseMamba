@@ -39,7 +39,7 @@
     {
       "id": "E-RWG-0",
       "track": "ABLATION",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "hypothesis": "anatomical topology is more useful than a fixed degree-preserving non-anatomical graph",
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "graph_topology_mode anatomical to degree_preserving_rewired with graph seed 3407",
@@ -75,9 +75,32 @@
         "train_pid": 1096370,
         "launcher_pid": 1096349,
         "launch_time": "2026-09-06T00:52:50+08:00",
-        "deployment_source": "git:1bb0a15b5308c440fcbd9952e485f59e983a089b"
+        "deployment_source": "git:1bb0a15b5308c440fcbd9952e485f59e983a089b",
+        "checkpoint_audit": ".experiments/paper_remaining_evidence/results/E-RWG-0/checkpoint_audit.json",
+        "analysis": ".experiments/paper_remaining_evidence/results/E-RWG-0/analysis.md",
+        "remote_verification": "/scratch/home/caiwei/GraphConditionedPoseMamba_REWIRED_20260906/verification/E-RWG-0-final"
       },
-      "result": null
+      "result": {
+        "completed_epochs": 80,
+        "natural_exit_code": 0,
+        "best_epoch": 41,
+        "best_ema_p1_mm": 40.41691211147642,
+        "best_ema_p2_mm": 33.82234998475077,
+        "best_raw_p1_mm": 41.04911499053557,
+        "best_raw_p2_mm": 33.941162942118005,
+        "fixed_epoch": 80,
+        "fixed_ema_p1_mm": 40.716591533290476,
+        "fixed_ema_p2_mm": 33.61119421630749,
+        "fixed_raw_p1_mm": 41.82673640267283,
+        "fixed_raw_p2_mm": 33.60659540608856,
+        "delta_vs_anatomical_full_best_p1_mm": 0.57175038484785,
+        "delta_vs_anatomical_full_paired_p2_mm": 0.59010962487636,
+        "optimizer_steps": 354960,
+        "ema_updates": 354960,
+        "peak_reserved_mib": 3034,
+        "mean_epoch_minutes": 2.906,
+        "recommendation": "KEEP"
+      }
     },
     {
       "id": "E-NR-0",
@@ -105,11 +128,12 @@
       "stopping_rule": "technical invalidity only; valid unfavorable results are retained",
       "dependencies": [
         "E-RWG-0",
-        "USER_CONFIRMATION"
+        "USER_AUTHORIZATION_20260906",
+        "NO_RESET_B4_PASS_20260906"
       ],
       "artifacts": {
         "config": "configs/pose3d/ablation_full_no_recurrence_reset_matched.yaml",
-        "preflight": ".experiments/paper_remaining_evidence/preflight_results.json",
+        "preflight": ".experiments/paper_remaining_evidence/results/E-NR-0/PREFLIGHT_PASS.json",
         "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
       },
       "result": null

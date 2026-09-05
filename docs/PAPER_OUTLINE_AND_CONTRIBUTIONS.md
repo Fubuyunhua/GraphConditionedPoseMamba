@@ -1,4 +1,4 @@
-> **2026-09-06 update:** R3 stopped by user at 54/60; E-RWG-0 is RUNNING. The serial experiment queue and GitHub sync are authorized. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](../.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md). Earlier running-status and confirmation statements below are historical.
+> **2026-09-06 update:** R3 stopped by user at 54/60. E-RWG-0 completed with best EMA `40.416912/33.822350 mm`, `+0.571750 mm` P1 worse than anatomical Full for seed0. E-NR-0 passed its real-data B4 gate and is next in the authorized serial queue. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](../.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md). Earlier status statements below are historical.
 
 # 论文大纲与主要创新点
 
@@ -223,22 +223,23 @@ H36M到MPI零样本泛化。
 | Factorized Only A1 | 749,891 | 47 | 40.0605 | 33.3565 |
 | Graph Feature Fusion A2 | 800,083 | 52 | 40.0588 | 33.2873 |
 | Full A3 | 800,083 | 53 | 39.8452 | 33.2322 |
+| Full with Rewired Graph | 800,083 | 41 | 40.4169 | 33.8223 |
 
 Full相对A0的观察差值为0.3809 mm，相对A2为0.2137 mm。这些差异尚不能称为稳定或统计
 显著。固定epoch120下Full为40.9894/33.3666，A0为40.4098/33.3151，Full没有优势，必须
 与best口径同时披露。
 
 尺度探索不是核心消融：W128/D20在65/80按用户要求取消，部分最佳为37.6593/31.8717；
-W256/D16 R1/R2因优化震荡无效；R3在本快照完成26/60轮，当前最佳37.8653/31.8041，仍是
-运行中结果，不能进入论文最终表。
+W256/D16 R1/R2因优化震荡无效；R3按用户要求在54/60停止，部分最佳为
+37.4302/31.5206，不能作为完整60轮结果。
 
 ## 6. 剩余证据
 
 | 主张 | 必需证据 | 当前状态 | 不支持时处理 |
 |---|---|---|---|
 | 条件化注入优于普通融合 | A2 vs Full，seed0/1/2 | seed0已有 | 降低核心机制精度主张 |
-| 真实拓扑有价值 | Full vs Rewired | 代码预检通过，未训练 | 改称一般关系上下文 |
-| reset边界有价值 | Full vs matched no-reset | 代码预检通过，未训练 | 降为组织方式 |
+| 真实拓扑有价值 | Full vs Rewired | seed0支持：Rewired P1差0.5718 mm；仍是单seed | 改称一般关系上下文 |
+| reset边界有价值 | Full vs matched no-reset | B4门禁通过，等待/进入正式训练 | 降为组织方式 |
 | 整体优于PoseMamba | released A0、corrected诊断、多seed | seed0及诊断预检已有 | 限定适用设置 |
 | 不限于H36M | MPI released A0 vs Full | 协议/CUDA预检通过 | 不写第二数据集提升 |
 | 更高运行效率 | 独占GPU同条件测量 | 未完成 | 只说紧凑/参数效率 |

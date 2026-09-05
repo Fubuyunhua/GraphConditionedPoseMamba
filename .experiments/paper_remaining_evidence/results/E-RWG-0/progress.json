@@ -1,12 +1,19 @@
 {
-  "status": "RUNNING",
-  "completed_epochs": 1,
+  "status": "COMPLETED",
+  "completed_epochs": 80,
   "budget": 80,
-  "train_pid": 1096370,
-  "time": "2026-09-06T00:56:32+08:00",
-  "loss": 0.06511,
-  "ema_p1": 299.544239,
-  "paired_ema_p2": 154.210676,
-  "checkpoint_save_observed": true,
-  "interpretation": "Initialization-stage metrics; no ablation conclusion"
+  "natural_exit_code": 0,
+  "completion_time": "2026-09-06T05:08:55+08:00",
+  "best_epoch": 41,
+  "best_ema_p1_mm": 40.41691211147642,
+  "best_ema_p2_mm": 33.82234998475077,
+  "fixed_epoch": 80,
+  "fixed_ema_p1_mm": 40.716591533290476,
+  "fixed_ema_p2_mm": 33.61119421630749,
+  "final_loss": 0.009816,
+  "optimizer_steps": 354960,
+  "ema_updates": 354960,
+  "mean_epoch_minutes": 2.906,
+  "peak_reserved_mib": 3034,
+  "error_matches": 0
 }

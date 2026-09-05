@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "time": "2026-09-06T05:39:37+08:00",
+  "scientific_implementation": "ad4e2fa66492737a3fcd88d9142a88731724f30b",
+  "config": "configs/pose3d/ablation_full_no_recurrence_reset_matched.yaml",
+  "config_sha256": "86d9d2c3188b1275b1fe9c624984e5402939c485d6ee4faf91ffc67670741af6",
+  "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+  "model": {"parameters": 800083, "recurrence_scope": "joined", "scan_length": 4131, "batch_size": 4, "compiled": true},
+  "benchmark": {
+    "real_data": true,
+    "finite_loss": 0.8273336887359619,
+    "warmup_peak_allocated_mib": 2565.61328125,
+    "warmup_peak_reserved_mib": 2750.0,
+    "measured_peak_allocated_mib": 2513.66796875,
+    "measured_peak_reserved_mib": 2752.0,
+    "iterations_per_second": 12.320790555905294,
+    "linear_warmup_enabled": false,
+    "optimizer_lr_after_steps": 0.0005,
+    "weight_decay": 0.012,
+    "grad_clip_fraction": 0.0
+  }
+}
