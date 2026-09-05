@@ -18,7 +18,9 @@
     "source_identity": "git:e3b89920090816b0a0a8f1b5f76db49b10800b5e",
     "command": "scripts/run_w256_d16_60e.sh",
     "environment": "RTX5090; PyTorch 2.11.0+cu128; FP32",
-    "seed_policy": [0]
+    "seed_policy": [
+      0
+    ]
   },
   "audit": {
     "verdict": "PASS",
@@ -40,14 +42,24 @@
       "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
       "delta": "width 256, depth 16, registered budget 60 epochs",
       "controls": "model mechanisms, data, batch, optimizer, loss, EMA, augmentation and evaluator frozen",
-      "seeds": [0],
+      "seeds": [
+        0
+      ],
       "budget": "60 epochs",
       "primary_metric": "best EMA P1 within epochs 1-60",
-      "secondary_metrics": ["same-checkpoint P2", "raw P1/P2", "VRAM", "it/s", "wall time"],
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "raw P1/P2",
+        "VRAM",
+        "it/s",
+        "wall time"
+      ],
       "acceptance": "P1 <= 39.7452 mm after a valid complete run",
       "falsification": "valid complete P1 > 39.8452 mm",
       "stopping_rule": "stop only on invalid execution",
-      "dependencies": ["D16-STAGED-PREFLIGHT"],
+      "dependencies": [
+        "D16-STAGED-PREFLIGHT"
+      ],
       "artifacts": {
         "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_scale_60e.yaml",
         "parameters": 20192451,
@@ -76,7 +88,10 @@
         },
         "uncertainty": "causal attribution to warmup requires revised-run evidence",
         "cost": "three completed diagnostic epochs",
-        "failures": ["configured warmup was inactive", "finite early optimization overshoot"],
+        "failures": [
+          "configured warmup was inactive",
+          "finite early optimization overshoot"
+        ],
         "recommendation": "MODIFY_AND_RESTART_NEW_RUN"
       }
     },
@@ -88,14 +103,24 @@
       "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
       "delta": "same D16 model and 60-epoch protocol; enable true 8-epoch linear warmup and max_grad_norm=1.0",
       "controls": "model, data, batch, target LR, losses, EMA, augmentation and evaluator unchanged",
-      "seeds": [0],
+      "seeds": [
+        0
+      ],
       "budget": "60 epochs",
       "primary_metric": "best EMA P1 within epochs 1-60",
-      "secondary_metrics": ["same-checkpoint P2", "raw P1/P2", "pre-clip grad norm", "VRAM", "it/s"],
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "raw P1/P2",
+        "pre-clip grad norm",
+        "VRAM",
+        "it/s"
+      ],
       "acceptance": "finite staged smoke and valid complete P1 <= 39.7452 mm",
       "falsification": "repeated early loss/P1 overshoot or valid complete P1 > 39.8452 mm",
       "stopping_rule": "stop on non-finite gradient, OOM, runtime error or repeated diagnosed early instability",
-      "dependencies": ["D16-R2-PREFLIGHT"],
+      "dependencies": [
+        "D16-R2-PREFLIGHT"
+      ],
       "artifacts": {
         "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_scale_60e.yaml",
         "parameters": 20192451,
@@ -135,19 +160,33 @@
     {
       "id": "D16-W256-D16-60E-R3",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "CANCELLED",
       "hypothesis": "lower smooth optimizer pressure and intended SSM no-decay grouping prevent finite whole-model excursions while preserving W256/D16 accuracy capacity",
       "baseline_id": "A3-FULL-GCPM-W64-D8-SEED0",
       "delta": "fresh W256/D16 run; peak LR 3e-4, eight-epoch linear warmup, per-step cosine decay to 3e-5, honor explicit no-weight-decay markers, add update and gradient telemetry",
       "controls": "architecture, H36M-SH data, batch 4, seed 0, 60 epochs, losses, augmentation, EMA, clipping and evaluator unchanged from R2",
-      "seeds": [0],
+      "seeds": [
+        0
+      ],
       "budget": "60 epochs",
       "primary_metric": "best EMA P1 within epochs 1-60",
-      "secondary_metrics": ["same-checkpoint P2", "raw P1/P2", "W128 curve", "parameter update relative L2", "maximum gradient norm", "clip fraction", "VRAM", "it/s"],
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "raw P1/P2",
+        "W128 curve",
+        "parameter update relative L2",
+        "maximum gradient norm",
+        "clip fraction",
+        "VRAM",
+        "it/s"
+      ],
       "acceptance": "valid complete P1 <= 39.7452 mm; accuracy target P1 < 37.6593 mm",
       "falsification": "another finite optimizer collapse or valid complete P1 > 39.8452 mm",
       "stopping_rule": "no agent-initiated interruption under the user's explicit instruction; monitor and report only, and do not retry if the program exits on its own",
-      "dependencies": ["D16-R3-REAUDIT", "D16-R3-STAGED-PREFLIGHT"],
+      "dependencies": [
+        "D16-R3-REAUDIT",
+        "D16-R3-STAGED-PREFLIGHT"
+      ],
       "artifacts": {
         "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_stable_r3_60e.yaml",
         "parameters": 20192451,
@@ -155,14 +194,39 @@
         "preflight": ".experiments/w256_d16_60e_20260904/PRELAUNCH_PASS_R3.json",
         "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_R3_60e_20260905/launch_logs/D16_R3_stable_164830.log",
         "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_R3_60e_20260905/runs/w256_d16_r3_60e/D16_w256_d16_stable_r3_seed0_2026_09_05_T_00_48_32",
-        "results": null,
+        "results": ".experiments/w256_d16_60e_20260904/results/D16-W256-D16-60E-R3/analysis.md",
         "source": "git:0e23c5d01eb5e6c81c66bc17a621d38787e7c46d",
         "environment": "RTX5090; PyTorch 2.11.0+cu128; FP32",
         "training_log_document": ".experiments/w256_d16_60e_20260904/training_log_r3.md",
         "queue_pid": 713220,
         "train_pid": 713242
       },
-      "result": null
+      "result": {
+        "completion_validity": "USER_CANCELLED_AFTER_54_OF_60",
+        "metrics": {
+          "best": {
+            "epoch": 32,
+            "train_minutes": 26.65,
+            "lr": 0.000181,
+            "loss": 0.008266,
+            "ema_p1": 37.430162,
+            "ema_p2": 31.520564,
+            "grad_norm": 0.907351
+          },
+          "last": {
+            "epoch": 54,
+            "train_minutes": 23.15,
+            "lr": 3.9e-05,
+            "loss": 0.005076,
+            "ema_p1": 37.913791,
+            "ema_p2": 31.753892,
+            "grad_norm": 0.396324
+          }
+        },
+        "uncertainty": "single seed; test-monitored selection and early termination",
+        "failures": [],
+        "recommendation": "KEEP_PARTIAL_EVIDENCE_PRIORITIZE_ABLATIONS"
+      }
     }
   ],
   "decisions": [
@@ -221,6 +285,12 @@
       "decision": "Make all R3 monitoring observation-only and prohibit any autonomous process interruption, restart or configuration change.",
       "evidence": "The user explicitly instructed that this experiment must not be autonomously interrupted.",
       "rejected_alternatives": "Do not translate metric, gradient, OOM or runtime observations into agent-issued process signals; only report a natural program exit."
+    },
+    {
+      "id": "D-D16-009",
+      "timestamp": "2026-09-06T00:49:26+08:00",
+      "decision": "User explicitly requested immediate stop and start ablations; overrides prior no-interruption instruction. Preserve checkpoints; no resume.",
+      "evidence": "54 completed epochs; best epoch32; persistent train/test divergence."
     }
   ]
 }

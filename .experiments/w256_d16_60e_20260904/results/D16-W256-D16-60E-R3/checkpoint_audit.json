@@ -1,0 +1,35 @@
+{
+  "status": "CANCELLED",
+  "reason": "Explicit user requested stop R3 and start ablations",
+  "time": "2026-09-06T00:49:26+08:00",
+  "checkpoints": {
+    "best_epoch.bin": {
+      "epoch": 32,
+      "finite": true,
+      "sha256": "a5c8c34d9dd32622aae75e9ce4d87bc50a99b54c463cf3c8129df8d3e3e3c66d",
+      "bytes": 324011449,
+      "optimizer_present": true
+    },
+    "best_ema_epoch.bin": {
+      "epoch": 32,
+      "finite": true,
+      "sha256": "c2175c027329e2d323bba5ceb3e613d2391f8dbf48a9e5cf6477eaf83bce7c7f",
+      "bytes": 243059713,
+      "optimizer_present": true
+    },
+    "latest_epoch.bin": {
+      "epoch": 54,
+      "finite": true,
+      "sha256": "209b126967775d583eb162628cdd04aa711e72cc9f6d302e345f9685007b76a8",
+      "bytes": 324017749,
+      "optimizer_present": true
+    },
+    "latest_ema_epoch.bin": {
+      "epoch": 54,
+      "finite": true,
+      "sha256": "0d23e4fd7f906cb33bef7e77946bca7d34cb34f49d33258896e338bb0af88ec2",
+      "bytes": 243064781,
+      "optimizer_present": true
+    }
+  }
+}
