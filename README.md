@@ -35,7 +35,8 @@ Human3.6M 2D-to-3D pose lifting.
 面向研究接手的完整状态见[RESEARCH_HANDOFF.md](RESEARCH_HANDOFF.md)，工程交接见
 [HANDOFF.md](HANDOFF.md)，结构差异见
 [docs/POSEMAMBA_CHANGES.md](docs/POSEMAMBA_CHANGES.md)，显存、CUDA Graph和低显存推理见
-[docs/VRAM_AND_INFERENCE.md](docs/VRAM_AND_INFERENCE.md)。
+[docs/VRAM_AND_INFERENCE.md](docs/VRAM_AND_INFERENCE.md)。论文中心论点、章节结构、证据边界
+和图表安排见[论文大纲](docs/PAPER_OUTLINE_AND_CONTRIBUTIONS.md)。
 
 ## 仓库内容
 

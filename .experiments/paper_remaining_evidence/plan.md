@@ -1,5 +1,9 @@
 # Remaining paper evidence plan
 
+Paper structure and claim boundaries are maintained in
+`docs/PAPER_OUTLINE_AND_CONTRIBUTIONS.md`; current operational state is in
+`RESEARCH_HANDOFF.md`.
+
 The implementation is isolated from the running R3 experiment. No long run and
 no remote push are authorized by this preparation task.
 
@@ -18,4 +22,3 @@ epoch-120 endpoint and does not monitor its test set per epoch.
 
 No graph search, seed search, V2 model, extra loss, MoE, frequency module,
 additional detector or automatic queue expansion is permitted.
-

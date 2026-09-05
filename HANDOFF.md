@@ -1,5 +1,10 @@
 # GraphConditionedPoseMamba 研究交接
 
+> 2026-09-05更新：本文保留工程构建与核心代码交接。最新论文论点、A0/A1/A2/Full结果、
+> W128/D16状态、剩余消融和执行权限以[`RESEARCH_HANDOFF.md`](RESEARCH_HANDOFF.md)及
+> [论文大纲](docs/PAPER_OUTLINE_AND_CONTRIBUTIONS.md)为准。论文证据代码目前仅在本地隔离
+> 分支，尚未push；远程D16 R3不得自主中断。
+
 完整研究背景、正式实验进度、显存分析和后续优先级同时维护在
 [`RESEARCH_HANDOFF.md`](RESEARCH_HANDOFF.md)。本文更偏重代码与环境交接。
 

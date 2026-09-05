@@ -1,370 +1,233 @@
 # GraphConditionedPoseMamba 研究接手文档
 
-> 快照时间：2026-09-02 13:13 UTC<br>
-> 仓库：`Fubuyunhua/GraphConditionedPoseMamba`（private）<br>
-> 研究状态：实现与工程验收完成；Human3.6M seed0 正式训练进行中；最终精度结论未形成。
+> 快照时间：2026-09-05 12:05（Asia/Shanghai）<br>
+> GitHub：`Fubuyunhua/GraphConditionedPoseMamba`（private）<br>
+> 当前远程实验分支：`codex/minimal-ablation-80e-20260903`<br>
+> 论文证据本地分支：`codex/paper-remaining-evidence-20260905`（未push）
 
-本文供下一位研究者直接接手。它记录当前研究问题、模型实现、训练协议、实验进度、工程证据、
-已知风险和下一步优先级。不要把本文中的中途指标写成论文最终结果。
+本文记录当前论文论点、实现身份、历史结果、运行中实验、剩余证据和接手顺序。完整论文结构
+见[论文大纲](docs/PAPER_OUTLINE_AND_CONTRIBUTIONS.md)，工程安装与CUDA构建仍参考
+[HANDOFF.md](HANDOFF.md)。
 
 ## 1. 一句话状态
 
-当前模型是一个 **Graph-Conditioned Factorized BiSSM PoseMamba**：固定人体骨架图建模局部
-拓扑，逐帧 Spatial BiSSM 建模单帧全局关节依赖，逐关节 Temporal BiSSM 建模长时轨迹，
-并只用 graph context 生成 selective SSM 的 `Delta/B/C`。主配置为 W64/D8、800,083 参数、
-batch 4、243 帧。正式 seed0 已完成65次评估，尚未完成120 epoch。
+W64/D8 GraphConditionedPoseMamba的seed0、A1和A2已完成，当前核心观察为Full
+`39.8452/33.2322 mm`。论文尚缺真实拓扑、匹配递推边界、多seed和第二数据集结果。
+对应代码与配置已在隔离worktree完成预检，但没有push，也没有启动长训练。并行的W256/D16
+R3属于尺度/优化诊断，仍在5090运行，不是论文核心消融。
 
-## 2. 研究目标与硬约束
+## 2. 仓库与分支身份
 
-唯一目标：在保持已经验证的 PoseMamba 训练策略、数据处理、loss、augmentation、EMA、
-optimizer 和 Human3.6M evaluation protocol 不变的条件下，只修改 PoseMamba backbone，争取
-降低 MPJPE。
-
-明确不研究、也不应重新加入：
-
-- ReliPose observation-risk；
-- dual-frequency 或 low/high-pass branch；
-- coarse temporal branch、stride-3 branch、temporal downsampling；
-- dynamic reliability/confidence/risk/frequency gate；
-- MoE、多尺度动态routing、新prediction head或新loss。
-
-第一版固定使用真实 Human3.6M skeleton bone edges和6组左右对称edges，不使用fully-connected
-dynamic graph或复杂attention。`gamma_s/gamma_t`均从1初始化，不使用zero-init或sigmoid gate。
-
-## 3. 核心研究假设
-
-原PoseMamba将`X [B,T,J,C]`作为一个二维规则网格并flatten scan，可能形成不属于真实人体
-时空图的状态转移：
+远程GitHub目前是线性继承的三个分支：
 
 ```text
-joint16(frame t) -> joint0(frame t+1)
-last frame(joint j) -> first frame(joint j+1)
+main (14216cc)
+  -> codex/memory-opt-5090-20260902 (6e60b78)
+     -> codex/minimal-ablation-80e-20260903 (a931525 at paper-worktree creation)
 ```
 
-其3x3 DWConv还把joint index邻近误当成骨骼空间邻近。新模型的职责拆分是：
+论文证据代码在独立本地worktree：
 
 ```text
-真实局部骨架拓扑           -> SkeletonGraphMixer
-单帧内全局joint dependency -> Spatial BiSSM
-单joint长时trajectory       -> Temporal BiSSM
-状态写入/遗忘/读取参数       -> graph-conditioned Delta/B/C
+D:\gpu5090\GraphConditionedPoseMamba-paper-evidence
+branch: codex/paper-remaining-evidence-20260905
+implementation: ad4e2fa
+records: 4d736c6
 ```
 
-该假设是否降低最终MPJPE仍必须由完成后的正式配对实验回答。
+提示词依据提交`3fac1a4`，实际创建worktree时HEAD为`a931525`；差异只有R3日志同步，没有
+模型源码或冻结配置变化。不得把本地论文分支误称为已经发布到GitHub。
 
-## 4. 模型数据流
+## 3. 论文中心问题
 
-输入与输出：
+GraphConditionedPoseMamba研究结构信息进入选择性状态空间计算的位置，而不是简单增加图特征：
 
 ```text
-input      [B,T,17,3]   # x, y, confidence
+content U, output gate Z <- current pose feature H
+Delta/B/C                <- H + GraphMixer(H)
+```
+
+三个问题分别由以下证据回答：
+
+1. 注入位置：Graph Feature Fusion A2 vs Full A3。
+2. 图内容：Anatomical Full vs Full with Rewired Graph。
+3. 递推边界：Full vs参数匹配的Full w/o Recurrence Reset。
+
+`SkeletonGraphMixer`是上下文编码器，不单独宣传成全新GNN。时空factorization是互补设计，
+不宣称首次提出。ReliPose风险、频率分解、MoE、额外loss和D16优化器不是本文主贡献。
+
+## 4. Full模型数据流
+
+输入输出：
+
+```text
+input      [B,T,17,3]  # x,y,confidence
 embedding  [B,T,17,64]
 prediction [B,T,17,3]
 ```
 
-每个`GraphConditionedPoseBlock`执行：
+每个block：
 
 ```text
-z_s = LN_s(x) + E_joint
-G_s = GraphMixer(z_s)
-s   = SpatialBiSSM(z_s, context=z_s + graph_scale * G_s)
-x   = x + gamma_s * s
-
-z_t = LN_t(x) + E_time
-t   = TemporalBiSSM(z_t, context=z_t + graph_scale * reused_G_s)
-x   = x + gamma_t * t
-
-x   = x + MLP(LN_mlp(x))
+H_s   = LN_s(H) + E_joint
+G     = GraphMixer(H_s)
+H_mid = H + gamma_s * SpatialBiSSM(H_s ; H_s + graph_scale*G)
+H_t   = LN_t(H_mid) + E_time
+H_tmp = H_mid + gamma_t * TemporalBiSSM(H_t ; H_t + graph_scale*G)
+H_out = H_tmp + MLP(LN_m(H_tmp))
 ```
 
-Spatial factorization：
+空间`[B,T,J,C]->[B*T,1,J,C]`，每帧独立；时间
+`[B,T,J,C]->[B*J,1,T,C]`，每条关节轨迹独立。两者均为真正K=2正反向scan。空间
+`d_conv=1`，时间为逐关节Conv1D `d_conv=3`。时间阶段复用同一block空间阶段得到的`G`。
+
+## 5. 已完成H36M结果
+
+以下均为单seed、逐轮监测H36M测试集得到的最佳EMA，P2来自同一checkpoint：
+
+| Variant | Params | Best epoch | EMA P1 | Paired P2 | 状态 |
+|---|---:|---:|---:|---:|---|
+| A0 PoseMamba released | 790,083 | 60 | 40.2260 | 33.5176 | 完成120轮 |
+| A1 Factorized Only | 749,891 | 47 | 40.0605 | 33.3565 | 完成80轮 |
+| A2 Graph Feature Fusion | 800,083 | 52 | 40.0588 | 33.2873 | 完成80轮 |
+| A3 Full | 800,083 | 53 | 39.8452 | 33.2322 | 完成120轮 |
+
+当前观察：Full比A0低0.3809 mm，比A2低0.2137 mm。差异很小，未做完整multi-seed前不能称为
+稳定或统计显著。
+
+固定epoch120 EMA：A0为`40.4098/33.3151`，Full为`40.9894/33.3666`，Full没有优势。
+因此必须分开报告“测试监测best”和“固定终点”。A0/Full没有保存epoch80权重，不能补造
+`ema_fixed_epoch80`；A1/A2的epoch80 EMA文件存在，但尚未重放固定终点指标。
+
+## 6. 实际80轮协议
 
 ```text
-[B,T,J,C] -> [B*T,1,J,C]
-batch4时  -> [972,1,17,64]
+dataset              H36M-SH xy+confidence, T243/S81
+dataset sha256        73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175
+train samples         17,748
+batch / steps         4 / 4,437 per epoch
+optimizer             AdamW
+LR / WD / decay       5e-4 / 0.012 / 0.99 per epoch
+effective warmup      disabled
+epochs / steps        80 / 354,960
+EMA decay / updates   0.9998 / 354,960
+loss                  position 1 + scale 0.5 + velocity 20 + difference 0.5
+best rule             best_ema_test_monitored_first80
+fixed rule            ema_fixed_epoch80
 ```
 
-每个frame是独立selective-scan sample，正向`j0...j16`，反向`j16...j0`，state不会跨frame。
-Spatial local topology已交给GraphMixer，所以`d_conv=1`。
+历史YAML含`warmup_epochs: 8`，但训练入口没有启用warmup。新增匹配配置明确写
+`enable_linear_warmup: false`，以保持实际协议，而不是采用D16 R3的新优化器。
 
-Temporal factorization：
+## 7. 论文证据实现
+
+### 7.1 Full with Rewired Graph
+
+配置：`configs/pose3d/ablation_full_rewired_graph.yaml`。
+
+- seed3407独立RNG固定生成，不消耗模型/数据全局RNG。
+- 骨骼16边、对称6边，节点度数分别保持，骨骼图连通。
+- 无自环、重复边，所有层共享同一图。
+- 图SHA256：`f9037c7265d94ba73c5941fc3070dec76cd022e8c302d141543e94c85627efad`。
+- 参数量与Full相同：800,083。
+
+### 7.2 Full w/o Recurrence Reset — matched
+
+配置：`configs/pose3d/ablation_full_no_recurrence_reset_matched.yaml`。
+
+局部Conv1D、输入/context投影、u、Delta/B/C和z先按Full计算，再连接scan：
 
 ```text
-[B,T,J,C] -> [B*J,1,T,C]
-batch4时  -> [68,1,243,64]
+spatial [B*T,2,D,J] -> [B,2,D,T*J]
+temporal [B*J,2,D,T] -> [B,2,D,J*T]
 ```
 
-每个joint是独立trajectory，正向`t0...t242`，反向`t242...t0`，state不会跨joint。时间局部邻域
-真实存在，因此使用Conv1D `d_conv=3`。
+T243/J17时scan长度为4,131。K=2、参数名/形状/数量、图、loss和训练协议均不变。旧1.028M
+K4 coupled版本保留为旧预检，不是这一消融。
 
-Graph-conditioned selective dynamics保持：
+### 7.3 PoseMamba corrected backward
+
+历史A0源码已确认：前向含`x+x[...,indices]`，backward遗漏索引路径的`P^Tg`。新增
+`posemamba_backward_mode: legacy|exact`，默认legacy；exact只补齐导数，不改变前向、K4、
+CrossMerge和CUDA scan。两者均为790,083参数，历史权重可严格加载；exact重放仍为
+`40.226022/33.517626 mm`。corrected结果必须作为独立诊断，不能与released A0混成多seed。
+
+### 7.4 重复性与MPI
+
+- A0、A2、Full的seed1/2配置已生成。
+- MPI预注册baseline为released PoseMamba W64/D6/M1，不在看到结果后切换corrected身份。
+- MPI使用已审计T81、stride9、2,875个有效测试中心、固定epoch120协议。
+- 两个MPI模型的协议和B4 CUDA forward/backward已通过。
+
+## 8. 预检状态
+
+- 47项CPU/CUDA单元测试通过。
+- Rewired、matched no-reset、corrected A0真实H36M单步通过。
+- Rewired/No-reset均为800,083参数；corrected A0为790,083。
+- 默认Full相对未修改源码：预测/loss逐位一致；梯度差在CUDA重复运行噪声内。
+- 历史Full与A0 checkpoint严格加载；完整评估口径保持。
+- 新H36M训练会显式保存`raw_fixed_epoch80.bin`和`ema_fixed_epoch80.bin`。
+- 独占GPU正式速度/FLOPs尚未测；并发smoke计时不能用于论文。
+- 所有新长训练均为`NOT_RUN`，等待用户逐个确认。
+
+详细记录：`.experiments/paper_remaining_evidence/check_report.md`、`ledger.json`、
+`experiment_registry.csv`和`results.csv`。
+
+## 9. 当前尺度实验状态
+
+远程唯一GraphConditionedPoseMamba长训练是W256/D16 R3：
 
 ```text
-u = encode(x)
-context = x + graph_scale * GraphMixer(x)
-(Delta, B, C) = projection(encode(context))
-y = selective_scan(u, Delta, A, B, C, D)
+remote root   /scratch/home/caiwei/GraphConditionedPoseMamba_W256_D16_R3_60e_20260905
+source        0e23c5d
+params        20,192,451
+budget        60 epochs
+snapshot      26/60 completed, epoch27 running
+best/latest   37.8653 / 31.8041 mm at epoch26
+loss          0.010022
+LR            2.28e-4
+reserved VRAM 21,140 MiB trainer
 ```
 
-状态内容`u`始终来自原feature；graph context只控制状态如何写入、遗忘和读取。输入与context
-共享input projection权重，CUDA selective-scan数值kernel未修改。
-
-## 5. GraphMixer定义
-
-Human3.6M 17 joints：root、双腿、belly/neck/nose/head、双肩肘腕。固定bone edges为：
-
-```text
-(0,1)(1,2)(2,3)  (0,4)(4,5)(5,6)
-(0,7)(7,8)(8,9)(9,10)
-(8,11)(11,12)(12,13)  (8,14)(14,15)(15,16)
-```
-
-symmetry edges为：
-
-```text
-(1,4)(2,5)(3,6)(11,14)(12,15)(13,16)
-```
-
-消息形式：
-
-```text
-r_ij = x_j - x_i
-m_ij = W_relation(r_ij) + W_neighbor(x_j)
-g_i  = alpha_bone * sum_bone(m_ij) + alpha_sym * sum_sym(m_ij)
-G_i  = W_out(GELU(g_i))
-```
-
-hidden dimension为32，`alpha_bone/alpha_sym`从1初始化。
-
-## 6. 当前主配置
-
-文件：`configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m.yaml`
-
-| 项目 | 当前值 |
-|---|---:|
-| width | 64 |
-| depth | 8 |
-| parameters | 800,083 |
-| graph hidden | 32 |
-| SSM inner | 120 (`ratio=1.875`) |
-| MLP inner | 126 (`ratio=1.96875`) |
-| d_state | 16 |
-| directional groups | 2（forward/backward） |
-| spatial conv | 1 |
-| temporal conv | 3 |
-| clip/joints/input | 243 / 17 / xy+confidence |
-| train/test batch | 4 / 4 |
-
-W64/D8若直接使用两个ratio=2会达到842,083参数；当前轻微缩小inner width以保持8层并落在
-0.800M档，不是通过明显扩容获取精度。
-
-## 7. 冻结的训练协议
-
-以下配置来自当前已验证PoseMamba配方，不能为了新模型随意调整：
-
-```text
-optimizer           AdamW
-learning rate       5e-4
-weight decay        0.012
-epochs              120
-warmup              8 epochs
-lr decay            0.99
-EMA                  enabled, decay 0.9998
-batch                4
-clip/data stride     243 / 81
-root-relative        enabled
-flip                 enabled
-confidence input     enabled
-lambda_3d            1.0
-lambda_scale         0.5
-lambda_3d_velocity   20.0
-lambda_diff          0.5
-```
-
-loss、augmentation、数据预处理、clip、stride和Protocol #1/#2均不因新backbone修改。
-
-## 8. 工程优化历史
-
-早期正确性优先版本约`1.8--1.9 it/s`。之后依次完成：
-
-1. 固定图dense等价聚合、context有效投影、零权loss shortcut和foreach EMA；
-2. 修复伪双向K4重复为真正K2 forward/backward；
-3. 为原`selective_scan_cuda_core`注册opaque compile接口，消除主要Dynamo graph break；
-4. temporal复用单次graph context；
-5. 合并GraphMixer relation/neighbor projection、延迟日志同步并标记compile step边界；
-6. W64/D8配置的真实H36M短基准达到约`195.6 ms/step`、`5.11 it/s`。
-
-同环境曾测默认PoseMamba约`4.210 it/s`，同等编译PoseMamba约`5.174 it/s`。因此当前GCF
-已接近同等编译PoseMamba速度；剩余问题主要是显存，而不是明显吞吐不足。
-
-## 9. 正式Human3.6M实验状态
-
-Docker源工作区（不在GitHub包中）的活跃run：
-
-```text
-/workspace/ReliPose_release/runs/graph_conditioned_posemamba/h36m/
-W64_D8_0p8M_seed0_restart_2026_09_02_T_04_36_22
-```
-
-发布快照时：
-
-```text
-完成评估次数       65
-正在训练           epoch 65
-最新P1/P2          39.9882 / 33.1112 mm
-P1最低             39.9882 mm（第65次评估）
-P2独立最低         33.0836 mm（第62次评估）
-最终120 epoch       未完成
-multi-seed          未运行
-```
-
-配置启用EMA，`train.py`训练期评估在`ema_helper.average_parameters(...)`上下文内完成，所以日志
-中的`e1/e2`是EMA参数评估。当前代码用该EMA P1判断是否更新best，同时保存raw和EMA两个best
-文件；因此`best_epoch.bin`是“由EMA指标选择时刻保存的raw权重”，不能把它误称为raw自身最优。
-训练完成后必须分别加载raw/EMA checkpoint做明确评估。
-
-以上均是中途状态，只支持“训练正常收敛”，不支持“已经优于PoseMamba”的最终claim。
-
-## 10. 显存状态与原因
-
-正式FP32、batch4、`torch.compile(mode="reduce-overhead")`训练短采样：
-
-```text
-GPU total     16,311 MiB
-used          15,844--16,005 MiB
-utilization   96--98%
-```
-
-短采样没有单调增长，进程也已跨越数十轮，当前更像CUDA Graph/allocator稳定高水位而不是明显
-泄漏。但余量仅约306--467 MiB，不适合直接扩大模型。
-
-主要因素：
-
-- 全FP32训练激活；
-- Spatial将batch4变成972条独立L=17 scan；
-- graph content/context双路中间量；
-- selective-scan backward state；
-- `reduce-overhead`隐式启用CUDA Graph私有池；
-- 训练与评估compiled graph及Inductor/caching allocator保留。
-
-完整公式、显存测量要求、保持精度的推理方式见`docs/VRAM_AND_INFERENCE.md`。
-
-## 11. 已验证与未验证
-
-已验证：
-
-- graph neighbors和symmetry edges正确；
-- Spatial/Temporal reshape与restore精确；
-- B4/T243输出`[4,243,17,3]`；
-- 800,083参数；
-- loss/backward/AdamW/EMA完整step；
-- opaque custom-op与原CUDA kernel输出/梯度一致；
-- 原PoseMamba仍可运行；
-- 从本包CUDA源码全新sm120编译并forward/backward通过；
-- GitHub包CPU聚焦测试、安全审计和SHA256校验通过。
-
-尚未验证：
-
-- 120 epoch最终raw/EMA P1/P2；
-- 与完全同配方PoseMamba的最终配对精度；
-- multi-seed均值/方差；
-- 当前W64/D8在eager/default/reduce-overhead下的严格同commit显存A/B；
-- 更大参数模型是否提高精度；
-- BF16或量化部署精度。
-
-## 12. 下一步优先级
-
-### Priority 0：完成当前实验
-
-不修改、不停止当前run。完成120 epoch后：
-
-1. 记录日志最终值和最低值；
-2. 分别评估`best_epoch.bin`、`best_ema_epoch.bin`、`latest_epoch.bin`和`latest_ema_epoch.bin`；
-3. 明确P1-selected checkpoint对应的P1/P2；
-4. 与冻结协议PoseMamba配对比较；
-5. 只有完整结果后才能形成精度结论。
-
-### Priority 1：显存专项优化
-
-用同一checkpoint/config在全新进程中测：
-
-```text
-eager
-torch.compile(mode="default")
-torch.compile(mode="reduce-overhead")
-compiled training + eager evaluation
-```
-
-分别记录`max_memory_allocated/reserved`。优先尝试train-only compile和非CUDA-Graph default
-compile；仍不足时增加非重入activation checkpoint并保持DropPath RNG。不能用`empty_cache()`
-代替测量，也不能通过减小batch/T或删除graph conditioning伪装显存优化。
-
-### Priority 2：更大容量
-
-只有显存优化通过输出、loss、梯度和checkpoint一致性验收后，才依次测试约1.0M、1.2M、1.5M，
-每次只改变容量。更大模型不保证更低MPJPE，不进行无依据的大规模超参数搜索。
-
-### Priority 3：可选数值优化
-
-BF16/FP16/INT8、剪枝、量化和新short-scan kernel均可能改变数值或研究边界，必须作为独立实验，
-不能覆盖FP32基线。
-
-## 13. 直接运行命令
-
-安装并编译：
-
-```bash
-python -m pip install -r requirements.txt
-bash scripts/build_selective_scan.sh
-python scripts/verify_install.py
-python tools/check_model.py
-python -m unittest discover -s tests -v
-```
-
-训练：
-
-```bash
-CUDA_VISIBLE_DEVICES=0 python train.py \
-  --config configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m.yaml \
-  --checkpoint runs/graph_posemamba/h36m/w64_d8_0p8m_seed0 \
-  --seed 0
-```
-
-评估：
-
-```bash
-CUDA_VISIBLE_DEVICES=0 python train.py \
-  --config configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m.yaml \
-  --evaluate path/to/checkpoint.bin \
-  --checkpoint runs/eval/graph_posemamba_w64_d8 \
-  --seed 0
-```
-
-首次compile可能在`0it`停留10--60秒或更久；TF32 deprecation、TF32未启用和SM不足以
-max-autotune是warning。没有最终`RuntimeError`/`CUDA error`时不要在首次backward中断。
-
-## 14. 数据、权重与安全边界
-
-仓库不包含：
-
-- Human3.6M或MPI-INF-3DHP数据；
-- runs、TensorBoard日志或checkpoint；
-- 编译后的`.so/.o`；
-- GitHub token、Docker credential或个人笔记；
-- ReliPose/ReliPoseMU和无关旧实验。
-
-数据路径和格式见`DATA.md`。训练完成后若要发布权重，应单独确认具体raw/EMA文件，并使用
-GitHub Release或Git LFS，不要直接把大型checkpoint写入普通Git历史。
-
-## 15. 接手检查清单
-
-接手者应按顺序确认：
-
-1. 阅读本文件、`HANDOFF.md`、`docs/POSEMAMBA_CHANGES.md`和
-   `docs/VRAM_AND_INFERENCE.md`；
-2. 核对Python/PyTorch/CUDA/GPU架构，重新编译`selective_scan_cuda_core`；
-3. 运行安装验证、参数/shape检查和单元测试；
-4. 准备外部数据，但不要提交数据或本地绝对路径；
-5. 若原Docker仍存在，先完成当前seed0，不要重复启动同一正式实验；
-6. 将最终实验数值、checkpoint类型、命令和run路径写入正式实验记录；
-7. 未完成配对baseline和multi-seed前，保持研究结论审慎。
+R3曾在epoch7—8有限值震荡后自行恢复。用户明确要求不得自主中断：监控只能记录、同步和告警，
+禁止发送任何停止、暂停、恢复或改配置命令。
+
+尺度历史：
+
+- W128/D20：用户在65/80取消，部分最佳37.6593/31.8717，不是完成结果。
+- W256/D10：首轮前取消。
+- D16 R1：3轮后因无效warmup与过冲判INVALID。
+- D16 R2：16轮后出现严重有限值震荡并已停止，判INVALID。
+- D16 R3：当前运行中，不能写入论文最终精度表。
+
+## 10. 下一步执行顺序
+
+新长训练没有获得授权。用户确认后一次只启动一个：
+
+1. Rewired Graph seed0，80轮。
+2. Matched no-reset seed0，80轮。
+3. Corrected PoseMamba seed0，80轮。
+4. A0/A2/Full seed1。
+5. MPI released A0/Full。
+6. A0/A2/Full seed2。
+
+不得自动push、自动排队全部实验、搜索重连图/seed/超参数，或删除任何不支持Full的有效结果。
+
+## 11. 写作口径
+
+- A2 vs Full只能称“图信息注入策略对照”。A2中内容、Delta/B/C和输出门控都来自图增强输入。
+- 真实图只有优于固定重连图时才能支持“解剖拓扑有价值”。
+- reset只有优于参数匹配joined版本时才能作为精度设计主张。
+- MPI训练并测试是第二数据集验证，不是零样本泛化。
+- best与fixed endpoint分列；P1/P2必须来自同一checkpoint。
+- 公开方法数值须核对原论文，并注明输入、帧长、规模和额外数据。
+
+## 12. 接手检查清单
+
+1. 阅读本文、论文大纲、`HANDOFF.md`和paper evidence检查报告。
+2. 区分远程实验分支、运行中R3源码和未push的论文证据分支。
+3. 不修改或停止R3；先核对PID、日志和checkpoint。
+4. 新实验必须从`ad4e2fa`或其已审计后继提交建立独立目录。
+5. 长训练前重新做独占GPU显存门禁，并等待用户指定单个run。
+6. 每个run记录git/config/data哈希、seed、graph seed、实际执行路径、raw/EMA身份和两种统计口径。
+7. 完成后如实更新证据—主张强度；不通过调参或选择结果迎合论文叙事。
