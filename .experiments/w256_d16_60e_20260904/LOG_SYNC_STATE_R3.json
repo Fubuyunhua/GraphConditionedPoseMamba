@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "cadence_hours": 2,
-  "last_sync_utc": "2026-09-05T11:25:43+00:00",
+  "last_sync_utc": "2026-09-05T13:10:05+00:00",
   "branch": "codex/minimal-ablation-80e-20260903",
   "document": ".experiments/w256_d16_60e_20260904/training_log_r3.md",
   "status": "R3_RUNNING_RECOVERED",
-  "last_completed_epoch": 41
+  "last_completed_epoch": 45
 }
