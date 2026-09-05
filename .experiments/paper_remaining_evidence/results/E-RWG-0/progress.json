@@ -1,0 +1,12 @@
+{
+  "status": "RUNNING",
+  "completed_epochs": 1,
+  "budget": 80,
+  "train_pid": 1096370,
+  "time": "2026-09-06T00:56:32+08:00",
+  "loss": 0.06511,
+  "ema_p1": 299.544239,
+  "paired_ema_p2": 154.210676,
+  "checkpoint_save_observed": true,
+  "interpretation": "Initialization-stage metrics; no ablation conclusion"
+}
