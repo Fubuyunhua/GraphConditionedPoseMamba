@@ -34,10 +34,10 @@ from timm.models.vision_transformer import _cfg
 import math
 import numpy as np
 
-from lib.model.graph_mixer import SkeletonGraphMixer
+from lib.model.graph_mixer import SkeletonGraphMixer, build_h36m_graph_spec
 from lib.model.mambablocks import BiSTSSM, BiSTSSMBlock, FactorizedBiSSM, Mlp
 class  PoseMamba(nn.Module):
-    def __init__(self, num_frame=9, num_joints=17, in_chans=2, embed_dim_ratio=256, depth=6, mlp_ratio=2., drop_rate=0., drop_path_rate=0.2,  norm_layer=None):
+    def __init__(self, num_frame=9, num_joints=17, in_chans=2, embed_dim_ratio=256, depth=6, mlp_ratio=2., drop_rate=0., drop_path_rate=0.2,  norm_layer=None, posemamba_backward_mode="legacy"):
         """    ##########hybrid_backbone=None, representation_size=None,
         Args:
             num_frame (int, tuple): input frame number
@@ -55,6 +55,18 @@ class  PoseMamba(nn.Module):
             norm_layer: (nn.Module): normalization layer
         """
         super().__init__()
+        posemamba_backward_mode = str(posemamba_backward_mode).lower()
+        if posemamba_backward_mode not in {"legacy", "exact"}:
+            raise ValueError(
+                "posemamba_backward_mode must be legacy or exact, received "
+                f"{posemamba_backward_mode!r}"
+            )
+        self.posemamba_backward_mode = posemamba_backward_mode
+        scan_forward_type = (
+            "v2_plus_poselimbs"
+            if posemamba_backward_mode == "legacy"
+            else "v2_plus_poselimbs_exact_backward"
+        )
 
         norm_layer = norm_layer or partial(nn.LayerNorm, eps=1e-6)
         embed_dim = embed_dim_ratio   #### temporal embed_dim is num_joints * spatial embedding dim ratio
@@ -71,7 +83,7 @@ class  PoseMamba(nn.Module):
                 mlp_ratio = mlp_ratio, 
                 drop_path=dpr[i], 
                 norm_layer=norm_layer,
-                forward_type='v2_plus_poselimbs'
+                forward_type=scan_forward_type
                 )
             for i in range(depth)])
 
@@ -81,7 +93,7 @@ class  PoseMamba(nn.Module):
                 mlp_ratio = mlp_ratio, 
                 drop_path=dpr[i], 
                 norm_layer=norm_layer,
-                forward_type='v2_plus_poselimbs'
+                forward_type=scan_forward_type
                 )
             for i in range(depth)])
 
@@ -141,6 +153,18 @@ class  PoseMamba(nn.Module):
         x = x.view(b, f, n, -1)
         return x
 
+    def execution_spec(self):
+        return {
+            "model": "PoseMamba",
+            "posemamba_backward_mode": self.posemamba_backward_mode,
+            "scan_forward_type": (
+                "v2_plus_poselimbs"
+                if self.posemamba_backward_mode == "legacy"
+                else "v2_plus_poselimbs_exact_backward"
+            ),
+            "k_group": 4,
+        }
+
 
 class GraphConditionedPoseBlock(nn.Module):
     """Graph-local mixing followed by factorized or coupled BiSSMs."""
@@ -160,6 +184,10 @@ class GraphConditionedPoseBlock(nn.Module):
         graph_scale=1.0,
         spatial_res_scale=1.0,
         temporal_res_scale=1.0,
+        graph_topology_mode="anatomical",
+        graph_rewire_seed=3407,
+        graph_topology_spec=None,
+        recurrence_scope="independent",
         spatial_ssm_conv=1,
         temporal_ssm_conv=3,
         compile_compatible_scan=False,
@@ -202,6 +230,18 @@ class GraphConditionedPoseBlock(nn.Module):
         self.coupled_ssm_forward_type = str(coupled_ssm_forward_type)
         self.compile_compatible_scan = bool(compile_compatible_scan)
         self.graph_scale = float(graph_scale)
+        self.graph_topology_mode = str(graph_topology_mode).lower()
+        self.graph_rewire_seed = int(graph_rewire_seed)
+        self.recurrence_scope = str(recurrence_scope).lower()
+        if self.recurrence_scope not in {"independent", "joined"}:
+            raise ValueError(
+                "recurrence_scope must be independent or joined, received "
+                f"{self.recurrence_scope!r}"
+            )
+        if self.recurrence_scope == "joined" and not self.factorized_spatial_temporal:
+            raise ValueError(
+                "joined recurrence requires factorized_spatial_temporal=True"
+            )
 
         self.norm_spatial = norm_layer(hidden_dim)
         self.norm_temporal = norm_layer(hidden_dim)
@@ -212,6 +252,9 @@ class GraphConditionedPoseBlock(nn.Module):
                 hidden_ratio=graph_hidden_ratio,
                 use_symmetry_edges=use_symmetry_edges,
                 num_joints=num_joints,
+                graph_topology_mode=self.graph_topology_mode,
+                graph_rewire_seed=self.graph_rewire_seed,
+                topology_spec=graph_topology_spec,
             )
             if self.use_graph_mixer
             else None
@@ -224,6 +267,7 @@ class GraphConditionedPoseBlock(nn.Module):
                 d_conv=spatial_ssm_conv,
                 axis="spatial",
                 compile_compatible_scan=compile_compatible_scan,
+                recurrence_scope=self.recurrence_scope,
             )
             self.temporal_ssm = FactorizedBiSSM(
                 d_model=hidden_dim,
@@ -232,6 +276,7 @@ class GraphConditionedPoseBlock(nn.Module):
                 d_conv=temporal_ssm_conv,
                 axis="temporal",
                 compile_compatible_scan=compile_compatible_scan,
+                recurrence_scope=self.recurrence_scope,
             )
         else:
             self.spatial_ssm = BiSTSSM(
@@ -325,10 +370,10 @@ class GraphConditionedPoseBlock(nn.Module):
                 else spatial_context
             )
         )
-        spatial_output = self.spatial_ssm(
-            spatial_input,
-            context=spatial_context_1d,
-        )
+        spatial_kwargs = {"context": spatial_context_1d}
+        if isinstance(self.spatial_ssm, FactorizedBiSSM):
+            spatial_kwargs["segments_per_sample"] = t
+        spatial_output = self.spatial_ssm(spatial_input, **spatial_kwargs)
         if self.factorized_spatial_temporal:
             spatial_output = self.restore_spatial(spatial_output, b, t)
         x = x + self.gamma_s * self.drop_path(spatial_output)
@@ -359,10 +404,10 @@ class GraphConditionedPoseBlock(nn.Module):
                 else temporal_context
             )
         )
-        temporal_output = self.temporal_ssm(
-            temporal_input,
-            context=temporal_context_1d,
-        )
+        temporal_kwargs = {"context": temporal_context_1d}
+        if isinstance(self.temporal_ssm, FactorizedBiSSM):
+            temporal_kwargs["segments_per_sample"] = j
+        temporal_output = self.temporal_ssm(temporal_input, **temporal_kwargs)
         if self.factorized_spatial_temporal:
             temporal_output = self.restore_temporal(temporal_output, b, j)
         x = x + self.gamma_t * self.drop_path(temporal_output)
@@ -372,6 +417,8 @@ class GraphConditionedPoseBlock(nn.Module):
             return x
         trace = {
             "graph_injection_mode": self.graph_injection_mode,
+            "graph_topology_mode": self.graph_topology_mode,
+            "recurrence_scope": self.recurrence_scope,
             "factorized_spatial_temporal": self.factorized_spatial_temporal,
             "ssm_forward_type": (
                 "v2_1d_bidir_k2_compile"
@@ -435,6 +482,9 @@ class GraphConditionedPoseMamba(nn.Module):
         ssm_d_state=16,
         ssm_ratio=2.0,
         activation_checkpoint_blocks=False,
+        graph_topology_mode="anatomical",
+        graph_rewire_seed=3407,
+        recurrence_scope="independent",
     ):
         super().__init__()
         if int(num_joints) != 17:
@@ -448,6 +498,14 @@ class GraphConditionedPoseMamba(nn.Module):
         self.factorized_spatial_temporal = bool(factorized_spatial_temporal)
         self.coupled_ssm_forward_type = str(coupled_ssm_forward_type)
         self.activation_checkpoint_blocks = bool(activation_checkpoint_blocks)
+        self.graph_topology_mode = str(graph_topology_mode).lower()
+        self.graph_rewire_seed = int(graph_rewire_seed)
+        self.recurrence_scope = str(recurrence_scope).lower()
+        self.graph_topology_spec = build_h36m_graph_spec(
+            self.graph_topology_mode,
+            seed=self.graph_rewire_seed,
+        )
+        self.graph_topology_hash = self.graph_topology_spec["sha256"]
 
         self.Spatial_patch_to_embedding = nn.Linear(in_chans, embed_dim)
         self.Spatial_pos_embed = nn.Parameter(torch.zeros(1, num_joints, embed_dim))
@@ -470,6 +528,10 @@ class GraphConditionedPoseMamba(nn.Module):
                     graph_scale=graph_scale,
                     spatial_res_scale=spatial_res_scale,
                     temporal_res_scale=temporal_res_scale,
+                    graph_topology_mode=self.graph_topology_mode,
+                    graph_rewire_seed=self.graph_rewire_seed,
+                    graph_topology_spec=self.graph_topology_spec,
+                    recurrence_scope=self.recurrence_scope,
                     spatial_ssm_conv=spatial_ssm_conv,
                     temporal_ssm_conv=temporal_ssm_conv,
                     compile_compatible_scan=compile_compatible_scan,
@@ -528,6 +590,23 @@ class GraphConditionedPoseMamba(nn.Module):
             trace["final_prediction"] = tuple(prediction.shape)
             return prediction, trace
         return prediction
+
+    def execution_spec(self):
+        return {
+            "model": "GraphConditionedPoseMamba",
+            "graph_injection_mode": self.blocks[0].graph_injection_mode,
+            "graph_topology_mode": self.graph_topology_mode,
+            "graph_rewire_seed": self.graph_rewire_seed,
+            "graph_topology_hash": self.graph_topology_hash,
+            "recurrence_scope": self.recurrence_scope,
+            "factorized_spatial_temporal": self.factorized_spatial_temporal,
+            "scan_forward_type": (
+                "v2_1d_bidir_k2_compile"
+                if self.blocks[0].compile_compatible_scan
+                else "v2_1d_bidir_k2"
+            ),
+            "k_group": 2,
+        }
 
 
 if __name__ == "__main__":

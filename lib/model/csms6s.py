@@ -1,5 +1,10 @@
 import torch
 
+
+POSE_LIMB_PARENT_INDICES = (
+    0, 0, 1, 2, 3, 0, 4, 5, 6, 8, 11, 12, 13, 8, 14, 15, 16
+)
+
 # pytorch cross scan =============
 class CrossScan(torch.autograd.Function):
     @staticmethod
@@ -153,7 +158,7 @@ class CrossScan_plus_poselimbs(torch.autograd.Function):
         assert W == 17, 'the number of joints is not 17'
         ctx.shape = (B, C, H, W)
         xs = x.new_empty((B, 4, C, H * W))
-        indices = [0, 0, 1, 2, 3, 0, 4, 5, 6, 8, 11, 12, 13, 8, 14, 15, 16]
+        indices = POSE_LIMB_PARENT_INDICES
         xs[:, 0] = (x+x[..., indices]).flatten(2, 3)
         xs[:, 1] = x.transpose(dim0=2, dim1=3).flatten(2, 3)
         xs[:, 2:4] = torch.flip(xs[:, 0:2], dims=[-1])
@@ -167,6 +172,46 @@ class CrossScan_plus_poselimbs(torch.autograd.Function):
         ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, -1, L)
         y = ys[:, 0] + ys[:, 1].view(B, -1, W, H).transpose(dim0=2, dim1=3).contiguous().view(B, -1, L)
         return y.view(B, -1, H, W)
+
+
+class CrossScanPlusPoseLimbsExactBackward(torch.autograd.Function):
+    """Released pose-limb forward with the mathematically exact derivative."""
+
+    @staticmethod
+    def forward(ctx, x: torch.Tensor):
+        B, C, H, W = x.shape
+        if W != 17:
+            raise ValueError("the number of joints is not 17")
+        ctx.shape = (B, C, H, W)
+        xs = x.new_empty((B, 4, C, H * W))
+        xs[:, 0] = (x + x[..., POSE_LIMB_PARENT_INDICES]).flatten(2, 3)
+        xs[:, 1] = x.transpose(dim0=2, dim1=3).flatten(2, 3)
+        xs[:, 2:4] = torch.flip(xs[:, 0:2], dims=[-1])
+        return xs
+
+    @staticmethod
+    def backward(ctx, ys: torch.Tensor):
+        B, C, H, W = ctx.shape
+        L = H * W
+        aligned = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(
+            B, 2, C, L
+        )
+        limb_gradient = aligned[:, 0].view(B, C, H, W)
+        parent_gradient = torch.zeros_like(limb_gradient)
+        parent_index = torch.as_tensor(
+            POSE_LIMB_PARENT_INDICES,
+            device=ys.device,
+            dtype=torch.long,
+        )
+        parent_gradient.index_add_(-1, parent_index, limb_gradient)
+        transpose_gradient = (
+            aligned[:, 1]
+            .view(B, C, W, H)
+            .transpose(dim0=2, dim1=3)
+            .contiguous()
+            .view(B, C, H, W)
+        )
+        return limb_gradient + parent_gradient + transpose_gradient
 class CrossMerge_plus_poselimbs(torch.autograd.Function):
     @staticmethod
     def forward(ctx, ys: torch.Tensor):
@@ -184,7 +229,6 @@ class CrossMerge_plus_poselimbs(torch.autograd.Function):
         H, W = ctx.shape
         B, C, L = x.shape
         xs = x.new_empty((B, 4, C, L))
-        indices = [0, 0, 1, 2, 3, 0, 4, 5, 6, 8, 11, 12, 13, 8, 14, 15, 16]
         xs[:, 0] = x
         xs[:, 1] = x.view(B, C, H, W).transpose(dim0=2, dim1=3).flatten(2, 3)
         xs[:, 2:4] = torch.flip(xs[:, 0:2], dims=[-1])
@@ -506,6 +550,5 @@ def selective_scan_flop_jit(inputs, outputs, flops_fn=flops_selective_scan_fn):
     N = inputs[2].type().sizes()[1]
     flops = flops_fn(B=B, L=L, D=D, N=N, with_D=True, with_Z=False)
     return flops
-
 
 

@@ -39,7 +39,12 @@ def load_backbone(args):
         drop_path_rate=getattr(args, "drop_path_rate", 0.2),
     )
     if args.backbone == "PoseMamba":
-        return PoseMamba(**common)
+        return PoseMamba(
+            **common,
+            posemamba_backward_mode=getattr(
+                args, "posemamba_backward_mode", "legacy"
+            ),
+        )
     if args.backbone != "GraphConditionedPoseMamba":
         raise ValueError(
             "This focused release supports PoseMamba and "
@@ -63,6 +68,11 @@ def load_backbone(args):
         temporal_ssm_conv=getattr(args, "temporal_ssm_conv", 3),
         compile_compatible_scan=getattr(args, "compile_compatible_scan", False),
         graph_scale=getattr(args, "graph_scale", 1.0),
+        graph_topology_mode=getattr(
+            args, "graph_topology_mode", "anatomical"
+        ),
+        graph_rewire_seed=getattr(args, "graph_rewire_seed", 3407),
+        recurrence_scope=getattr(args, "recurrence_scope", "independent"),
         spatial_res_scale=getattr(args, "spatial_res_scale", 1.0),
         temporal_res_scale=getattr(args, "temporal_res_scale", 1.0),
         ssm_d_state=getattr(args, "ssm_d_state", 16),

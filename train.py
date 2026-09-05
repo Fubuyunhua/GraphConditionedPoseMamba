@@ -3,6 +3,7 @@ import numpy as np
 import argparse
 import errno
 import math
+import json
 import pickle
 import datetime
 import tensorboardX
@@ -329,6 +330,8 @@ def save_checkpoint(chk_path, epoch, lr, optimizer, model_pos, min_loss, model_s
         'model_pos': _clone_state_dict_for_save(checkpoint_model.state_dict() if model_state_dict is None else model_state_dict),
         'min_loss': min_loss,
     }
+    if hasattr(checkpoint_model, "execution_spec"):
+        payload["execution_spec"] = checkpoint_model.execution_spec()
     if extra_state:
         payload.update(extra_state)
     torch.save(payload, chk_path)
@@ -340,6 +343,7 @@ class EMAModel:
         self.decay = decay
         self.shadow = {k: v.detach().clone() for k, v in model.state_dict().items() if v.is_floating_point()}
         self.backup = {}
+        self.num_updates = 0
 
     def update(self, model):
         model = _unwrap_compiled_model(model)
@@ -359,6 +363,7 @@ class EMAModel:
             for shadows, sources in grouped.values():
                 torch._foreach_mul_(shadows, self.decay)
                 torch._foreach_add_(shadows, sources, alpha=1 - self.decay)
+            self.num_updates += 1
 
     @contextmanager
     def average_parameters(self, model):
@@ -388,6 +393,7 @@ def save_ema_checkpoint(chk_path, epoch, lr, optimizer, model_pos, min_loss, ema
             extra_state={
                 'checkpoint_type': 'ema',
                 'ema_decay': ema_helper.decay,
+                'ema_updates': ema_helper.num_updates,
             },
         )
 
@@ -819,6 +825,11 @@ def train_with_config(args, opts):
     for parameter in model_backbone.parameters():
         model_params = model_params + parameter.numel()
     log.info(f'INFO: Trainable parameter count:{model_params}')
+    if hasattr(model_backbone, "execution_spec"):
+        log.info(
+            "INFO: Model execution path: "
+            + json.dumps(model_backbone.execution_spec(), sort_keys=True)
+        )
 
     compile_model = bool(getattr(args, "compile_model", False))
     cuda_graph_model = bool(getattr(args, "cuda_graph_model", False))
@@ -876,6 +887,7 @@ def train_with_config(args, opts):
             ema_helper.shadow = _move_state_dict_to_model_devices(checkpoint['ema_shadow'], model_backbone)
         elif checkpoint.get('checkpoint_type') == 'ema':
             ema_helper.shadow = {k: v.detach().clone() for k, v in model_backbone.state_dict().items() if v.is_floating_point()}
+        ema_helper.num_updates = int(checkpoint.get("ema_updates", 0))
 
     if args.partial_train:
         model_pos = partial_train_layers(model_pos, args.partial_train)
@@ -956,6 +968,15 @@ def train_with_config(args, opts):
         steps_per_epoch = len(train_loader_3d)
         if args.train_2d:
             steps_per_epoch += len(instav_loader_2d) + len(posetrack_loader_2d)
+        log.info(
+            "INFO: Effective optimization protocol: "
+            f"batch_size={args.batch_size}, steps_per_epoch={steps_per_epoch}, "
+            f"total_optimizer_steps={steps_per_epoch * int(args.epochs)}, "
+            f"initial_lr={float(args.learning_rate):.10f}, "
+            f"linear_warmup_enabled={bool(getattr(args, 'enable_linear_warmup', False))}, "
+            f"ema_enabled={ema_helper is not None}, "
+            f"expected_ema_updates={steps_per_epoch * int(args.epochs) if ema_helper is not None else 0}"
+        )
         schedule_start_step = st * steps_per_epoch
         if checkpoint is not None and checkpoint.get("lr_schedule_state") is not None:
             schedule_start_step = int(
@@ -1097,6 +1118,15 @@ def train_with_config(args, opts):
                 f'grad_norm_max={losses["grad_norm_max"].avg:.6f} '
                 f'grad_clip_fraction={losses["grad_clip_fraction"].avg:.6f}'
             )
+            completed_optimizer_steps = (
+                lr_schedule.global_step
+                if lr_schedule is not None
+                else (epoch + 1) * train_batches
+            )
+            runtime_message += (
+                f' optimizer_steps={completed_optimizer_steps} '
+                f'ema_updates={ema_helper.num_updates if ema_helper is not None else 0}'
+            )
             if parameter_update_rel_l2 is not None:
                 runtime_message += (
                     f' param_update_rel_l2={parameter_update_rel_l2:.8f} '
@@ -1122,12 +1152,39 @@ def train_with_config(args, opts):
             if ema_helper is not None:
                 raw_extra_state['ema_shadow'] = _clone_state_dict_for_save(ema_helper.shadow)
                 raw_extra_state['ema_decay'] = ema_helper.decay
+                raw_extra_state['ema_updates'] = ema_helper.num_updates
             if lr_schedule is not None:
                 raw_extra_state['lr_schedule_state'] = lr_schedule.state_dict()
 
             save_checkpoint(chk_path_latest, epoch, lr, optimizer, model_pos, min_loss, extra_state=raw_extra_state)
             if ema_helper is not None:
                 save_ema_checkpoint(chk_path_latest_ema, epoch, lr, optimizer, model_pos, min_loss, ema_helper)
+            if epoch + 1 == int(args.epochs):
+                fixed_raw = os.path.join(
+                    opts.checkpoint, f"raw_fixed_epoch{epoch + 1}.bin"
+                )
+                save_checkpoint(
+                    fixed_raw,
+                    epoch,
+                    lr,
+                    optimizer,
+                    model_pos,
+                    min_loss,
+                    extra_state=raw_extra_state,
+                )
+                if ema_helper is not None:
+                    fixed_ema = os.path.join(
+                        opts.checkpoint, f"ema_fixed_epoch{epoch + 1}.bin"
+                    )
+                    save_ema_checkpoint(
+                        fixed_ema,
+                        epoch,
+                        lr,
+                        optimizer,
+                        model_pos,
+                        min_loss,
+                        ema_helper,
+                    )
             if (epoch + 1) % args.checkpoint_frequency == 0:
                 save_checkpoint(chk_path, epoch, lr, optimizer, model_pos, min_loss, extra_state=raw_extra_state)
                 if ema_helper is not None:

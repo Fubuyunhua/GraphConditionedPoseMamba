@@ -1,0 +1,14 @@
+_base_: posemamba_h36m_w64_d6_m1_current_eval.yaml
+
+config: configs/pose3d/diagnostic_posemamba_corrected_backward.yaml
+checkpoint: runs/paper_remaining_evidence/posemamba_corrected_backward_seed0
+pretrained: runs/paper_remaining_evidence/posemamba_corrected_backward_seed0
+seed: 0
+epochs: 80
+
+enable_linear_warmup: false
+honor_no_weight_decay: false
+max_grad_norm: 0.0
+track_parameter_update_norm: false
+posemamba_backward_mode: exact
+

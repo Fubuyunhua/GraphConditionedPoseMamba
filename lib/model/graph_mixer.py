@@ -7,7 +7,10 @@ same lightweight relation/neighbor projections are shared by both edge types.
 
 from __future__ import annotations
 
-from typing import Dict, List, Sequence, Tuple
+import hashlib
+import json
+import random
+from typing import Any, Dict, List, Sequence, Tuple
 
 import torch
 import torch.nn as nn
@@ -63,6 +66,166 @@ H36M_SYMMETRY_EDGES: Tuple[Tuple[int, int], ...] = (
 )
 
 
+def _canonical_edge(edge: Sequence[int]) -> Tuple[int, int]:
+    left, right = (int(edge[0]), int(edge[1]))
+    if left == right:
+        raise ValueError(f"self-loop is not allowed: {(left, right)}")
+    return (left, right) if left < right else (right, left)
+
+
+def _normalized_edges(
+    edges: Sequence[Sequence[int]],
+    *,
+    num_nodes: int,
+) -> Tuple[Tuple[int, int], ...]:
+    normalized = tuple(_canonical_edge(edge) for edge in edges)
+    if any(left < 0 or right >= num_nodes for left, right in normalized):
+        raise ValueError(f"edge outside [0,{num_nodes}): {normalized}")
+    if len(set(normalized)) != len(normalized):
+        raise ValueError(f"duplicate undirected edge: {normalized}")
+    return tuple(sorted(normalized))
+
+
+def _degrees(edges: Sequence[Sequence[int]], num_nodes: int) -> Tuple[int, ...]:
+    degree = [0] * int(num_nodes)
+    for left, right in edges:
+        degree[int(left)] += 1
+        degree[int(right)] += 1
+    return tuple(degree)
+
+
+def _is_connected(edges: Sequence[Sequence[int]], num_nodes: int) -> bool:
+    adjacency = [[] for _ in range(num_nodes)]
+    for left, right in edges:
+        adjacency[int(left)].append(int(right))
+        adjacency[int(right)].append(int(left))
+    seen = {0}
+    stack = [0]
+    while stack:
+        node = stack.pop()
+        for neighbor in adjacency[node]:
+            if neighbor not in seen:
+                seen.add(neighbor)
+                stack.append(neighbor)
+    return len(seen) == num_nodes
+
+
+def _degree_preserving_rewire(
+    edges: Sequence[Sequence[int]],
+    *,
+    num_nodes: int,
+    seed: int,
+    require_connected: bool,
+    successful_swaps: int,
+) -> Tuple[Tuple[int, int], ...]:
+    """Deterministic undirected double-edge swaps with a private RNG."""
+
+    original = _normalized_edges(edges, num_nodes=num_nodes)
+    current = set(original)
+    rng = random.Random(int(seed))
+    accepted = 0
+    attempts = 0
+    max_attempts = max(10_000, int(successful_swaps) * 2_000)
+    while accepted < successful_swaps and attempts < max_attempts:
+        attempts += 1
+        first, second = rng.sample(sorted(current), 2)
+        a, b = first
+        c, d = second
+        if len({a, b, c, d}) != 4:
+            continue
+        if rng.randrange(2):
+            proposed = {_canonical_edge((a, c)), _canonical_edge((b, d))}
+        else:
+            proposed = {_canonical_edge((a, d)), _canonical_edge((b, c))}
+        if len(proposed) != 2:
+            continue
+        remaining = current - {first, second}
+        if proposed & remaining:
+            continue
+        candidate = remaining | proposed
+        if require_connected and not _is_connected(candidate, num_nodes):
+            continue
+        current = candidate
+        accepted += 1
+    if accepted != successful_swaps:
+        raise RuntimeError(
+            "unable to satisfy degree-preserving rewiring constraints: "
+            f"accepted={accepted} requested={successful_swaps} attempts={attempts}"
+        )
+    result = tuple(sorted(current))
+    if result == original:
+        raise RuntimeError("degree-preserving rewiring returned the anatomical graph")
+    if _degrees(result, num_nodes) != _degrees(original, num_nodes):
+        raise RuntimeError("degree sequence changed during rewiring")
+    if require_connected and not _is_connected(result, num_nodes):
+        raise RuntimeError("rewired bone graph is disconnected")
+    return result
+
+
+def build_h36m_graph_spec(
+    mode: str = "anatomical",
+    *,
+    seed: int = 3407,
+) -> Dict[str, Any]:
+    """Build one immutable, JSON-serializable topology specification."""
+
+    mode = str(mode).lower()
+    if mode not in {"anatomical", "degree_preserving_rewired"}:
+        raise ValueError(
+            "graph_topology_mode must be anatomical or "
+            f"degree_preserving_rewired, received {mode!r}"
+        )
+    anatomical_bone = tuple(H36M_BONE_EDGES)
+    anatomical_symmetry = tuple(H36M_SYMMETRY_EDGES)
+    if mode == "anatomical":
+        bone_edges = anatomical_bone
+        symmetry_edges = anatomical_symmetry
+        generator = "fixed_h36m_anatomical_v1"
+    else:
+        bone_edges = _degree_preserving_rewire(
+            anatomical_bone,
+            num_nodes=len(H36M_JOINT_NAMES),
+            seed=int(seed) * 2 + 1,
+            require_connected=True,
+            successful_swaps=len(anatomical_bone) * 8,
+        )
+        symmetry_edges = _degree_preserving_rewire(
+            anatomical_symmetry,
+            num_nodes=len(H36M_JOINT_NAMES),
+            seed=int(seed) * 2 + 2,
+            require_connected=False,
+            successful_swaps=len(anatomical_symmetry) * 8,
+        )
+        generator = "private_python_rng_double_edge_swap_v1"
+
+    bone_set = set(_normalized_edges(bone_edges, num_nodes=17))
+    symmetry_set = set(_normalized_edges(symmetry_edges, num_nodes=17))
+    anatomical_bone_set = set(_normalized_edges(anatomical_bone, num_nodes=17))
+    anatomical_symmetry_set = set(
+        _normalized_edges(anatomical_symmetry, num_nodes=17)
+    )
+    payload: Dict[str, Any] = {
+        "mode": mode,
+        "graph_rewire_seed": int(seed),
+        "generator": generator,
+        "joint_names": list(H36M_JOINT_NAMES),
+        "bone_edges": [list(edge) for edge in bone_edges],
+        "symmetry_edges": [list(edge) for edge in symmetry_edges],
+        "bone_degrees": list(_degrees(bone_edges, 17)),
+        "symmetry_degrees": list(_degrees(symmetry_edges, 17)),
+        "bone_connected": _is_connected(bone_edges, 17),
+        "bone_edge_overlap_with_anatomical": len(bone_set & anatomical_bone_set)
+        / len(anatomical_bone_set),
+        "symmetry_edge_overlap_with_anatomical": len(
+            symmetry_set & anatomical_symmetry_set
+        )
+        / len(anatomical_symmetry_set),
+    }
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    payload["sha256"] = hashlib.sha256(encoded).hexdigest()
+    return payload
+
+
 def _make_directed_edges(
     edges: Sequence[Tuple[int, int]],
 ) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -74,16 +237,21 @@ def _make_directed_edges(
     return torch.tensor(targets, dtype=torch.long), torch.tensor(sources, dtype=torch.long)
 
 
-def h36m_neighbor_names(use_symmetry_edges: bool = True) -> Dict[str, Dict[str, List[str]]]:
+def h36m_neighbor_names(
+    use_symmetry_edges: bool = True,
+    *,
+    bone_edges: Sequence[Sequence[int]] = H36M_BONE_EDGES,
+    symmetry_edges: Sequence[Sequence[int]] = H36M_SYMMETRY_EDGES,
+) -> Dict[str, Dict[str, List[str]]]:
     """Return human-readable fixed graph neighborhoods for diagnostics."""
 
     bone: List[List[str]] = [[] for _ in H36M_JOINT_NAMES]
     symmetry: List[List[str]] = [[] for _ in H36M_JOINT_NAMES]
-    for left, right in H36M_BONE_EDGES:
+    for left, right in bone_edges:
         bone[left].append(H36M_JOINT_NAMES[right])
         bone[right].append(H36M_JOINT_NAMES[left])
     if use_symmetry_edges:
-        for left, right in H36M_SYMMETRY_EDGES:
+        for left, right in symmetry_edges:
             symmetry[left].append(H36M_JOINT_NAMES[right])
             symmetry[right].append(H36M_JOINT_NAMES[left])
     return {
@@ -111,6 +279,9 @@ class SkeletonGraphMixer(nn.Module):
         hidden_ratio: float = 0.5,
         use_symmetry_edges: bool = True,
         num_joints: int = 17,
+        graph_topology_mode: str = "anatomical",
+        graph_rewire_seed: int = 3407,
+        topology_spec: Dict[str, Any] | None = None,
     ) -> None:
         super().__init__()
         if int(num_joints) != len(H36M_JOINT_NAMES):
@@ -120,6 +291,16 @@ class SkeletonGraphMixer(nn.Module):
         self.hidden_dim = hidden_dim
         self.num_joints = int(num_joints)
         self.use_symmetry_edges = bool(use_symmetry_edges)
+        topology_spec = topology_spec or build_h36m_graph_spec(
+            graph_topology_mode,
+            seed=graph_rewire_seed,
+        )
+        if topology_spec["mode"] != str(graph_topology_mode).lower():
+            raise ValueError("topology_spec mode does not match graph_topology_mode")
+        self.graph_topology_mode = str(topology_spec["mode"])
+        self.graph_rewire_seed = int(topology_spec["graph_rewire_seed"])
+        self.graph_topology_hash = str(topology_spec["sha256"])
+        self._topology_spec = json.loads(json.dumps(topology_spec))
 
         # Both transforms consume the same joint feature in the dense path.
         # A single wider GEMM is algebraically identical to two small Linear
@@ -128,12 +309,25 @@ class SkeletonGraphMixer(nn.Module):
         self.out_proj = nn.Linear(hidden_dim, self.dim)
         self.activation = nn.GELU()
 
-        bone_targets, bone_sources = _make_directed_edges(H36M_BONE_EDGES)
-        sym_targets, sym_sources = _make_directed_edges(H36M_SYMMETRY_EDGES)
-        self.register_buffer("bone_targets", bone_targets, persistent=True)
-        self.register_buffer("bone_sources", bone_sources, persistent=True)
-        self.register_buffer("symmetry_targets", sym_targets, persistent=True)
-        self.register_buffer("symmetry_sources", sym_sources, persistent=True)
+        bone_edges = tuple(tuple(edge) for edge in topology_spec["bone_edges"])
+        symmetry_edges = tuple(
+            tuple(edge) for edge in topology_spec["symmetry_edges"]
+        )
+        bone_targets, bone_sources = _make_directed_edges(bone_edges)
+        sym_targets, sym_sources = _make_directed_edges(symmetry_edges)
+        persistent_topology = self.graph_topology_mode == "anatomical"
+        self.register_buffer(
+            "bone_targets", bone_targets, persistent=persistent_topology
+        )
+        self.register_buffer(
+            "bone_sources", bone_sources, persistent=persistent_topology
+        )
+        self.register_buffer(
+            "symmetry_targets", sym_targets, persistent=persistent_topology
+        )
+        self.register_buffer(
+            "symmetry_sources", sym_sources, persistent=persistent_topology
+        )
 
         bone_adjacency = torch.zeros(self.num_joints, self.num_joints)
         bone_adjacency[bone_targets, bone_sources] = 1.0
@@ -223,7 +417,27 @@ class SkeletonGraphMixer(nn.Module):
         return output.reshape(batch, frames, joints, channels)
 
     def neighbor_names(self) -> Dict[str, Dict[str, List[str]]]:
-        return h36m_neighbor_names(self.use_symmetry_edges)
+        bone_edges = tuple(
+            (int(left), int(right))
+            for left, right in zip(
+                self.bone_targets[::2].tolist(), self.bone_sources[::2].tolist()
+            )
+        )
+        symmetry_edges = tuple(
+            (int(left), int(right))
+            for left, right in zip(
+                self.symmetry_targets[::2].tolist(),
+                self.symmetry_sources[::2].tolist(),
+            )
+        )
+        return h36m_neighbor_names(
+            self.use_symmetry_edges,
+            bone_edges=bone_edges,
+            symmetry_edges=symmetry_edges,
+        )
+
+    def topology_metadata(self) -> Dict[str, Any]:
+        return json.loads(json.dumps(self._topology_spec))
 
 
 __all__ = [
@@ -231,5 +445,6 @@ __all__ = [
     "H36M_BONE_EDGES",
     "H36M_SYMMETRY_EDGES",
     "SkeletonGraphMixer",
+    "build_h36m_graph_spec",
     "h36m_neighbor_names",
 ]

@@ -1,0 +1,13 @@
+_base_: posemamba_h36m_w64_d6_m1_current_eval.yaml
+
+config: configs/pose3d/repro_a0_posemamba_seed1_80e.yaml
+checkpoint: runs/paper_remaining_evidence/a0_posemamba_released_seed1
+pretrained: runs/paper_remaining_evidence/a0_posemamba_released_seed1
+seed: 1
+epochs: 80
+enable_linear_warmup: false
+honor_no_weight_decay: false
+max_grad_norm: 0.0
+track_parameter_update_norm: false
+posemamba_backward_mode: legacy
+

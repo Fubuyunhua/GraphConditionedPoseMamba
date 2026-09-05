@@ -96,7 +96,7 @@ def model_provenance(args: Any) -> dict[str, Any]:
         Path("lib/model/mambablocks.py"),
         Path("lib/model/graph_mixer.py"),
     )
-    return {
+    result = {
         "backbone": str(args.backbone),
         "dim_feat": int(args.dim_feat),
         "depth": int(args.depth),
@@ -107,6 +107,7 @@ def model_provenance(args: Any) -> dict[str, Any]:
             str(path): _sha256_file(path.resolve()) for path in files
         },
     }
+    return result
 
 
 def _sha256_file(path: Path) -> str:
@@ -477,6 +478,11 @@ def main() -> None:
     model = load_backbone(args)
     parameter_count = int(sum(p.numel() for p in model.parameters()))
     log.info(f"trainable_parameter_count={parameter_count}")
+    if hasattr(model, "execution_spec"):
+        log.info(
+            "model_execution_path="
+            + json.dumps(model.execution_spec(), sort_keys=True)
+        )
     manifest["trainable_parameter_count"] = parameter_count
     manifest["model_provenance"] = model_provenance(args)
     _atomic_write_json(run_dir / "run_manifest.json", manifest)
@@ -491,6 +497,25 @@ def main() -> None:
         model.parameters(),
         lr=float(args.learning_rate),
         weight_decay=float(args.weight_decay),
+    )
+    log.info(
+        "effective_optimization_protocol="
+        + json.dumps(
+            {
+                "batch_size": int(args.batch_size),
+                "steps_per_epoch": len(train_loader),
+                "total_optimizer_steps": len(train_loader) * int(args.epochs),
+                "declared_warmup_epochs": int(getattr(args, "warmup_epochs", 0)),
+                "effective_linear_warmup": False,
+                "initial_lr": float(args.learning_rate),
+                "ema_updates": (
+                    len(train_loader) * int(args.epochs)
+                    if ema is not None
+                    else 0
+                ),
+            },
+            sort_keys=True,
+        )
     )
     if bool(getattr(args, "compile_model", False)):
         compile_mode = str(getattr(args, "compile_mode", "default"))
@@ -680,6 +705,29 @@ def main() -> None:
             kind="ema",
             protocol=protocol,
         )
+        if final_epoch:
+            _save_checkpoint(
+                run_dir / f"raw_fixed_epoch{epoch + 1}.bin",
+                epoch=epoch,
+                lr=lr,
+                optimizer=optimizer,
+                model=model,
+                ema=ema,
+                best_metrics=best_metrics,
+                kind="raw",
+                protocol=protocol,
+            )
+            _save_checkpoint(
+                run_dir / f"ema_fixed_epoch{epoch + 1}.bin",
+                epoch=epoch,
+                lr=lr,
+                optimizer=optimizer,
+                model=model,
+                ema=ema,
+                best_metrics=best_metrics,
+                kind="ema",
+                protocol=protocol,
+            )
         if raw_improved:
             _save_checkpoint(
                 run_dir / "best_epoch.bin",

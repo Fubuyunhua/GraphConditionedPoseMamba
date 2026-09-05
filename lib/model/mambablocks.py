@@ -28,14 +28,14 @@ torch.backends.cudnn.deterministic = True
 try:
     from .csm_triton import CrossScanTriton, CrossMergeTriton, CrossScanTriton1b1, getCSM
     from .csm_triton import CrossScanTritonF, CrossMergeTritonF, CrossScanTriton1b1F
-    from .csms6s import CrossScan, CrossMerge, CrossScan_fs_ft, CrossScan_fs_bt, CrossScan_bs_ft, CrossScan_bs_bt, CrossMerge_bs_bt, CrossMerge_bs_ft, CrossMerge_fs_bt, CrossMerge_fs_ft, CrossScan_plus_poselimbs, CrossMerge_plus_poselimbs
+    from .csms6s import CrossScan, CrossMerge, CrossScan_fs_ft, CrossScan_fs_bt, CrossScan_bs_ft, CrossScan_bs_bt, CrossMerge_bs_bt, CrossMerge_bs_ft, CrossMerge_fs_bt, CrossMerge_fs_ft, CrossScan_plus_poselimbs, CrossScanPlusPoseLimbsExactBackward, CrossMerge_plus_poselimbs
     from .csms6s import CrossScan_Ab_1direction, CrossMerge_Ab_1direction, CrossScan_Ab_2direction, CrossMerge_Ab_2direction
     from .csms6s import SelectiveScanMamba, SelectiveScanCore, SelectiveScanOflex
     from .csms6s import flops_selective_scan_fn, flops_selective_scan_ref, selective_scan_flop_jit
 except:
     from csm_triton import CrossScanTriton, CrossMergeTriton, CrossScanTriton1b1, getCSM
     from csm_triton import CrossScanTritonF, CrossMergeTritonF, CrossScanTriton1b1F
-    from csms6s import CrossScan, CrossMerge
+    from csms6s import CrossScan, CrossMerge, CrossScan_plus_poselimbs, CrossScanPlusPoseLimbsExactBackward, CrossMerge_plus_poselimbs
     from csms6s import CrossScan_Ab_1direction, CrossMerge_Ab_1direction, CrossScan_Ab_2direction, CrossMerge_Ab_2direction
     from csms6s import SelectiveScanMamba, SelectiveScanCore, SelectiveScanOflex
     from csms6s import flops_selective_scan_fn, flops_selective_scan_ref, selective_scan_flop_jit
@@ -218,6 +218,76 @@ class CrossMerge1DBidirectional:
         return ys[:, 0] + ys[:, 1].flip(-1)
 
 
+def join_bidirectional_segments(
+    tensor: torch.Tensor,
+    segments_per_sample: int,
+) -> torch.Tensor:
+    """Join local K=2 sequences into one globally bidirectional sequence.
+
+    Direction zero preserves segment order. Direction one already contains a
+    local token reversal, so its segment order is additionally reversed to
+    represent the exact reverse of the complete joined sequence.
+    """
+
+    if tensor.ndim < 4 or tensor.shape[1] != 2:
+        raise ValueError(
+            "expected [B*S,2,...,L] bidirectional segments, received "
+            f"{tuple(tensor.shape)}"
+        )
+    segments_per_sample = int(segments_per_sample)
+    if segments_per_sample <= 0 or tensor.shape[0] % segments_per_sample:
+        raise ValueError(
+            "segments_per_sample must be positive and divide the first axis"
+        )
+    batch = tensor.shape[0] // segments_per_sample
+    middle = tensor.shape[2:-1]
+    length = tensor.shape[-1]
+    grouped = tensor.reshape(batch, segments_per_sample, 2, *middle, length)
+
+    def flatten_segments(direction: torch.Tensor) -> torch.Tensor:
+        # [B,S,*middle,L] -> [B,*middle,S*L]
+        order = [0, *range(2, direction.ndim - 1), 1, direction.ndim - 1]
+        return direction.permute(*order).contiguous().reshape(
+            batch, *middle, segments_per_sample * length
+        )
+
+    forward = flatten_segments(grouped[:, :, 0])
+    backward = flatten_segments(grouped[:, :, 1].flip(1))
+    return torch.stack((forward, backward), dim=1)
+
+
+def split_bidirectional_segments(
+    tensor: torch.Tensor,
+    segments_per_sample: int,
+) -> torch.Tensor:
+    """Invert :func:`join_bidirectional_segments` exactly."""
+
+    if tensor.ndim < 4 or tensor.shape[1] != 2:
+        raise ValueError(
+            "expected [B,2,...,S*L] joined directions, received "
+            f"{tuple(tensor.shape)}"
+        )
+    segments_per_sample = int(segments_per_sample)
+    if segments_per_sample <= 0 or tensor.shape[-1] % segments_per_sample:
+        raise ValueError("joined length must be divisible by segments_per_sample")
+    batch = tensor.shape[0]
+    middle = tensor.shape[2:-1]
+    length = tensor.shape[-1] // segments_per_sample
+
+    def restore_segments(direction: torch.Tensor) -> torch.Tensor:
+        # [B,*middle,S*L] -> [B,S,*middle,L]
+        restored = direction.reshape(batch, *middle, segments_per_sample, length)
+        segment_axis = 1 + len(middle)
+        order = [0, segment_axis, *range(1, segment_axis), segment_axis + 1]
+        return restored.permute(*order).contiguous()
+
+    forward = restore_segments(tensor[:, 0])
+    backward = restore_segments(tensor[:, 1]).flip(1)
+    return torch.stack((forward, backward), dim=2).reshape(
+        batch * segments_per_sample, 2, *middle, length
+    )
+
+
 # =====================================================
 class mamba_init:
     @staticmethod
@@ -372,6 +442,7 @@ class BiSTSSM_v2:
             v2_bs_ft=partial(self.forward_corev2, force_fp32=(not self.disable_force32), CrossScan=CrossScan_bs_ft, SelectiveScan=SelectiveScanCore, CrossMerge=CrossMerge_bs_ft),
             v2_bs_bt=partial(self.forward_corev2, force_fp32=(not self.disable_force32), CrossScan=CrossScan_bs_bt, SelectiveScan=SelectiveScanCore, CrossMerge=CrossMerge_bs_bt),
             v2_plus_poselimbs=partial(self.forward_corev2, force_fp32=(not self.disable_force32), CrossScan=CrossScan_plus_poselimbs, SelectiveScan=SelectiveScanCore, CrossMerge=CrossMerge_plus_poselimbs),
+            v2_plus_poselimbs_exact_backward=partial(self.forward_corev2, force_fp32=(not self.disable_force32), CrossScan=CrossScanPlusPoseLimbsExactBackward, SelectiveScan=SelectiveScanCore, CrossMerge=CrossMerge_plus_poselimbs),
             v2_1d_bidir=partial(self.forward_corev2, force_fp32=(not self.disable_force32), no_einsum=True, CrossScan=CrossScan_Ab_2direction, SelectiveScan=SelectiveScanCore, CrossMerge=CrossMerge_Ab_2direction),
             v2_1d_bidir_k2=partial(self.forward_corev2, force_fp32=(not self.disable_force32), no_einsum=True, CrossScan=CrossScan1DBidirectional, SelectiveScan=SelectiveScanCore, CrossMerge=CrossMerge1DBidirectional),
             v2_1d_bidir_k2_compile=partial(self.forward_corev2, force_fp32=(not self.disable_force32), no_einsum=True, CrossScan=CrossScan1DBidirectional, SelectiveScan=SelectiveScanCoreCompile, CrossMerge=CrossMerge1DBidirectional),
@@ -492,6 +563,15 @@ class BiSTSSM_v2:
         out_norm = getattr(self, "out_norm", None)
         channel_first = self.channel_first
         to_fp32 = lambda *args: (_a.to(torch.float32) for _a in args)
+        recurrence_scope = str(
+            kwargs.pop("recurrence_scope", "independent")
+        ).lower()
+        segments_per_sample = kwargs.pop("segments_per_sample", None)
+        if recurrence_scope not in {"independent", "joined"}:
+            raise ValueError(
+                "recurrence_scope must be independent or joined, received "
+                f"{recurrence_scope!r}"
+            )
 
         B, D, H, W = x.shape
         if context is not None and context.shape != x.shape:
@@ -595,20 +675,45 @@ class BiSTSSM_v2:
                 dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
                 dts = torch.einsum("b k r l, k d r -> b k d l", dts, dt_projs_weight)
 
-            xs = xs.view(B, -1, L)
-            dts = dts.contiguous().view(B, -1, L)
+            xs = xs.view(B, K, D, L)
+            dts = dts.contiguous().view(B, K, D, L)
             As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
             Bs = Bs.contiguous().view(B, K, N, L)
             Cs = Cs.contiguous().view(B, K, N, L)
             Ds = Ds.to(torch.float) # (K * c)
             delta_bias = dt_projs_bias.view(-1).to(torch.float)
 
+            local_xs = xs
+            local_dts = dts
+            local_Bs = Bs
+            local_Cs = Cs
+            if recurrence_scope == "joined":
+                if H != 1 or K != 2 or segments_per_sample is None:
+                    raise ValueError(
+                        "joined recurrence requires factorized K=2 inputs, "
+                        "H=1, and segments_per_sample"
+                    )
+                xs = join_bidirectional_segments(xs, segments_per_sample)
+                dts = join_bidirectional_segments(dts, segments_per_sample)
+                Bs = join_bidirectional_segments(Bs, segments_per_sample)
+                Cs = join_bidirectional_segments(Cs, segments_per_sample)
+            scan_batch = xs.shape[0]
+            scan_length = xs.shape[-1]
+            xs = xs.reshape(scan_batch, K * D, scan_length)
+            dts = dts.reshape(scan_batch, K * D, scan_length)
+
             if force_fp32:
                 xs, dts, Bs, Cs = to_fp32(xs, dts, Bs, Cs)
 
             ys: torch.Tensor = selective_scan(
                 xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
-            ).view(B, K, -1, H, W)
+            ).view(scan_batch, K, -1, 1, scan_length)
+            if recurrence_scope == "joined":
+                ys = split_bidirectional_segments(
+                    ys, int(segments_per_sample)
+                ).view(B, K, -1, H, W)
+            else:
+                ys = ys.view(B, K, -1, H, W)
             
             y: torch.Tensor = CrossMerge.apply(ys)
 
@@ -617,7 +722,19 @@ class BiSTSSM_v2:
                     A_logs=A_logs, Bs=Bs, Cs=Cs, Ds=Ds,
                     us=xs, dts=dts, delta_bias=delta_bias,
                     ys=ys, y=y,
+                    local_us=local_xs,
+                    local_dts=local_dts,
+                    local_Bs=local_Bs,
+                    local_Cs=local_Cs,
                 ))
+                setattr(
+                    self,
+                    "__debug_meta__",
+                    {
+                        "recurrence_scope": recurrence_scope,
+                        "segments_per_sample": segments_per_sample,
+                    },
+                )
 
         y = y.view(B, -1, H, W)
         if not channel_first:
@@ -725,7 +842,7 @@ class BiSTSSM_v2:
         else:
             context_x = self.act(context_x)
         # torch.Size([1, 256, 243, 17])
-        y = self.forward_core(x, context=context_x)
+        y = self.forward_core(x, context=context_x, **kwargs)
         y = self.out_act(y)
         if not self.disable_z:
             y = y * z
@@ -792,11 +909,19 @@ class FactorizedBiSSM(BiSTSSM):
         axis: str,
         d_conv: int,
         compile_compatible_scan: bool = False,
+        recurrence_scope: str = "independent",
         **kwargs,
     ):
         if axis not in {"spatial", "temporal"}:
             raise ValueError(f"axis must be spatial or temporal, received {axis!r}")
         self.axis = axis
+        recurrence_scope = str(recurrence_scope).lower()
+        if recurrence_scope not in {"independent", "joined"}:
+            raise ValueError(
+                "recurrence_scope must be independent or joined, received "
+                f"{recurrence_scope!r}"
+            )
+        self.recurrence_scope = recurrence_scope
         super().__init__(
             *args,
             d_conv=d_conv,
@@ -815,6 +940,7 @@ class FactorizedBiSSM(BiSTSSM):
         self,
         x: torch.Tensor,
         context: torch.Tensor = None,
+        segments_per_sample: int | None = None,
         **kwargs,
     ) -> torch.Tensor:
         if x.ndim != 4 or x.shape[1] != 1:
@@ -825,6 +951,8 @@ class FactorizedBiSSM(BiSTSSM):
         return self.forwardv2(
             x,
             context=context,
+            recurrence_scope=self.recurrence_scope,
+            segments_per_sample=segments_per_sample,
             **kwargs,
         )
 

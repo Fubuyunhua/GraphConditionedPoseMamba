@@ -1,0 +1,20 @@
+_base_: graph_posemamba_h36m_w64_d8_0p8m_memopt_speed.yaml
+
+config: configs/pose3d/ablation_full_no_recurrence_reset_matched.yaml
+checkpoint: runs/paper_remaining_evidence/full_no_recurrence_reset_matched_seed0
+pretrained: runs/paper_remaining_evidence/full_no_recurrence_reset_matched_seed0
+seed: 0
+epochs: 80
+
+enable_linear_warmup: false
+honor_no_weight_decay: false
+max_grad_norm: 0.0
+track_parameter_update_norm: false
+
+graph_injection_mode: control
+graph_conditioned_ssm: true
+graph_topology_mode: anatomical
+graph_rewire_seed: 3407
+factorized_spatial_temporal: true
+recurrence_scope: joined
+

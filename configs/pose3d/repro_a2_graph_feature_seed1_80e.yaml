@@ -1,0 +1,14 @@
+_base_: ablation_graph_feature.yaml
+
+config: configs/pose3d/repro_a2_graph_feature_seed1_80e.yaml
+checkpoint: runs/paper_remaining_evidence/a2_graph_feature_seed1
+pretrained: runs/paper_remaining_evidence/a2_graph_feature_seed1
+seed: 1
+enable_linear_warmup: false
+honor_no_weight_decay: false
+max_grad_norm: 0.0
+track_parameter_update_norm: false
+graph_topology_mode: anatomical
+graph_rewire_seed: 3407
+recurrence_scope: independent
+

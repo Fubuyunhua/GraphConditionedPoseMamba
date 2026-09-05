@@ -1,0 +1,7 @@
+_base_: repro_full_seed1_80e.yaml
+
+config: configs/pose3d/repro_full_seed2_80e.yaml
+checkpoint: runs/paper_remaining_evidence/full_seed2
+pretrained: runs/paper_remaining_evidence/full_seed2
+seed: 2
+

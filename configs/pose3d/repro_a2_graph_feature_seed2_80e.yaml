@@ -1,0 +1,7 @@
+_base_: repro_a2_graph_feature_seed1_80e.yaml
+
+config: configs/pose3d/repro_a2_graph_feature_seed2_80e.yaml
+checkpoint: runs/paper_remaining_evidence/a2_graph_feature_seed2
+pretrained: runs/paper_remaining_evidence/a2_graph_feature_seed2
+seed: 2
+

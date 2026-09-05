@@ -1,0 +1,16 @@
+_base_: graph_posemamba_3dhp_w64_d8_protocol_v2_memopt.yaml
+
+config: configs/pose3d_3dhp/posemamba_3dhp_w64_d6_m1_released_protocol_v2.yaml
+checkpoint: runs/paper_remaining_evidence/3dhp_posemamba_released_seed0
+pretrained: runs/paper_remaining_evidence/3dhp_posemamba_released_seed0
+seed: 0
+
+# Pre-registered before results: MPI baseline is the released/legacy backward
+# definition, not the corrected diagnostic variant.
+backbone: PoseMamba
+model_type: PoseMamba
+dim_feat: 64
+depth: 6
+mlp_ratio: 1.0
+posemamba_backward_mode: legacy
+

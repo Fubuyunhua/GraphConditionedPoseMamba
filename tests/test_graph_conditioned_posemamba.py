@@ -1,5 +1,6 @@
 import sys
 import unittest
+import random
 from pathlib import Path
 
 import torch
@@ -14,12 +15,25 @@ from lib.model.PoseMamba import (
     GraphConditionedPoseMamba,
     PoseMamba,
 )
-from lib.model.graph_mixer import SkeletonGraphMixer, h36m_neighbor_names
+from lib.model.graph_mixer import (
+    H36M_BONE_EDGES,
+    H36M_SYMMETRY_EDGES,
+    SkeletonGraphMixer,
+    build_h36m_graph_spec,
+    h36m_neighbor_names,
+)
 from lib.model.mambablocks import (
     BiSTSSM,
     CrossMerge1DBidirectional,
     CrossScan1DBidirectional,
     FactorizedBiSSM,
+    join_bidirectional_segments,
+    split_bidirectional_segments,
+)
+from lib.model.csms6s import (
+    CrossScan_plus_poselimbs,
+    CrossScanPlusPoseLimbsExactBackward,
+    POSE_LIMB_PARENT_INDICES,
 )
 from lib.utils.tools import get_config
 
@@ -932,6 +946,250 @@ class ConfigurationAndCapacityTests(unittest.TestCase):
         self.assertEqual(parameter_count(model), 20_192_451)
 
 
+class PaperEvidenceCpuTests(unittest.TestCase):
+    def test_rewired_graph_preserves_constraints_and_private_rng(self):
+        random.seed(991)
+        python_state = random.getstate()
+        torch.manual_seed(992)
+        torch_state = torch.get_rng_state().clone()
+        first = build_h36m_graph_spec(
+            "degree_preserving_rewired", seed=3407
+        )
+        second = build_h36m_graph_spec(
+            "degree_preserving_rewired", seed=3407
+        )
+        self.assertEqual(first, second)
+        self.assertEqual(random.getstate(), python_state)
+        self.assertTrue(torch.equal(torch.get_rng_state(), torch_state))
+        anatomical = build_h36m_graph_spec("anatomical", seed=3407)
+        self.assertEqual(first["bone_degrees"], anatomical["bone_degrees"])
+        self.assertEqual(
+            first["symmetry_degrees"], anatomical["symmetry_degrees"]
+        )
+        self.assertEqual(len(first["bone_edges"]), len(H36M_BONE_EDGES))
+        self.assertEqual(
+            len(first["symmetry_edges"]), len(H36M_SYMMETRY_EDGES)
+        )
+        self.assertTrue(first["bone_connected"])
+        self.assertNotEqual(first["bone_edges"], anatomical["bone_edges"])
+        self.assertNotEqual(
+            first["symmetry_edges"], anatomical["symmetry_edges"]
+        )
+        for key in ("bone_edges", "symmetry_edges"):
+            edges = [tuple(edge) for edge in first[key]]
+            self.assertEqual(len(edges), len(set(edges)))
+            self.assertTrue(all(left != right for left, right in edges))
+        self.assertEqual(len(first["sha256"]), 64)
+
+    def test_rewired_graph_is_shared_and_parameter_matched(self):
+        torch.manual_seed(401)
+        anatomical = GraphConditionedPoseMamba(
+            num_frame=9,
+            in_chans=3,
+            embed_dim_ratio=16,
+            depth=2,
+            mlp_ratio=2.0,
+            graph_topology_mode="anatomical",
+        )
+        torch.manual_seed(401)
+        rewired = GraphConditionedPoseMamba(
+            num_frame=9,
+            in_chans=3,
+            embed_dim_ratio=16,
+            depth=2,
+            mlp_ratio=2.0,
+            graph_topology_mode="degree_preserving_rewired",
+            graph_rewire_seed=3407,
+        )
+        self.assertEqual(
+            [(name, tuple(value.shape)) for name, value in anatomical.named_parameters()],
+            [(name, tuple(value.shape)) for name, value in rewired.named_parameters()],
+        )
+        self.assertEqual(parameter_count(anatomical), parameter_count(rewired))
+        hashes = {
+            block.graph_mixer.graph_topology_hash for block in rewired.blocks
+        }
+        self.assertEqual(hashes, {rewired.graph_topology_hash})
+        self.assertFalse(
+            torch.equal(
+                anatomical.blocks[0].graph_mixer.bone_adjacency,
+                rewired.blocks[0].graph_mixer.bone_adjacency,
+            )
+        )
+
+    def test_rewired_dense_and_explicit_aggregation_are_equal(self):
+        mixer = SkeletonGraphMixer(
+            16,
+            graph_topology_mode="degree_preserving_rewired",
+            graph_rewire_seed=3407,
+        ).eval()
+        x = torch.randn(2, 5, 17, 16)
+        with torch.no_grad():
+            mixer.use_dense_aggregation = True
+            dense = mixer(x)
+            mixer.use_dense_aggregation = False
+            explicit = mixer(x)
+        torch.testing.assert_close(dense, explicit, rtol=1e-5, atol=1e-6)
+
+    def test_rewired_save_load_rebuilds_topology(self):
+        first = SkeletonGraphMixer(
+            8,
+            graph_topology_mode="degree_preserving_rewired",
+            graph_rewire_seed=3407,
+        ).eval()
+        second = SkeletonGraphMixer(
+            8,
+            graph_topology_mode="degree_preserving_rewired",
+            graph_rewire_seed=3407,
+        ).eval()
+        second.load_state_dict(first.state_dict(), strict=True)
+        x = torch.randn(2, 3, 17, 8)
+        with torch.no_grad():
+            torch.testing.assert_close(first(x), second(x), rtol=0, atol=0)
+        self.assertEqual(first.topology_metadata(), second.topology_metadata())
+        self.assertFalse(
+            any(
+                token in first.state_dict()
+                for token in (
+                    "bone_targets",
+                    "bone_sources",
+                    "symmetry_targets",
+                    "symmetry_sources",
+                )
+            )
+        )
+
+    def test_joined_bidirectional_mapping_and_inverse(self):
+        batch, segments, channels, length = 2, 3, 2, 4
+        local = torch.arange(
+            batch * segments * 2 * channels * length,
+            dtype=torch.float64,
+        ).reshape(batch * segments, 2, channels, length)
+        joined = join_bidirectional_segments(local, segments)
+        restored = split_bidirectional_segments(joined, segments)
+        self.assertTrue(torch.equal(restored, local))
+        grouped = local.reshape(batch, segments, 2, channels, length)
+        expected_forward = grouped[:, :, 0].permute(0, 2, 1, 3).reshape(
+            batch, channels, segments * length
+        )
+        expected_backward = grouped[:, :, 1].flip(1).permute(
+            0, 2, 1, 3
+        ).reshape(batch, channels, segments * length)
+        self.assertTrue(torch.equal(joined[:, 0], expected_forward))
+        self.assertTrue(torch.equal(joined[:, 1], expected_backward))
+
+    def test_joined_mapping_single_segment_is_identity(self):
+        local = torch.randn(3, 2, 4, 7)
+        joined = join_bidirectional_segments(local, 1)
+        self.assertTrue(torch.equal(joined, local))
+        self.assertTrue(
+            torch.equal(split_bidirectional_segments(joined, 1), local)
+        )
+
+    def test_matched_no_reset_has_identical_parameters(self):
+        torch.manual_seed(402)
+        independent = GraphConditionedPoseMamba(
+            num_frame=9,
+            in_chans=3,
+            embed_dim_ratio=16,
+            depth=1,
+            mlp_ratio=2.0,
+            recurrence_scope="independent",
+        )
+        torch.manual_seed(402)
+        joined = GraphConditionedPoseMamba(
+            num_frame=9,
+            in_chans=3,
+            embed_dim_ratio=16,
+            depth=1,
+            mlp_ratio=2.0,
+            recurrence_scope="joined",
+        )
+        self.assertEqual(
+            [(name, tuple(value.shape)) for name, value in independent.named_parameters()],
+            [(name, tuple(value.shape)) for name, value in joined.named_parameters()],
+        )
+        joined.load_state_dict(independent.state_dict(), strict=True)
+
+    @staticmethod
+    def _pose_limb_reference(x):
+        batch, channels, height, width = x.shape
+        first = (x + x[..., POSE_LIMB_PARENT_INDICES]).flatten(2, 3)
+        second = x.transpose(2, 3).flatten(2, 3)
+        return torch.stack(
+            (first, second, first.flip(-1), second.flip(-1)), dim=1
+        ).reshape(batch, 4, channels, height * width)
+
+    def test_corrected_pose_limb_forward_is_legacy_exact(self):
+        x = torch.randn(2, 3, 4, 17, dtype=torch.float64)
+        legacy = CrossScan_plus_poselimbs.apply(x)
+        corrected = CrossScanPlusPoseLimbsExactBackward.apply(x)
+        reference = self._pose_limb_reference(x)
+        self.assertTrue(torch.equal(corrected, legacy))
+        self.assertTrue(torch.equal(corrected, reference))
+
+    def test_corrected_pose_limb_backward_matches_reference(self):
+        x_reference = torch.randn(
+            1, 2, 3, 17, dtype=torch.float64, requires_grad=True
+        )
+        upstream = torch.randn(1, 4, 2, 51, dtype=torch.float64)
+        (self._pose_limb_reference(x_reference) * upstream).sum().backward()
+        expected = x_reference.grad.detach().clone()
+
+        x_corrected = x_reference.detach().clone().requires_grad_(True)
+        (
+            CrossScanPlusPoseLimbsExactBackward.apply(x_corrected) * upstream
+        ).sum().backward()
+        torch.testing.assert_close(
+            x_corrected.grad, expected, rtol=1e-12, atol=1e-12
+        )
+
+        x_legacy = x_reference.detach().clone().requires_grad_(True)
+        (CrossScan_plus_poselimbs.apply(x_legacy) * upstream).sum().backward()
+        self.assertFalse(torch.equal(x_legacy.grad, expected))
+
+    def test_corrected_pose_limb_fp64_gradcheck(self):
+        x = torch.randn(
+            1, 1, 2, 17, dtype=torch.float64, requires_grad=True
+        )
+        self.assertTrue(
+            torch.autograd.gradcheck(
+                CrossScanPlusPoseLimbsExactBackward.apply,
+                (x,),
+                eps=1e-6,
+                atol=1e-5,
+                rtol=1e-4,
+            )
+        )
+
+    def test_posemamba_backward_modes_are_forward_and_checkpoint_compatible(self):
+        torch.manual_seed(403)
+        legacy = PoseMamba(
+            num_frame=9,
+            in_chans=3,
+            embed_dim_ratio=16,
+            depth=1,
+            mlp_ratio=1.0,
+            posemamba_backward_mode="legacy",
+        ).eval()
+        exact = PoseMamba(
+            num_frame=9,
+            in_chans=3,
+            embed_dim_ratio=16,
+            depth=1,
+            mlp_ratio=1.0,
+            posemamba_backward_mode="exact",
+        ).eval()
+        exact.load_state_dict(legacy.state_dict(), strict=True)
+        self.assertEqual(
+            [(name, tuple(value.shape)) for name, value in legacy.named_parameters()],
+            [(name, tuple(value.shape)) for name, value in exact.named_parameters()],
+        )
+        self.assertEqual(
+            exact.execution_spec()["posemamba_backward_mode"], "exact"
+        )
+
+
 @unittest.skipUnless(cuda_selective_scan_available(), "CUDA selective scan is unavailable")
 class CudaIntegrationTests(unittest.TestCase):
     def test_actual_b2_t243_forward(self):
@@ -1102,6 +1360,100 @@ class CudaIntegrationTests(unittest.TestCase):
                 rtol=1e-5,
                 atol=2e-10,
             )
+
+    def test_joined_recurrence_preserves_local_prescan_tensors(self):
+        independent = FactorizedBiSSM(
+            d_model=16, d_state=4, ssm_ratio=2.0, d_conv=3,
+            axis="temporal", recurrence_scope="independent",
+        ).cuda()
+        joined = FactorizedBiSSM(
+            d_model=16, d_state=4, ssm_ratio=2.0, d_conv=3,
+            axis="temporal", recurrence_scope="joined",
+        ).cuda()
+        joined.load_state_dict(independent.state_dict(), strict=True)
+        setattr(independent, "__DEBUG__", True)
+        setattr(joined, "__DEBUG__", True)
+        x = torch.randn(6, 1, 7, 16, device="cuda")
+        context = torch.randn_like(x)
+        output_independent = independent(
+            x, context=context, segments_per_sample=3
+        )
+        output_joined = joined(x, context=context, segments_per_sample=3)
+        for key in ("local_us", "local_dts", "local_Bs", "local_Cs"):
+            torch.testing.assert_close(
+                independent.__data__[key], joined.__data__[key], rtol=0, atol=0
+            )
+        self.assertFalse(torch.equal(output_independent, output_joined))
+
+    def test_joined_recurrence_single_segment_matches_independent(self):
+        independent = FactorizedBiSSM(
+            d_model=16, d_state=4, ssm_ratio=2.0, d_conv=3,
+            axis="temporal", recurrence_scope="independent",
+        ).cuda().eval()
+        joined = FactorizedBiSSM(
+            d_model=16, d_state=4, ssm_ratio=2.0, d_conv=3,
+            axis="temporal", recurrence_scope="joined",
+        ).cuda().eval()
+        joined.load_state_dict(independent.state_dict(), strict=True)
+        x = torch.randn(2, 1, 7, 16, device="cuda")
+        context = torch.randn_like(x)
+        with torch.no_grad():
+            expected = independent(x, context=context, segments_per_sample=1)
+            actual = joined(x, context=context, segments_per_sample=1)
+        torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+
+    def test_joined_recurrence_keeps_batch_samples_isolated(self):
+        module = FactorizedBiSSM(
+            d_model=16, d_state=4, ssm_ratio=2.0, d_conv=1,
+            axis="spatial", recurrence_scope="joined",
+        ).cuda().eval()
+        x = torch.randn(6, 1, 5, 16, device="cuda")
+        context = torch.randn_like(x)
+        changed_x = x.clone()
+        changed_context = context.clone()
+        changed_x[3:] += torch.randn_like(changed_x[3:])
+        changed_context[3:] += torch.randn_like(changed_context[3:])
+        with torch.no_grad():
+            first = module(x, context=context, segments_per_sample=3)
+            second = module(
+                changed_x, context=changed_context, segments_per_sample=3
+            )
+        torch.testing.assert_close(first[:3], second[:3], rtol=0, atol=0)
+
+    def test_matched_no_reset_full_step_is_finite(self):
+        model = GraphConditionedPoseMamba(
+            num_frame=9, in_chans=3, embed_dim_ratio=16, depth=1,
+            mlp_ratio=2.0, recurrence_scope="joined",
+        ).cuda().train()
+        x = torch.randn(2, 9, 17, 3, device="cuda")
+        target = torch.randn(2, 9, 17, 3, device="cuda")
+        output = model(x)
+        loss = (output - target).square().mean()
+        loss.backward()
+        self.assertTrue(torch.isfinite(output).all())
+        self.assertTrue(torch.isfinite(loss))
+        self.assertTrue(
+            all(
+                parameter.grad is None or torch.isfinite(parameter.grad).all()
+                for parameter in model.parameters()
+            )
+        )
+
+    def test_posemamba_exact_backward_preserves_full_forward(self):
+        legacy = PoseMamba(
+            num_frame=9, in_chans=3, embed_dim_ratio=16, depth=1,
+            mlp_ratio=1.0, posemamba_backward_mode="legacy",
+        ).cuda().eval()
+        exact = PoseMamba(
+            num_frame=9, in_chans=3, embed_dim_ratio=16, depth=1,
+            mlp_ratio=1.0, posemamba_backward_mode="exact",
+        ).cuda().eval()
+        exact.load_state_dict(legacy.state_dict(), strict=True)
+        x = torch.randn(1, 9, 17, 3, device="cuda")
+        with torch.no_grad():
+            legacy_output = legacy(x)
+            exact_output = exact(x)
+        torch.testing.assert_close(exact_output, legacy_output, rtol=0, atol=0)
 
     def test_original_posemamba_still_runs(self):
         model = PoseMamba(
