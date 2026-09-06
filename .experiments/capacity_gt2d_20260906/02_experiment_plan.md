@@ -1,3 +1,5 @@
+> **Latest user cancellation (2026-09-06): MPI-PoseMamba M-A0 is CANCELLED before launch. Do not run it or block other tasks on it. MPI Full and H36M GT2D continue unchanged; H36M A0 repeats remain authorized. On MPI, report Full performance with the actual protocol and limitations; do not claim a matched advantage over PoseMamba. Earlier requirements to run the MPI pair below are superseded.**
+
 > Latest run: corrected-A0 is COMPLETED. User-authorized active pair is MPI Full PID1136724 plus S-GT2D-S0 PID1203060, launched19:16:44. GT remote root `/scratch/home/caiwei/GraphConditionedPoseMamba_H36M_GT2D_S_20260906`; log `launch_logs/h36m_gt2d_s_seed0.log`;80e per-epoch best EMA. See capacity_gt2d_20260906/SMALL_GT2D_PARALLEL_20260906.md. Skip its old later queue position; no third run.
 
 # Registered serial expansion

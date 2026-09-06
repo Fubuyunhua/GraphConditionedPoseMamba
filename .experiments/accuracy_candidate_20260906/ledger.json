@@ -65,7 +65,6 @@
       "falsification": "valid fixed60 P1>=37.430162 fails target",
       "stopping_rule": "Complete fixed budget unless technical failure; no test-based stopping, automatic retry or unlimited tuning",
       "dependencies": [
-        "M-A0",
         "M-FULL",
         "R-A0",
         "R-A2",
@@ -96,6 +95,11 @@
     {
       "id": "ACC-002",
       "decision": "Latest user expands bounded family; execute this XL detector once after M/L pairs and before XL GT2D, not as a duplicate."
+    },
+    {
+      "id": "CANCEL-MPI-A0-20260906",
+      "decision": "User explicitly cancels unstarted MPI-PoseMamba. Keep existing MPI Full and H36M GT2D unchanged. Waive MPI-baseline prerequisite; H36M released A0 repeats remain authorized. No matched MPI superiority claim.",
+      "scope": "MPI only"
     }
   ]
 }

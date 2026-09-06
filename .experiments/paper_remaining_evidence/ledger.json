@@ -343,7 +343,7 @@
     {
       "id": "M-A0",
       "track": "IMPROVEMENT",
-      "status": "PLANNED",
+      "status": "CANCELLED",
       "hypothesis": "released PoseMamba provides the predeclared MPI baseline",
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "train released A0 on MPI-INF-3DHP repaired protocol",
@@ -373,7 +373,12 @@
         "config": "configs/pose3d_3dhp/posemamba_3dhp_w64_d6_m1_released_testbest.yaml",
         "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
       },
-      "result": null
+      "result": null,
+      "cancellation": {
+        "reason": "User explicitly rejects MPI-PoseMamba baseline; not launched; no accuracy result",
+        "authorization": "revoked",
+        "date": "2026-09-06"
+      }
     },
     {
       "id": "M-FULL",
@@ -464,6 +469,11 @@
       "id": "D-GT2D-PARALLEL-20260906",
       "decision": "Corrected A0 completed; user requests small GT2D parallel with current MPI. Do not duplicate or start a third job.",
       "time": "2026-09-06T19:16:44+08:00"
+    },
+    {
+      "id": "CANCEL-MPI-A0-20260906",
+      "decision": "User explicitly cancels unstarted MPI-PoseMamba. Keep existing MPI Full and H36M GT2D unchanged. Waive MPI-baseline prerequisite; H36M released A0 repeats remain authorized. No matched MPI superiority claim.",
+      "scope": "MPI only"
     }
   ],
   "execution_authorization": {
@@ -472,7 +482,6 @@
   },
   "execution_order": [
     "M-FULL + S-GT2D-S0 (current authorized pair)",
-    "M-A0",
     "R-A0-1",
     "R-A2-1",
     "R-FULL-1",
@@ -494,6 +503,6 @@
       "S-GT2D-S0"
     ],
     "max_formal_jobs": 2,
-    "after_pair": "M-A0 then remaining repeats and capacity candidates; skip S-GT2D already running/completed"
+    "after_pair": "remaining H36M paired repeats and capacity/GT2D; MPI A0 cancelled; skip completed small GT2D"
   }
 }

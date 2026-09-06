@@ -59,6 +59,7 @@ posemamba_variants:
 mpi_inf_3dhp:
   protocol: mpi-inf-3dhp-gt2d-f81-official-repaired-v1
   baseline_predeclared: PoseMamba_W64_D6_M1_released_legacy
+  baseline_execution_status: CANCELLED_USER_REQUEST_BEFORE_LAUNCH
   full: GraphConditionedPoseMamba_W64_D8
   clip_len: 81
   train_stride: 9

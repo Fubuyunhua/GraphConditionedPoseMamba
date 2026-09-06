@@ -111,7 +111,7 @@
       "falsification": "No capacity benefit within comparable results; GT does not support assumed error reduction",
       "stopping_rule": "Technical failure pauses queue; no test-based stopping, seed replacement, or automatic retry",
       "dependencies": [
-        "MPI_PAIR",
+        "M-FULL",
         "REQUIRED_PAIRED_REPEATS",
         "CAPACITY_GT2D_PREFLIGHT"
       ],
@@ -148,7 +148,7 @@
       "falsification": "No capacity benefit within comparable results; GT does not support assumed error reduction",
       "stopping_rule": "Technical failure pauses queue; no test-based stopping, seed replacement, or automatic retry",
       "dependencies": [
-        "MPI_PAIR",
+        "M-FULL",
         "REQUIRED_PAIRED_REPEATS",
         "CAPACITY_GT2D_PREFLIGHT"
       ],
@@ -185,7 +185,7 @@
       "falsification": "No capacity benefit within comparable results; GT does not support assumed error reduction",
       "stopping_rule": "Technical failure pauses queue; no test-based stopping, seed replacement, or automatic retry",
       "dependencies": [
-        "MPI_PAIR",
+        "M-FULL",
         "REQUIRED_PAIRED_REPEATS",
         "CAPACITY_GT2D_PREFLIGHT"
       ],
@@ -222,7 +222,7 @@
       "falsification": "No capacity benefit within comparable results; GT does not support assumed error reduction",
       "stopping_rule": "Technical failure pauses queue; no test-based stopping, seed replacement, or automatic retry",
       "dependencies": [
-        "MPI_PAIR",
+        "M-FULL",
         "REQUIRED_PAIRED_REPEATS",
         "CAPACITY_GT2D_PREFLIGHT"
       ],
@@ -259,7 +259,7 @@
       "falsification": "No capacity benefit within comparable results; GT does not support assumed error reduction",
       "stopping_rule": "Technical failure pauses queue; no test-based stopping, seed replacement, or automatic retry",
       "dependencies": [
-        "MPI_PAIR",
+        "M-FULL",
         "REQUIRED_PAIRED_REPEATS",
         "CAPACITY_GT2D_PREFLIGHT"
       ],
@@ -287,6 +287,11 @@
       "id": "CAP-GT-002",
       "decision": "User requests immediate small-GT2D concurrency; launch ahead of predecessors after successful coordinate/flip/root/gradient and B4 gates. Use H36M-style per-epoch best EMA preference for this small run; larger candidate endpoint registrations unchanged.",
       "time": "2026-09-06T19:16:44+08:00"
+    },
+    {
+      "id": "CANCEL-MPI-A0-20260906",
+      "decision": "User explicitly cancels unstarted MPI-PoseMamba. Keep existing MPI Full and H36M GT2D unchanged. Waive MPI-baseline prerequisite; H36M released A0 repeats remain authorized. No matched MPI superiority claim.",
+      "scope": "MPI only"
     }
   ]
 }
