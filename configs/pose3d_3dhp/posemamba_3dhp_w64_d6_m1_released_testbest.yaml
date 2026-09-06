@@ -1,0 +1,5 @@
+_base_: posemamba_3dhp_w64_d6_m1_released_protocol_v2.yaml
+config: configs/pose3d_3dhp/posemamba_3dhp_w64_d6_m1_released_testbest.yaml
+checkpoint: runs/mpi_a0_testbest_seed0
+pretrained: runs/mpi_a0_testbest_seed0
+mpi3dhp_checkpoint_selection: legacy_test_best

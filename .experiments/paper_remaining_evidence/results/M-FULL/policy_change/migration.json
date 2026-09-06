@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "time": "2026-09-06T05:56:41.172039+00:00",
+  "change": "User-selected per-epoch test-monitored best EMA MPJPE; fixed120 secondary",
+  "resumed_epoch": 1,
+  "best_metrics_initialized_from_epoch1": {
+    "raw_epoch": 1,
+    "raw_p1_mm": 45.33778991334335,
+    "raw_p2_mm": 36.68589175779923,
+    "raw_pck_150_percent": 95.64194373401534,
+    "raw_auc_0_150_percent": 71.64453537936915,
+    "ema_epoch": 1,
+    "ema_p1_mm": 47.07302046336299,
+    "ema_p2_mm": 38.721892668848454,
+    "ema_pck_150_percent": 94.66598465473146,
+    "ema_auc_0_150_percent": 71.00791133844841
+  },
+  "config_sha256": "3b1614db6e5a77686f00c1edf101dbd9eb0b9adca34e7c7cf51362a695539631",
+  "trainer_sha256": "9dd49e093ac57b37b161da794e74cc6647c34f6aedf6b7969ead70b809d8c357",
+  "resume_sha256": "01092c91c1ef8a01c70492486b4b56d4b24f32e01a68c73c7125d6b84fc4d6d1",
+  "preserved_state": "model, optimizer, EMA, LR and RNG copied without alteration; only best metric metadata populated",
+  "prior_run": "runs/mpi_full_seed0",
+  "first_epoch_evaluation": "verification/policy_change_20260906/eval_ema/evaluation.json",
+  "discarded_work": "partial epoch2 before policy transition; re-executed from saved epoch1"
+}

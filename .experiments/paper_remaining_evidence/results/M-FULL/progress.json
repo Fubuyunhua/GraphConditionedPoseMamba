@@ -1,11 +1,19 @@
 {
   "status": "RUNNING",
-  "completed_epochs": 0,
-  "active_epoch": 1,
-  "observed_batches": 986,
-  "time_utc": "2026-09-06T05:34:14+00:00",
-  "gpu_utilization_percent": 96,
-  "gpu_total_used_mib": 5039,
-  "train_pid": 1131838,
-  "other_train_pid": 1102590
+  "completed_epochs": 1,
+  "active_epoch": 2,
+  "train_pid": 1136724,
+  "policy": "best_ema_test_monitored_first120",
+  "best": {
+    "raw_epoch": 1,
+    "raw_p1_mm": 45.33778991334335,
+    "raw_p2_mm": 36.68589175779923,
+    "raw_pck_150_percent": 95.64194373401534,
+    "raw_auc_0_150_percent": 71.64453537936915,
+    "ema_epoch": 1,
+    "ema_p1_mm": 47.07302046336299,
+    "ema_p2_mm": 38.721892668848454,
+    "ema_pck_150_percent": 94.66598465473146,
+    "ema_auc_0_150_percent": 71.00791133844841
+  }
 }

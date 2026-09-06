@@ -69,6 +69,7 @@ mpi_inf_3dhp:
   train_sha256: 313644a5330a140a78766708811b7640e1a7ab13c2dde0575adb2c69eedaaef8
   test_sha256: 78d8d90fa3f4b0f2c040e85353ad0fe75e8cdde199f63b76575f866e9933f409
   epochs: 120
-  checkpoint_rule: ema_fixed_epoch120
-  test_monitoring: false
+  checkpoint_rule: best_ema_test_monitored_first120
+  secondary_checkpoint_rule: ema_fixed_epoch120
+  test_monitoring: true
 

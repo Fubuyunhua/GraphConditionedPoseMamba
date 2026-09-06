@@ -584,7 +584,11 @@ def main() -> None:
         "3DHP evaluation policy; "
         f"declared_selection_policy={declared_selection_policy} "
         f"effective_evaluation_policy={effective_evaluation_policy}; "
-        "epoch-120 is the locked formal endpoint"
+        + (
+            "primary=best test-monitored EMA MPJPE; fixed final epoch is secondary"
+            if effective_evaluation_policy in {"legacy_test_best", "per_epoch_monitored_test"}
+            else "primary=fixed final-epoch EMA MPJPE"
+        )
     )
     history: list[dict[str, Any]] = []
     for epoch in range(start_epoch, int(args.epochs)):

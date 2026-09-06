@@ -1,3 +1,5 @@
+> Latest MPI policy amendment: user requests per-epoch test evaluation and best EMA MPJPE selection for Full and released A0. Fixed120 is secondary. Full now resumes epoch1 in `runs/mpi_full_testbest_seed0`, PID1136724, log `launch_logs/mpi_full_testbest_seed0.log`; epoch1 replay participates in best selection. See `.experiments/paper_remaining_evidence/MPI_TESTBEST_POLICY_CHANGE_20260906.md`. Prior fixed-only/current-PID statements below are historical.
+
 # User-authorized concurrent MPI Full launch
 
 2026-09-06: User explicitly requested concurrent launch of the approximately0.8M 3DHP Full model while corrected-A0 continues. This overrides exclusive/serial launch requirements only for this named pair. Do not stop corrected-A0 and do not start a third formal run.

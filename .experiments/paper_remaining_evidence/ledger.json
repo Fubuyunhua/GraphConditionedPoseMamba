@@ -324,19 +324,20 @@
       "hypothesis": "released PoseMamba provides the predeclared MPI baseline",
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "train released A0 on MPI-INF-3DHP repaired protocol",
-      "controls": "T81 protocol, joint mapping, data, loss, optimizer and fixed endpoint shared with M-FULL",
+      "controls": "same repaired T81 data/model-specific architecture/loss/optimizer/EMA; both now per-epoch test-monitored best EMA with fixed120 secondary",
       "seeds": [
         0
       ],
       "budget": "120 epochs",
-      "primary_metric": "EMA fixed epoch120 MPJPE",
+      "primary_metric": "minimum test-monitored EMA MPJPE in epochs1-120",
       "secondary_metrics": [
-        "P-MPJPE",
-        "PCK150",
-        "AUC",
+        "same-checkpoint P-MPJPE",
+        "same-checkpoint PCK150",
+        "same-checkpoint AUC",
+        "fixed120 EMA/raw",
         "per-sequence"
       ],
-      "acceptance": "valid locked endpoint",
+      "acceptance": "valid completed120 epochs; disclosed test-monitored best EMA with paired metrics",
       "falsification": "protocol or source mismatch",
       "stopping_rule": "technical invalidity only",
       "dependencies": [
@@ -346,7 +347,7 @@
         "USER_AUTHORIZATION_20260906_PRIORITY"
       ],
       "artifacts": {
-        "config": "configs/pose3d_3dhp/posemamba_3dhp_w64_d6_m1_released_protocol_v2.yaml",
+        "config": "configs/pose3d_3dhp/posemamba_3dhp_w64_d6_m1_released_testbest.yaml",
         "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
       },
       "result": null
@@ -358,19 +359,20 @@
       "hypothesis": "Full improves over released A0 on the second dataset",
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "train Full on MPI-INF-3DHP repaired protocol",
-      "controls": "T81 protocol, joint mapping, data, loss, optimizer and fixed endpoint shared with M-A0",
+      "controls": "same repaired T81 data/model-specific architecture/loss/optimizer/EMA; both now per-epoch test-monitored best EMA with fixed120 secondary",
       "seeds": [
         0
       ],
       "budget": "120 epochs",
-      "primary_metric": "EMA fixed epoch120 MPJPE",
+      "primary_metric": "minimum test-monitored EMA MPJPE in epochs1-120",
       "secondary_metrics": [
-        "P-MPJPE",
-        "PCK150",
-        "AUC",
+        "same-checkpoint P-MPJPE",
+        "same-checkpoint PCK150",
+        "same-checkpoint AUC",
+        "fixed120 EMA/raw",
         "per-sequence"
       ],
-      "acceptance": "valid locked endpoint",
+      "acceptance": "valid completed120 epochs; disclosed test-monitored best EMA with paired metrics",
       "falsification": "Full equals or underperforms released A0",
       "stopping_rule": "technical invalidity only",
       "dependencies": [
@@ -378,16 +380,20 @@
         "MPI_FULL_CONCURRENT_B4_PASS"
       ],
       "artifacts": {
-        "config": "configs/pose3d_3dhp/graph_posemamba_3dhp_w64_d8_protocol_v2_memopt.yaml",
+        "config": "configs/pose3d_3dhp/graph_posemamba_3dhp_w64_d8_testbest.yaml",
         "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b",
         "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906",
-        "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906/runs/mpi_full_seed0",
-        "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906/launch_logs/mpi_full_seed0.log",
-        "train_pid": 1131838,
-        "launcher_pid": 1131831,
+        "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906/runs/mpi_full_testbest_seed0",
+        "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906/launch_logs/mpi_full_testbest_seed0.log",
+        "train_pid": 1136724,
+        "launcher_pid": 1136698,
         "launch_time": "2026-09-06T05:33:34.658353+00:00",
         "deployment_source": "git:3920d956ba46deb8d02498e4ad6373c7bbba8a39",
-        "preflight": ".experiments/paper_remaining_evidence/results/M-FULL/parallel_preflight.json"
+        "preflight": ".experiments/paper_remaining_evidence/results/M-FULL/parallel_preflight.json",
+        "policy_transition": "2026-09-06T05:56:41.172039+00:00",
+        "previous_checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906/runs/mpi_full_seed0",
+        "resume_checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906/verification/policy_change_20260906/resume_raw_epoch1_with_best.bin",
+        "policy_audit": ".experiments/paper_remaining_evidence/results/M-FULL/policy_change/migration.json"
       },
       "result": null
     }
@@ -424,6 +430,12 @@
       "decision": "User explicitly requested direct concurrent0.8M3DHP launch. Start M-FULL while corrected-A0 continues; only these two concurrently, then M-A0.",
       "evidence": "Fresh B4 finite CUDA/protocol gate,789715 params,launch manifest and both live PIDs; retain frozen scientific recipe",
       "document": ".experiments/paper_remaining_evidence/PARALLEL_MPI_FULL_20260906.md"
+    },
+    {
+      "id": "D-MPI-TESTBEST-20260906",
+      "timestamp": "2026-09-06T05:56:41.172039+00:00",
+      "decision": "User requests H36M-style best selection. Apply per-epoch test-monitored EMA minimum to both MPI models; preserve fixed120 secondary and historical fixed-only records. Full resumes epoch1 with separate epoch1 replay included in best selection.",
+      "document": ".experiments/paper_remaining_evidence/MPI_TESTBEST_POLICY_CHANGE_20260906.md"
     }
   ],
   "execution_authorization": {

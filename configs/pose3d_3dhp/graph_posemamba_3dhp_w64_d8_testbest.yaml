@@ -1,0 +1,5 @@
+_base_: graph_posemamba_3dhp_w64_d8_protocol_v2_memopt.yaml
+config: configs/pose3d_3dhp/graph_posemamba_3dhp_w64_d8_testbest.yaml
+checkpoint: runs/mpi_full_testbest_seed0
+pretrained: runs/mpi_full_testbest_seed0
+mpi3dhp_checkpoint_selection: legacy_test_best
