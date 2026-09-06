@@ -1,3 +1,5 @@
+> Latest amendment: use `.experiments/final_two_sizes_20260906/GT_FINETUNE_AND_SEEDS_LAST.md`. All random-seed repeats move LAST. Detector models train fresh; each GT2D model fine-tunes from its SAME-width best EMA for30 epochs at LR3e-5, not from scratch or across widths. Earlier budgets/order below are historical.
+
 # Audit: redesigned two-size family
 
 BLOCKED pending current tasks/dependencies and runtime preflight; user execution authorization is present. Static design retains previously CPU-verified W128D20=6836355 and W256D16=20192451 parameters. No model source change. Full anatomical graph/control injection/independent K2 recurrence,T243,J17,SSM state16 and ratios1.875/1.96875 unchanged. Input and output[B,T,J,3]. GT uses normalized image-label xy+c1; evaluator preserves known input xy before denormalization/factor/root-centering and must be named separately.

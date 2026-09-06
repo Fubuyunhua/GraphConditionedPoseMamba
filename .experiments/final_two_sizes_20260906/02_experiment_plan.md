@@ -1,3 +1,5 @@
+> Latest amendment: use `.experiments/final_two_sizes_20260906/GT_FINETUNE_AND_SEEDS_LAST.md`. All random-seed repeats move LAST. Detector models train fresh; each GT2D model fine-tunes from its SAME-width best EMA for30 epochs at LR3e-5, not from scratch or across widths. Earlier budgets/order below are historical.
+
 # Remaining bounded plan
 
 Finish active MPI Full and S-GT2D in their already authorized parallel arrangement. MPI-PoseMamba stays CANCELLED. Existing Rewired/no-reset/corrected A0 studies are complete and must not be repeated. Retain the six already-authorized H36M paired repetitions: A0/A2/Full seed1,then seed2, because the injection effect is only~0.214mm and variance unknown.

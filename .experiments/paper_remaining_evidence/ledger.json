@@ -478,6 +478,10 @@
     {
       "id": "FINAL-TWO-SIZES",
       "decision": "Replace unstarted larger candidates with exactly four final_two_sizes runs; MPI baseline remains cancelled."
+    },
+    {
+      "id": "SEEDS-LAST-20260906",
+      "decision": "User explicitly puts different random-seed experiments last; final two-width detector/GT2D phases now precede all six paired repeats. MPI baseline stays cancelled."
     }
   ],
   "execution_authorization": {
@@ -486,16 +490,16 @@
   },
   "execution_order": [
     "M-FULL + S-GT2D-S0 (current pair)",
+    "FINAL-W128-DET2D-S0",
+    "FINAL-W256-DET2D-S0",
+    "FINAL-W128-GT2D-S0",
+    "FINAL-W256-GT2D-S0",
     "R-A0-1",
     "R-A2-1",
     "R-FULL-1",
     "R-A0-2",
     "R-A2-2",
-    "R-FULL-2",
-    "FINAL-W128-DET2D-S0",
-    "FINAL-W256-DET2D-S0",
-    "FINAL-W128-GT2D-S0",
-    "FINAL-W256-GT2D-S0"
+    "R-FULL-2"
   ],
   "active_concurrency": {
     "authorized": true,

@@ -7,10 +7,10 @@ evaluate: ''
 seed: 0
 dim_feat: 256
 depth: 16
-epochs: 60
+epochs: 30
 drop_path_rate: 0.3
-learning_rate: 0.0003
-warmup_epochs: 8
+learning_rate: 0.00003
+warmup_epochs: 3
 enable_linear_warmup: true
 warmup_start_factor: 0.1
 lr_schedule_mode: cosine
@@ -32,3 +32,8 @@ mask_T_ratio: 0.0
 scale_range_pretrain: null
 no_eval: false
 checkpoint_frequency: 10
+
+# Fine-tune from same-width detected-input best EMA, never cross-width resume.
+finetune: true
+partial_train: null
+selection: gt2d_init_ema.bin

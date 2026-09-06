@@ -1,3 +1,5 @@
+> Latest amendment: use `.experiments/final_two_sizes_20260906/GT_FINETUNE_AND_SEEDS_LAST.md`. All random-seed repeats move LAST. Detector models train fresh; each GT2D model fine-tunes from its SAME-width best EMA for30 epochs at LR3e-5, not from scratch or across widths. Earlier budgets/order below are historical.
+
 > Latest redesign: remaining large models are ONLY W128D20(80e,dp0.25) and W256D16(60e,dp0.30), each detector2D and GT2D, as registered in `.experiments/final_two_sizes_20260906/ledger.json`. Old unstarted capacity/accuracy candidates are superseded CANCELLED. Existing MPI and small-GT jobs unchanged; MPI baseline remains cancelled.
 
 > **Latest user cancellation (2026-09-06): MPI-PoseMamba M-A0 is CANCELLED before launch. Do not run it or block other tasks on it. MPI Full and H36M GT2D continue unchanged; H36M A0 repeats remain authorized. On MPI, report Full performance with the actual protocol and limitations; do not claim a matched advantage over PoseMamba. Earlier requirements to run the MPI pair below are superseded.**

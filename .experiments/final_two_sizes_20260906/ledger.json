@@ -64,7 +64,6 @@
       "stopping_rule": "fixed full budget unless technical failure or explicit user stop; no automatic retry or best-seed selection",
       "dependencies": [
         "CURRENT_MPI_AND_SMALL_GT2D_COMPLETE",
-        "NECESSARY_H36M_PAIRED_REPEATS",
         "FINAL_SIZE_PREFLIGHT"
       ],
       "artifacts": {
@@ -81,33 +80,35 @@
       "status": "PLANNED",
       "hypothesis": "Stabilized optimization with moderate stochastic depth improves accuracy at the chosen capacity",
       "baseline_id": "Historical-W128-partial",
-      "delta": "W128/D20,DropPath0.25,R3 optimizer; gt2d; full fresh budget",
+      "delta": "W128/D20,DropPath0.25,R3 optimizer; gt2d; full fresh budget; same-width best EMA initialization; new optimizer/LR/RNG/EMA update count; all layers trainable",
       "controls": "Within same-width detector/GT pairs keep optimization,seed,budget,architecture identical; GT uses inherited known-input-xy evaluator. Across sizes this is recipe optimization, not causal width-only ablation.",
       "seeds": [
         0
       ],
-      "budget": "80 epochs; one fresh run",
-      "primary_metric": "minimum test-monitored EMA P1 over epochs1-80, gt2d",
+      "budget": "30 fine-tuning epochs from same-width detector best EMA",
+      "primary_metric": "minimum test-monitored GT2D EMA P1 over30 fine-tuning epochs",
       "secondary_metrics": [
         "same-checkpoint P2",
-        "fixed80 EMA/raw",
-        "parameters",
-        "runtime",
-        "per-action"
+        "fixed30 EMA/raw",
+        "pretrained source identity",
+        "GT2D initial evaluation",
+        "per-action",
+        "runtime"
       ],
       "acceptance": "completed valid run; report performance under its named input protocol",
       "falsification": "No reliable improvement or failed technical gate; retain negative results and do not launch an unregistered sweep",
       "stopping_rule": "fixed full budget unless technical failure or explicit user stop; no automatic retry or best-seed selection",
       "dependencies": [
         "CURRENT_MPI_AND_SMALL_GT2D_COMPLETE",
-        "NECESSARY_H36M_PAIRED_REPEATS",
-        "FINAL_SIZE_PREFLIGHT"
+        "FINAL_SIZE_PREFLIGHT",
+        "FINAL-W128-DET2D-S0"
       ],
       "artifacts": {
         "config": "configs/pose3d/graph_posemamba_h36m_final_w128_d20_gt2d.yaml",
-        "config_sha256": "a46a93f4f7e438dd42f6819acfc5b8ae5d289cbb776de2972368cb03154e7043",
+        "config_sha256": "3faebb9ba68535bf3b5dc3dec820425c9a3eb7d69c2d45a7c5fdee52f5ddc445",
         "parameters": 6836355,
-        "source": "freeze exact deployed successor; inherited model architecture already CPU-count verified"
+        "source": "freeze exact deployed successor; inherited model architecture already CPU-count verified",
+        "initialization": "FINAL-W128-DET2D-S0 best_ema_epoch.bin, immutable weights-only export with EMA count0"
       },
       "result": null
     },
@@ -136,7 +137,6 @@
       "stopping_rule": "fixed full budget unless technical failure or explicit user stop; no automatic retry or best-seed selection",
       "dependencies": [
         "CURRENT_MPI_AND_SMALL_GT2D_COMPLETE",
-        "NECESSARY_H36M_PAIRED_REPEATS",
         "FINAL_SIZE_PREFLIGHT"
       ],
       "artifacts": {
@@ -153,33 +153,35 @@
       "status": "PLANNED",
       "hypothesis": "Stabilized optimization with moderate stochastic depth improves accuracy at the chosen capacity",
       "baseline_id": "Historical-W256-partial",
-      "delta": "W256/D16,DropPath0.3,R3 optimizer; gt2d; full fresh budget",
+      "delta": "W256/D16,DropPath0.3,R3 optimizer; gt2d; full fresh budget; same-width best EMA initialization; new optimizer/LR/RNG/EMA update count; all layers trainable",
       "controls": "Within same-width detector/GT pairs keep optimization,seed,budget,architecture identical; GT uses inherited known-input-xy evaluator. Across sizes this is recipe optimization, not causal width-only ablation.",
       "seeds": [
         0
       ],
-      "budget": "60 epochs; one fresh run",
-      "primary_metric": "minimum test-monitored EMA P1 over epochs1-60, gt2d",
+      "budget": "30 fine-tuning epochs from same-width detector best EMA",
+      "primary_metric": "minimum test-monitored GT2D EMA P1 over30 fine-tuning epochs",
       "secondary_metrics": [
         "same-checkpoint P2",
-        "fixed60 EMA/raw",
-        "parameters",
-        "runtime",
-        "per-action"
+        "fixed30 EMA/raw",
+        "pretrained source identity",
+        "GT2D initial evaluation",
+        "per-action",
+        "runtime"
       ],
       "acceptance": "completed valid run; report performance under its named input protocol",
       "falsification": "No reliable improvement or failed technical gate; retain negative results and do not launch an unregistered sweep",
       "stopping_rule": "fixed full budget unless technical failure or explicit user stop; no automatic retry or best-seed selection",
       "dependencies": [
         "CURRENT_MPI_AND_SMALL_GT2D_COMPLETE",
-        "NECESSARY_H36M_PAIRED_REPEATS",
-        "FINAL_SIZE_PREFLIGHT"
+        "FINAL_SIZE_PREFLIGHT",
+        "FINAL-W256-DET2D-S0"
       ],
       "artifacts": {
         "config": "configs/pose3d/graph_posemamba_h36m_final_w256_d16_gt2d.yaml",
-        "config_sha256": "5a4f29eb9e43a3dd26555fa06475d95fbd7081568d65a9176536b38e1aaa6c8d",
+        "config_sha256": "907d17f2c4cf5c9b1b611b0c7d64bee8d9cbfa6bc1f814a2b2de5caf2b13f7b0",
         "parameters": 20192451,
-        "source": "freeze exact deployed successor; inherited model architecture already CPU-count verified"
+        "source": "freeze exact deployed successor; inherited model architecture already CPU-count verified",
+        "initialization": "FINAL-W256-DET2D-S0 best_ema_epoch.bin, immutable weights-only export with EMA count0"
       },
       "result": null
     }
@@ -189,6 +191,11 @@
       "id": "FINAL-001",
       "decision": "Keep proven W128D20 and W256D16 capacity; replace old unstarted M/L/XL candidates with exactly four named runs. No MPI baseline, no extra third size.",
       "evidence": "W128 partial best37.659301 at45/65,6.836M params; R3 partial best37.430162 at32/54,20.192M; late train/test divergence."
+    },
+    {
+      "id": "FINAL-002",
+      "decision": "Move all different-seed repeats after the four final models. Train detector models fresh, then fine-tune each GT2D model from its own same-width best EMA for30 epochs. No128-to256 partial weight mapping.",
+      "evidence": "User asks whether to fine-tune GT2D and explicitly prioritizes seed repeats last; strict checkpoint loading requires matching widths."
     }
   ]
 }
