@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "time": "2026-09-06T09:05:31+08:00",
+  "scientific_implementation": "ad4e2fa66492737a3fcd88d9142a88731724f30b",
+  "config": "configs/pose3d/diagnostic_posemamba_corrected_backward.yaml",
+  "config_sha256": "a1a1b03389b302488751f4a9ab0d0222bb2b578c42b623603f6cfe3bf01cbe76",
+  "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+  "model": {"parameters": 790083, "backward_mode": "exact", "batch_size": 4, "compiled": false},
+  "benchmark": {
+    "real_data": true,
+    "finite_loss": 0.8283764123916626,
+    "warmup_peak_reserved_mib": 2846.0,
+    "measured_peak_reserved_mib": 2856.0,
+    "iterations_per_second": 16.19899853709483,
+    "linear_warmup_enabled": false,
+    "optimizer_lr_after_steps": 0.0005,
+    "weight_decay": 0.012,
+    "grad_clip_fraction": 0.0
+  }
+}

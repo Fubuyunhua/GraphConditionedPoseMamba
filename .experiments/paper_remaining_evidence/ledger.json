@@ -105,7 +105,7 @@
     {
       "id": "E-NR-0",
       "track": "ABLATION",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "hypothesis": "resetting recurrence at frame and joint-trajectory boundaries improves accuracy",
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "recurrence_scope independent to joined after identical local projection and Conv1D",
@@ -141,9 +141,32 @@
         "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_NORESET_20260906/launch_logs/no_reset_seed0.log",
         "train_pid": 1100140,
         "launcher_pid": 1100118,
-        "launch_time": "2026-09-06T05:46:15+08:00"
+        "launch_time": "2026-09-06T05:46:15+08:00",
+        "checkpoint_audit": ".experiments/paper_remaining_evidence/results/E-NR-0/checkpoint_audit.json",
+        "analysis": ".experiments/paper_remaining_evidence/results/E-NR-0/analysis.md",
+        "remote_verification": "/scratch/home/caiwei/GraphConditionedPoseMamba_NORESET_20260906/verification/E-NR-0-final"
       },
-      "result": null
+      "result": {
+        "completed_epochs": 80,
+        "natural_exit_code": 0,
+        "best_epoch": 50,
+        "best_ema_p1_mm": 40.56898003872975,
+        "best_ema_p2_mm": 33.80245088941101,
+        "best_raw_p1_mm": 41.922773183761926,
+        "best_raw_p2_mm": 35.21883627353506,
+        "fixed_epoch": 80,
+        "fixed_ema_p1_mm": 40.909880429001184,
+        "fixed_ema_p2_mm": 33.821655913525674,
+        "fixed_raw_p1_mm": 41.78461603304304,
+        "fixed_raw_p2_mm": 33.70134960133235,
+        "delta_vs_full_best_p1_mm": 0.72381831210118,
+        "delta_vs_full_paired_p2_mm": 0.57021052953660,
+        "optimizer_steps": 354960,
+        "ema_updates": 354960,
+        "peak_reserved_mib": 3034,
+        "mean_epoch_minutes": 2.17875,
+        "recommendation": "KEEP"
+      }
     },
     {
       "id": "D-PM-BWD-0",
@@ -169,11 +192,12 @@
       "stopping_rule": "technical invalidity only",
       "dependencies": [
         "E-NR-0",
-        "USER_CONFIRMATION"
+        "USER_AUTHORIZATION_20260906",
+        "CORRECTED_A0_B4_PASS_20260906"
       ],
       "artifacts": {
         "config": "configs/pose3d/diagnostic_posemamba_corrected_backward.yaml",
-        "preflight": ".experiments/paper_remaining_evidence/preflight_results.json",
+        "preflight": ".experiments/paper_remaining_evidence/results/D-PM-BWD-0/PREFLIGHT_PASS.json",
         "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
       },
       "result": null

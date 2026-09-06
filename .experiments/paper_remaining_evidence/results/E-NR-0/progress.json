@@ -1,12 +1,21 @@
 {
-  "status": "RUNNING",
-  "completed_epochs": 0,
+  "status": "COMPLETED",
+  "completed_epochs": 80,
   "budget": 80,
   "launch_time": "2026-09-06T05:46:15+08:00",
-  "launcher_pid": 1100118,
-  "train_pid": 1100140,
+  "natural_exit_code": 0,
+  "completion_time": "2026-09-06T09:01:39+08:00",
   "run_directory": "/scratch/home/caiwei/GraphConditionedPoseMamba_NORESET_20260906/runs/paper_remaining_evidence/full_no_recurrence_reset_matched_seed0_2026_09_06_T_05_46_15",
-  "first_trace_iterations_per_second": 34.3,
-  "immediate_error_matches": 0,
-  "interpretation": "Compilation completed and formal epoch 1 is running; no accuracy conclusion."
+  "best_epoch": 50,
+  "best_ema_p1_mm": 40.56898003872975,
+  "best_ema_p2_mm": 33.80245088941101,
+  "fixed_epoch": 80,
+  "fixed_ema_p1_mm": 40.909880429001184,
+  "fixed_ema_p2_mm": 33.821655913525674,
+  "final_loss": 0.009236,
+  "optimizer_steps": 354960,
+  "ema_updates": 354960,
+  "mean_epoch_minutes": 2.17875,
+  "peak_reserved_mib": 3034,
+  "error_matches": 0
 }

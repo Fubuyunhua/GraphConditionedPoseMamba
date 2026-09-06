@@ -1,4 +1,4 @@
-> **2026-09-06 update:** R3 stopped by user at 54/60. E-RWG-0 completed with best EMA `40.416912/33.822350 mm`, `+0.571750 mm` P1 worse than anatomical Full for seed0. E-NR-0 passed its real-data B4 gate and began formal 80-epoch training at 05:46:15. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](../.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md). Earlier status statements below are historical.
+> **2026-09-06 update:** R3 stopped by user at 54/60. E-RWG-0 completed with best EMA `40.416912/33.822350 mm`, `+0.571750 mm` P1 worse than Full. E-NR-0 completed with best EMA `40.568980/33.802451 mm`, `+0.723818 mm` P1 worse than Full. Both are seed0 results. Corrected PoseMamba passed its B4 gate and is next in the authorized queue. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](../.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md).
 
 # 论文大纲与主要创新点
 
@@ -224,6 +224,7 @@ H36M到MPI零样本泛化。
 | Graph Feature Fusion A2 | 800,083 | 52 | 40.0588 | 33.2873 |
 | Full A3 | 800,083 | 53 | 39.8452 | 33.2322 |
 | Full with Rewired Graph | 800,083 | 41 | 40.4169 | 33.8223 |
+| Full w/o Recurrence Reset matched | 800,083 | 50 | 40.5690 | 33.8025 |
 
 Full相对A0的观察差值为0.3809 mm，相对A2为0.2137 mm。这些差异尚不能称为稳定或统计
 显著。固定epoch120下Full为40.9894/33.3666，A0为40.4098/33.3151，Full没有优势，必须
@@ -239,7 +240,7 @@ W256/D16 R1/R2因优化震荡无效；R3按用户要求在54/60停止，部分�
 |---|---|---|---|
 | 条件化注入优于普通融合 | A2 vs Full，seed0/1/2 | seed0已有 | 降低核心机制精度主张 |
 | 真实拓扑有价值 | Full vs Rewired | seed0支持：Rewired P1差0.5718 mm；仍是单seed | 改称一般关系上下文 |
-| reset边界有价值 | Full vs matched no-reset | B4门禁通过；E-NR-0正式训练中 | 降为组织方式 |
+| reset边界有价值 | Full vs matched no-reset | seed0支持：no-reset P1差0.7238 mm；仍是单seed | 降为组织方式 |
 | 整体优于PoseMamba | released A0、corrected诊断、多seed | seed0及诊断预检已有 | 限定适用设置 |
 | 不限于H36M | MPI released A0 vs Full | 协议/CUDA预检通过 | 不写第二数据集提升 |
 | 更高运行效率 | 独占GPU同条件测量 | 未完成 | 只说紧凑/参数效率 |
