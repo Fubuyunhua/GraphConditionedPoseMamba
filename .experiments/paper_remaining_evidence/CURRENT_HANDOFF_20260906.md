@@ -1,3 +1,5 @@
+> Queue update: use [PRIORITY_UPDATE_20260906.md](PRIORITY_UPDATE_20260906.md). MPI now precedes H36M repeats; one registered accuracy candidate follows required evidence. Earlier queue order below is superseded.
+
 # Current handoff — 2026-09-06
 
 - R3 was explicitly stopped by the user at 00:49:26 Asia/Shanghai, after 54/60 completed epochs. Status CANCELLED; do not resume or wait for epoch60. Best epoch32 EMA 37.430162/31.520564 mm, final epoch54 37.913791/31.753892. Four checkpoints verified finite and preserved. See the R3 analysis and checkpoint audit.

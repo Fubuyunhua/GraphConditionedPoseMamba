@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "accuracy_candidate_20260906",
+    "created_at": "2026-09-06T12:38:00+08:00"
+  },
+  "baseline": {
+    "id": "D16-R3-PARTIAL-SEED0",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_stable_r3_60e.yaml",
+    "config_sha256": "aa65995971b42892373f8f12d61448dc2d9343b0314d97271532f7b068404fc9",
+    "dataset": "H36M-SH xy+confidence T243/S81",
+    "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+    "split": "S1,S5,S6,S7,S8 train; S9,S11 test",
+    "metric": "EMA P1",
+    "direction": "min",
+    "source_identity": "git:0e23c5d01eb5e6c81c66bc17a621d38787e7c46d",
+    "checkpoint": "R3 best epoch32; reference only, never initialize candidate from it",
+    "command": "historical R3 run; see R3 ledger",
+    "seed_policy": [
+      0
+    ],
+    "limitation": "CANCELLED at54/60; no fixed60 comparator; test-monitored best37.430162",
+    "primary_metric": "test-monitored best EMA P1 (historical unmatched reference)"
+  },
+  "audit": {
+    "verdict": "BLOCKED",
+    "timestamp": "2026-09-06T12:38:00+08:00",
+    "report": ".experiments/accuracy_candidate_20260906/00_model_audit.md",
+    "blocking_findings": [
+      "Predecessor studies pending",
+      "Effective config, stochastic-depth path, no-eval lifecycle and real B4 CUDA preflight required"
+    ],
+    "accepted_risks": [
+      "One exploratory seed",
+      "Historical reference is unmatched and test-exposed"
+    ]
+  },
+  "execution_authorization": {
+    "authorized": true,
+    "scope": "One candidate after required paper evidence and passing technical gates"
+  },
+  "experiments": [
+    {
+      "id": "ACC-D16-DP030-S0",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "Moderately stronger stochastic depth improves large-model generalization",
+      "baseline_id": "D16-R3-PARTIAL-SEED0",
+      "delta": "DropPath maximum0.20->0.30; observation policy changes to fixed60 without per-epoch test evaluation",
+      "controls": "R3 architecture/data/optimizer/loss/EMA/batch/precision/seed unchanged; fresh initialization",
+      "seeds": [
+        0
+      ],
+      "budget": "60 epochs; one run",
+      "primary_metric": "EMA P1 at fixed epoch60",
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "final raw P1/P2",
+        "loss",
+        "VRAM",
+        "throughput"
+      ],
+      "acceptance": "valid fixed60 P1<37.430162 as exploratory target only, not matched causal superiority",
+      "falsification": "valid fixed60 P1>=37.430162 fails target",
+      "stopping_rule": "Complete fixed budget unless technical failure; no test-based stopping, automatic retry or unlimited tuning",
+      "dependencies": [
+        "M-A0",
+        "M-FULL",
+        "R-A0",
+        "R-A2",
+        "R-FULL",
+        "ACC_PREFLIGHT_PASS"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_accuracy_dp030_60e.yaml",
+        "config_sha256": "829b702f2a07662d11a589475c94f2b4b9c789e06233555efa8bd564703f15c8",
+        "source": "git:e30ae89; freeze exact deployed successor before launch",
+        "results": ".experiments/accuracy_candidate_20260906/results/ACC-D16-DP030-S0/analysis.md"
+      },
+      "result": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "ACC-001",
+      "timestamp": "2026-09-06T12:38:00+08:00",
+      "decision": "One bounded DropPath candidate after minimum paper evidence; see03_decisions.md",
+      "evidence": "R3 train/test divergence and current ablation direction"
+    }
+  ]
+}

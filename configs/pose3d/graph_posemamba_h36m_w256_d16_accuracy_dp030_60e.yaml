@@ -1,0 +1,17 @@
+_base_: graph_posemamba_h36m_w256_d16_stable_r3_60e.yaml
+
+config: configs/pose3d/graph_posemamba_h36m_w256_d16_accuracy_dp030_60e.yaml
+checkpoint: runs/accuracy_candidate_20260906/d16_dp030_seed0
+pretrained: runs/accuracy_candidate_20260906/d16_dp030_seed0
+resume: ''
+evaluate: ''
+seed: 0
+epochs: 60
+
+# Only scientific training delta from R3: stronger stochastic depth.
+drop_path_rate: 0.30
+
+# Freeze endpoint rather than tuning duration on the monitored H36M test set.
+# Explicit evaluation of latest_ema_epoch.bin is performed after 60 epochs.
+no_eval: true
+checkpoint_frequency: 10

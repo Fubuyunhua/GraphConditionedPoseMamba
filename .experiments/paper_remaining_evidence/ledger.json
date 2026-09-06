@@ -160,7 +160,7 @@
         "fixed_raw_p1_mm": 41.78461603304304,
         "fixed_raw_p2_mm": 33.70134960133235,
         "delta_vs_full_best_p1_mm": 0.72381831210118,
-        "delta_vs_full_paired_p2_mm": 0.57021052953660,
+        "delta_vs_full_paired_p2_mm": 0.5702105295366,
         "optimizer_steps": 354960,
         "ema_updates": 354960,
         "peak_reserved_mib": 3034,
@@ -233,8 +233,8 @@
       "falsification": "paired direction is inconsistent across seeds",
       "stopping_rule": "do not select or replace seeds",
       "dependencies": [
-        "D-PM-BWD-0",
-        "USER_CONFIRMATION"
+        "M-FULL",
+        "USER_AUTHORIZATION_20260906_PRIORITY"
       ],
       "artifacts": {
         "configs": [
@@ -269,8 +269,8 @@
       "falsification": "paired direction is inconsistent across seeds",
       "stopping_rule": "do not select or replace seeds",
       "dependencies": [
-        "D-PM-BWD-0",
-        "USER_CONFIRMATION"
+        "M-FULL",
+        "USER_AUTHORIZATION_20260906_PRIORITY"
       ],
       "artifacts": {
         "configs": [
@@ -305,8 +305,8 @@
       "falsification": "seed uncertainty dominates the claimed effects",
       "stopping_rule": "do not select or replace seeds",
       "dependencies": [
-        "D-PM-BWD-0",
-        "USER_CONFIRMATION"
+        "M-FULL",
+        "USER_AUTHORIZATION_20260906_PRIORITY"
       ],
       "artifacts": {
         "configs": [
@@ -340,10 +340,9 @@
       "falsification": "protocol or source mismatch",
       "stopping_rule": "technical invalidity only",
       "dependencies": [
-        "R-A0",
-        "R-A2",
-        "R-FULL",
-        "USER_CONFIRMATION"
+        "D-PM-BWD-0",
+        "USER_AUTHORIZATION_20260906_PRIORITY",
+        "MPI_A0_PREFLIGHT"
       ],
       "artifacts": {
         "config": "configs/pose3d_3dhp/posemamba_3dhp_w64_d6_m1_released_protocol_v2.yaml",
@@ -375,7 +374,8 @@
       "stopping_rule": "technical invalidity only",
       "dependencies": [
         "M-A0",
-        "USER_CONFIRMATION"
+        "USER_AUTHORIZATION_20260906_PRIORITY",
+        "MPI_FULL_PREFLIGHT"
       ],
       "artifacts": {
         "config": "configs/pose3d_3dhp/graph_posemamba_3dhp_w64_d8_protocol_v2_memopt.yaml",
@@ -397,10 +397,30 @@
       "timestamp": "2026-09-06T00:52:50+08:00",
       "decision": "Launch only E-RWG-0 now after R3 user stop and exclusive B4 preflight; remaining authorized queue stays serial.",
       "evidence": "Dataset/source hashes verified, 800083 params, batch4 compiled finite loss, 2806 MiB reserved, frozen legacy optimizer confirmed."
+    },
+    {
+      "id": "D-PAPER-PRIORITY-20260906",
+      "timestamp": "2026-09-06T12:38:00+08:00",
+      "decision": "Move MPI pair immediately after current corrected-A0, retain six necessary paired repeats, then one registered high-accuracy trial; no extra structural ablations.",
+      "evidence": "Explicit user instruction and single-seed A2-Full gap0.213664 mm.",
+      "document": ".experiments/paper_remaining_evidence/PRIORITY_UPDATE_20260906.md"
     }
   ],
   "execution_authorization": {
     "time": "2026-09-06T00:49:26+08:00",
-    "scope": "Stop R3 immediately; start registered ablations, then continue authorized serial queue and GitHub synchronization. Overrides prior per-run confirmation requirements."
-  }
+    "scope": "User authorizes reordered serial queue: current corrected-A0 -> MPI pair -> necessary paired repeats -> one audited accuracy candidate; GitHub synchronization continues."
+  },
+  "execution_order": [
+    "D-PM-BWD-0",
+    "M-A0",
+    "M-FULL",
+    "R-A0-1",
+    "R-A2-1",
+    "R-FULL-1",
+    "R-A0-2",
+    "R-A2-2",
+    "R-FULL-2",
+    "BRIEF_REQUIRED_EVALUATION_AND_EFFICIENCY",
+    "ACC-D16-DP030-S0"
+  ]
 }

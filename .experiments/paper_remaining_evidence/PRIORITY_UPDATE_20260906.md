@@ -1,0 +1,26 @@
+# Priority and scope update — 2026-09-06
+
+User instruction: give a simple ablation judgment, prioritize 3DHP next, retain only necessary remaining experiments, then design and start a highest-accuracy candidate using the accumulated evidence. Execution and GitHub synchronization are authorized. This supersedes the earlier order placing H36M seed1 before MPI. Preserve the currently running corrected-A0 diagnostic through its registered endpoint.
+
+## Current judgment
+
+Under the single-seed monitored-best protocol, anatomical Full P1 is39.845162, Rewired40.416912 (+0.571750), matched no-reset40.568980 (+0.723818), and feature fusion A2 40.058826 (+0.213664) mm. Retain anatomical graph, independent recurrence and control injection. These observations support the proposed mechanisms for seed0; they do not establish significance or guarantee a benefit at large width/depth or on MPI.
+
+## Required serial order
+
+1. Finish D-PM-BWD-0 corrected A0 (currently running), strictly verify and analyze it separately from released A0.
+2. M-A0: released PoseMamba on MPI-INF-3DHP, seed0,120 epochs.
+3. M-FULL: GraphConditionedPoseMamba on MPI-INF-3DHP, seed0,120 epochs.
+4. H36M paired repeats A0,A2,Full at seed1, then A0,A2,Full at seed2. Existing seed0 remains unchanged; do not selectively skip seed2 based on seed1.
+5. Brief exclusive-GPU matched efficiency measurement and existing-checkpoint evaluation/aggregation; do not add another long model-training study for efficiency. This is required only for a runtime-efficiency claim; otherwise omit that claim.
+6. Launch one registered H36M high-accuracy candidate after technical preflight. See ../accuracy_candidate_20260906/. Do not indefinitely add more ablations or hyperparameter searches.
+
+MPI must use the existing repaired T81/stride9 protocol, same data fingerprints, same loss/optimizer/EMA, fixed epoch120 primary endpoint, PCK150/AUC/MPJPE/P-MPJPE, and no per-epoch test selection. Run the two models sequentially. Protocol-only checks and independent B4 CUDA smoke are required before launch, with separate smoke and formal directories. Do not switch released A0 to corrected A0 based on diagnostic accuracy. No per-epoch test numbers is expected under this protocol and is not a monitoring failure.
+
+Why retain repeats: the central A2-Full effect is about0.214 mm and no seed variance is known. Three paired seeds are the minimum already registered evidence needed for a stable-improvement claim. Rewired/no-reset need not be expanded to every seed unless the paper explicitly claims those individual effects are statistically robust. Retain all results regardless of sign.
+
+## High-accuracy scope
+
+Assume the requested high-accuracy target remains Human3.6M, where previous W256/D16 evidence exists. MPI remains the controlled second-dataset experiment; do not silently transplant a tuned H36M configuration into its comparison. The first candidate is W256/D16 R3 with maximum DropPath0.30 instead of0.20, preserving its architecture, optimizer and loss. This is a falsifiable regularization hypothesis, not a known optimal configuration. Technical setup and source must be frozen before launch. If subsequent evidence invalidates this candidate, record a bounded replacement decision before any new training rather than silently stacking changes.
+
+Do not modify or interrupt a healthy running experiment to reorder the queue. Technical failures pause advancement and are reported, without automatic retries or configuration changes. Update this document, ledger and automation together when the current run changes.
