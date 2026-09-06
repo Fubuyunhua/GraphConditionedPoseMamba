@@ -1,0 +1,11 @@
+{
+  "status": "RUNNING",
+  "completed_epochs": 0,
+  "active_epoch": 1,
+  "observed_batches": 387,
+  "observed_train_it_per_sec": 14.24,
+  "gpu_utilization_percent": 97,
+  "gpu_used_mib": 5091,
+  "timestamp": "2026-09-06T19:17:17+08:00",
+  "train_pid": 1203060
+}

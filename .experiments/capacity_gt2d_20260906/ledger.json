@@ -34,13 +34,20 @@
       "Legacy GT2D evaluator copies known input xy; not raw three-coordinate prediction",
       "Cross-size S80 versus M/L/XL60 recipe differs"
     ],
-    "cpu_preflight": ".experiments/capacity_gt2d_20260906/cpu_preflight.json"
+    "cpu_preflight": ".experiments/capacity_gt2d_20260906/cpu_preflight.json",
+    "per_experiment": {
+      "S-GT2D-S0": {
+        "verdict": "PASS",
+        "report": ".experiments/capacity_gt2d_20260906/SMALL_GT2D_PARALLEL_20260906.md",
+        "accepted_risk": "user-authorized shared GPU with MPI Full; throughput not publication efficiency"
+      }
+    }
   },
   "experiments": [
     {
       "id": "S-GT2D-S0",
       "track": "IMPROVEMENT",
-      "status": "PLANNED",
+      "status": "RUNNING",
       "hypothesis": "A separately trained true-2D-input model reduces dependence on detector error under the disclosed GT2D evaluator",
       "baseline_id": "FULL-W64-D8-DET2D-SEED0",
       "delta": "W64/D8; GT2D label xy plus confidence1 and legacy input-xy passthrough at evaluation",
@@ -49,28 +56,34 @@
         0
       ],
       "budget": "80 epochs, one fresh run",
-      "primary_metric": "fixed epoch80 EMA P1 under explicitly named GT2D-with-input-xy evaluator",
+      "primary_metric": "minimum test-monitored EMA P1 in epochs1-80, GT input-xy-preserving evaluator",
       "secondary_metrics": [
         "same-checkpoint P2",
+        "fixed80 EMA/raw",
         "per-action",
-        "training loss",
         "VRAM",
         "throughput"
       ],
       "acceptance": "Finite complete run under frozen protocol; assess improvement only within compatible input/endpoint definitions",
       "falsification": "No capacity benefit within comparable results; GT does not support assumed error reduction",
-      "stopping_rule": "Technical failure pauses queue; no test-based stopping, seed replacement, or automatic retry",
+      "stopping_rule": "Technical failure pauses advancement; no automatic retry or test-based early stop",
       "dependencies": [
-        "MPI_PAIR",
-        "REQUIRED_PAIRED_REPEATS",
-        "CAPACITY_GT2D_PREFLIGHT"
+        "USER_IMMEDIATE_PARALLEL_GT2D_20260906",
+        "S_GT2D_PROTOCOL_AND_B4_PASS"
       ],
       "artifacts": {
         "config": "configs/pose3d/graph_posemamba_h36m_w64_d8_gt2d_80e.yaml",
-        "config_sha256": "b4b590f047c9b0fe851ea1840af01d3573b20ef9bc029ca246421ab57349f601",
+        "config_sha256": "7112d5139a09e3d1debeb5048ee565f79ffdd4c8b43aaa05a401886835b018fd",
         "expected_parameters": 800083,
-        "source": "freeze full deployed commit before run",
-        "checkpoint_prefix": "runs/capacity_gt2d_20260906/s-gt2d_seed0"
+        "source": "7c60065 archive + explicit GT no_eval=false config and launcher/preflight tools",
+        "checkpoint_prefix": "runs/capacity_gt2d_20260906/s-gt2d_seed0",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_H36M_GT2D_S_20260906",
+        "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_H36M_GT2D_S_20260906/runs/capacity_gt2d_20260906/s-gt2d_seed0_2026_09_06_T_19_16_44",
+        "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_H36M_GT2D_S_20260906/launch_logs/h36m_gt2d_s_seed0.log",
+        "train_pid": 1203060,
+        "launcher_pid": 1203038,
+        "launch_time": "2026-09-06T19:16:44+08:00",
+        "preflight": ".experiments/capacity_gt2d_20260906/results/S-GT2D-S0/PREFLIGHT_PASS.json"
       },
       "result": null
     },
@@ -269,6 +282,11 @@
       "id": "CAP-GT-001",
       "decision": "Use W128/D20 and W256/D10 intermediate sizes with stabilized R3 optimizer; include existing W256/D16 candidate and its GT2D twin without duplicate XL detector run. Preserve anatomical graph/control/independent recurrence.",
       "evidence": "W128/D20 partial best37.6593, D16 partial best37.4302 but late overfit, W256/D10 had no completed epoch; no new mechanism claimed."
+    },
+    {
+      "id": "CAP-GT-002",
+      "decision": "User requests immediate small-GT2D concurrency; launch ahead of predecessors after successful coordinate/flip/root/gradient and B4 gates. Use H36M-style per-epoch best EMA preference for this small run; larger candidate endpoint registrations unchanged.",
+      "time": "2026-09-06T19:16:44+08:00"
     }
   ]
 }

@@ -17,7 +17,8 @@ noise: false
 mask_ratio: 0.0
 mask_T_ratio: 0.0
 scale_range_pretrain: null
-no_eval: true
+# Follow the user's H36M-style per-epoch best-EMA preference for this run.
+no_eval: false
 checkpoint_frequency: 10
 enable_linear_warmup: false
 honor_no_weight_decay: false

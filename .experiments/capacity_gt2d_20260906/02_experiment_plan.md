@@ -1,3 +1,5 @@
+> Latest run: corrected-A0 is COMPLETED. User-authorized active pair is MPI Full PID1136724 plus S-GT2D-S0 PID1203060, launched19:16:44. GT remote root `/scratch/home/caiwei/GraphConditionedPoseMamba_H36M_GT2D_S_20260906`; log `launch_logs/h36m_gt2d_s_seed0.log`;80e per-epoch best EMA. See capacity_gt2d_20260906/SMALL_GT2D_PARALLEL_20260906.md. Skip its old later queue position; no third run.
+
 # Registered serial expansion
 
 Preserve current corrected A0 -> MPI pair -> six paired H36M repeats. Then S-GT2D80e -> M-DET2D60e -> M-GT2D60e -> L-DET2D60e -> L-GT2D60e -> existing ACC-D16-DP030-S0 detector60e -> XL-GT2D60e. All seed0, separate fresh outputs and per-run gate. Existing XL detector registration is the only XL detector run; do not duplicate it here.

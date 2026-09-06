@@ -459,6 +459,11 @@
       "timestamp": "2026-09-06T05:56:41.172039+00:00",
       "decision": "User requests H36M-style best selection. Apply per-epoch test-monitored EMA minimum to both MPI models; preserve fixed120 secondary and historical fixed-only records. Full resumes epoch1 with separate epoch1 replay included in best selection.",
       "document": ".experiments/paper_remaining_evidence/MPI_TESTBEST_POLICY_CHANGE_20260906.md"
+    },
+    {
+      "id": "D-GT2D-PARALLEL-20260906",
+      "decision": "Corrected A0 completed; user requests small GT2D parallel with current MPI. Do not duplicate or start a third job.",
+      "time": "2026-09-06T19:16:44+08:00"
     }
   ],
   "execution_authorization": {
@@ -466,7 +471,7 @@
     "scope": "User authorizes reordered serial queue: current corrected-A0 -> MPI pair -> necessary paired repeats -> one audited accuracy candidate; GitHub synchronization continues."
   },
   "execution_order": [
-    "D-PM-BWD-0 + M-FULL (current authorized pair)",
+    "M-FULL + S-GT2D-S0 (current authorized pair)",
     "M-A0",
     "R-A0-1",
     "R-A2-1",
@@ -475,7 +480,6 @@
     "R-A2-2",
     "R-FULL-2",
     "BRIEF_REQUIRED_EVALUATION_AND_EFFICIENCY",
-    "S-GT2D-S0",
     "M-DET2D-S0",
     "M-GT2D-S0",
     "L-DET2D-S0",
@@ -486,10 +490,10 @@
   "active_concurrency": {
     "authorized": true,
     "scope": [
-      "D-PM-BWD-0",
-      "M-FULL"
+      "M-FULL",
+      "S-GT2D-S0"
     ],
     "max_formal_jobs": 2,
-    "after_pair": "M-A0 then existing repeats and capacity/GT2D; do not duplicate Full"
+    "after_pair": "M-A0 then remaining repeats and capacity candidates; skip S-GT2D already running/completed"
   }
 }
