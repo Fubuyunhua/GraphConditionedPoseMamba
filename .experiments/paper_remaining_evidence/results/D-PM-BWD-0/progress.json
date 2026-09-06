@@ -1,0 +1,12 @@
+{
+  "status": "RUNNING",
+  "completed_epochs": 0,
+  "budget": 80,
+  "launch_time": "2026-09-06T09:11:21+08:00",
+  "launcher_pid": 1102568,
+  "train_pid": 1102590,
+  "run_directory": "/scratch/home/caiwei/GraphConditionedPoseMamba_CORRECTED_A0_20260906/runs/paper_remaining_evidence/posemamba_corrected_backward_seed0_2026_09_06_T_09_11_21",
+  "first_trace_iterations_per_second": 16.9,
+  "immediate_error_matches": 0,
+  "interpretation": "Exact-backward formal epoch 1 is running; no diagnostic conclusion."
+}

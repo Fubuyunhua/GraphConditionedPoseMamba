@@ -171,7 +171,7 @@
     {
       "id": "D-PM-BWD-0",
       "track": "DIAGNOSTIC",
-      "status": "PLANNED",
+      "status": "RUNNING",
       "hypothesis": "the released PoseMamba indexed scan backward changes optimization despite identical inference",
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "PoseMamba W64/D6/M1 legacy to exact indexed-path derivative only",
@@ -198,7 +198,14 @@
       "artifacts": {
         "config": "configs/pose3d/diagnostic_posemamba_corrected_backward.yaml",
         "preflight": ".experiments/paper_remaining_evidence/results/D-PM-BWD-0/PREFLIGHT_PASS.json",
-        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
+        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b",
+        "deployment_source": "git:72c85945a2292efa9cc50c018ffbf08a23a6232d",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_CORRECTED_A0_20260906",
+        "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_CORRECTED_A0_20260906/runs/paper_remaining_evidence/posemamba_corrected_backward_seed0_2026_09_06_T_09_11_21",
+        "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_CORRECTED_A0_20260906/launch_logs/corrected_a0_seed0.log",
+        "train_pid": 1102590,
+        "launcher_pid": 1102568,
+        "launch_time": "2026-09-06T09:11:21+08:00"
       },
       "result": null
     },

@@ -5,7 +5,7 @@ A2-0,Graph Feature Fusion,0,800083,52,40.05882593176248,33.287296461890385,80,,,
 A3-0,Full,0,800083,53,39.84516172662857,33.23224035987441,80,,,COMPLETED_EXISTING,fixed-80 checkpoint not saved; single seed and test monitored
 E-RWG-0,Full with Rewired Graph,0,800083,41,40.41691211147642,33.82234998475077,80,40.716591533290476,33.61119421630749,COMPLETED,single seed; rewired worse than anatomical Full by 0.571750 mm P1 under monitored-best rule
 E-NR-0,Full w/o Recurrence Reset matched,0,800083,50,40.56898003872975,33.80245088941101,80,40.909880429001184,33.821655913525674,COMPLETED,single seed; joined no-reset worse than Full by 0.723818 mm P1 under monitored-best rule
-D-PM-BWD-0,PoseMamba corrected backward,0,790083,,,,80,,,NOT_RUN,separate diagnostic; never merge with released A0 seeds
+D-PM-BWD-0,PoseMamba corrected backward,0,790083,,,,80,,,RUNNING,separate diagnostic; exact backward; never merge with released A0 seeds
 R-A0-1,PoseMamba released,1,790083,,,,80,,,NOT_RUN,
 R-A2-1,Graph Feature Fusion,1,800083,,,,80,,,NOT_RUN,
 R-FULL-1,Full,1,800083,,,,80,,,NOT_RUN,
