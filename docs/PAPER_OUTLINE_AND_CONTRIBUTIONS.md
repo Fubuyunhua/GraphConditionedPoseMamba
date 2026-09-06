@@ -1,6 +1,6 @@
 > Latest MPI policy amendment: user requests per-epoch test evaluation and best EMA MPJPE selection for Full and released A0. Fixed120 is secondary. Full now resumes epoch1 in `runs/mpi_full_testbest_seed0`, PID1136724, log `launch_logs/mpi_full_testbest_seed0.log`; epoch1 replay participates in best selection. See `.experiments/paper_remaining_evidence/MPI_TESTBEST_POLICY_CHANGE_20260906.md`. Prior fixed-only/current-PID statements below are historical.
 
-> **2026-09-06 update:** R3 stopped by user at 54/60. E-RWG-0 completed with best EMA `40.416912/33.822350 mm`, `+0.571750 mm` P1 worse than Full. E-NR-0 completed with best EMA `40.568980/33.802451 mm`, `+0.723818 mm` P1 worse than Full. Both are seed0 results. Corrected PoseMamba passed its B4 gate and is running its formal 80-epoch diagnostic. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](../.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md).
+> **2026-09-06 update:** E-RWG-0 and E-NR-0 support anatomical topology and independent recurrence for seed0. Corrected PoseMamba completed with best EMA `40.660688/33.532125 mm`, worse than released seed0 by `0.434666 mm` P1, and remains a separate diagnostic. MPI Full is running under the user-selected per-epoch test-best policy. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](../.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md).
 
 # 论文大纲与主要创新点
 

@@ -1,16 +1,21 @@
 {
-  "status": "RUNNING",
-  "completed_epochs": 78,
-  "active_epoch": 79,
+  "status": "COMPLETED",
+  "completed_epochs": 80,
   "budget": 80,
   "launch_time": "2026-09-06T09:11:21+08:00",
   "launcher_pid": 1102568,
   "train_pid": 1102590,
   "run_directory": "/scratch/home/caiwei/GraphConditionedPoseMamba_CORRECTED_A0_20260906/runs/paper_remaining_evidence/posemamba_corrected_backward_seed0_2026_09_06_T_09_11_21",
-  "latest": {"epoch": 78, "loss": 0.009893, "ema_p1_mm": 40.820411, "ema_p2_mm": 33.519064, "minutes": 9.21},
+  "natural_exit_code": 0,
+  "completion_time": "2026-09-06T17:30:38+08:00",
+  "latest": {"epoch": 80, "loss": 0.009757, "ema_p1_mm": 40.88194311279208, "ema_p2_mm": 33.50240428594153, "minutes": 9.21},
   "best": {"epoch": 52, "ema_p1_mm": 40.660688, "ema_p2_mm": 33.532125},
   "mean_epoch_minutes_before_mpi_concurrency": 4.3838,
   "mean_epoch_minutes_during_mpi_concurrency": 8.856,
   "error_matches": 0,
-  "interpretation": "Healthy but materially slower during user-authorized MPI Full concurrency; no final diagnostic conclusion."
+  "optimizer_steps": 354960,
+  "ema_updates": 354960,
+  "mean_epoch_minutes": 5.846625,
+  "peak_reserved_mib": 2854,
+  "interpretation": "Completed validly; exact backward is worse than released seed0 by 0.434666 mm P1 under the monitored-best rule."
 }

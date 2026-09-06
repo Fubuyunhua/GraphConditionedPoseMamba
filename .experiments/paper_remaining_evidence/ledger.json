@@ -171,7 +171,7 @@
     {
       "id": "D-PM-BWD-0",
       "track": "DIAGNOSTIC",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "hypothesis": "the released PoseMamba indexed scan backward changes optimization despite identical inference",
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "PoseMamba W64/D6/M1 legacy to exact indexed-path derivative only",
@@ -205,9 +205,32 @@
         "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_CORRECTED_A0_20260906/launch_logs/corrected_a0_seed0.log",
         "train_pid": 1102590,
         "launcher_pid": 1102568,
-        "launch_time": "2026-09-06T09:11:21+08:00"
+        "launch_time": "2026-09-06T09:11:21+08:00",
+        "checkpoint_audit": ".experiments/paper_remaining_evidence/results/D-PM-BWD-0/checkpoint_audit.json",
+        "analysis": ".experiments/paper_remaining_evidence/results/D-PM-BWD-0/analysis.md",
+        "remote_verification": "/scratch/home/caiwei/GraphConditionedPoseMamba_CORRECTED_A0_20260906/verification/D-PM-BWD-0-final"
       },
-      "result": null
+      "result": {
+        "completed_epochs": 80,
+        "natural_exit_code": 0,
+        "best_epoch": 52,
+        "best_ema_p1_mm": 40.660688459765,
+        "best_ema_p2_mm": 33.53212473608283,
+        "best_raw_p1_mm": 41.93065875724623,
+        "best_raw_p2_mm": 34.227655631352924,
+        "fixed_epoch": 80,
+        "fixed_ema_p1_mm": 40.88194311279208,
+        "fixed_ema_p2_mm": 33.50240428594153,
+        "fixed_raw_p1_mm": 41.887125255294244,
+        "fixed_raw_p2_mm": 33.99331309176638,
+        "delta_vs_released_best_p1_mm": 0.43466643262562,
+        "delta_vs_released_paired_p2_mm": 0.01449838864636,
+        "optimizer_steps": 354960,
+        "ema_updates": 354960,
+        "peak_reserved_mib": 2854,
+        "mean_epoch_minutes": 5.846625,
+        "recommendation": "KEEP_DIAGNOSTIC_REJECT_ACCURACY_IMPROVEMENT"
+      }
     },
     {
       "id": "R-A0",

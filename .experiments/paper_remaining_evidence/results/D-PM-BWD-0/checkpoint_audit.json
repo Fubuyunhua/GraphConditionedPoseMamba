@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "run_epoch_count": 80,
+  "natural_exit_code": 0,
+  "checkpoints": {
+    "best_epoch.bin": {"epoch": 52, "type": "raw", "finite": true, "sha256": "e8ee8f7b0370ee8e0c69968a06b5c3d3187b20619fc2eda3a4316f40c087e9d1", "p1_mm": 41.93065875724623, "p2_mm": 34.227655631352924},
+    "best_ema_epoch.bin": {"epoch": 52, "type": "ema", "finite": true, "sha256": "8fabdfd4b183a4ef95e8fe6a88b136ed035f146d13f708bcc97c884434d534dd", "p1_mm": 40.660688459765, "p2_mm": 33.53212473608283},
+    "raw_fixed_epoch80.bin": {"epoch": 80, "type": "raw", "finite": true, "sha256": "94b97b51d4873e65a801f8c8351e0156a2ddf8928fdc8fa2259ea0de44065b95", "p1_mm": 41.887125255294244, "p2_mm": 33.99331309176638},
+    "ema_fixed_epoch80.bin": {"epoch": 80, "type": "ema", "finite": true, "sha256": "26a5b35f6ac5467cbe75784fd11fdc4fd0c52617d5fbc59b0d4b8c5a66f3c687", "p1_mm": 40.88194311279208, "p2_mm": 33.50240428594153},
+    "latest_epoch.bin": {"epoch": 80, "type": "raw", "finite": true, "sha256": "1a72823e1f429ae7ba654837cdb44f9a94a86b34b4497936fc97200c997a8c88"},
+    "latest_ema_epoch.bin": {"epoch": 80, "type": "ema", "finite": true, "sha256": "e589aebe037af51adc6df218ef66c946bbdbe942bdfd808a31450f5c3b7c98dc"}
+  },
+  "training_log_sha256": "733f5b539fdb9b6015103dde63282ab04b47f36afd9efb149dbd1b9e1f5bc06c"
+}
