@@ -1,0 +1,9 @@
+# Audit: redesigned two-size family
+
+BLOCKED pending current tasks/dependencies and runtime preflight; user execution authorization is present. Static design retains previously CPU-verified W128D20=6836355 and W256D16=20192451 parameters. No model source change. Full anatomical graph/control injection/independent K2 recurrence,T243,J17,SSM state16 and ratios1.875/1.96875 unchanged. Input and output[B,T,J,3]. GT uses normalized image-label xy+c1; evaluator preserves known input xy before denormalization/factor/root-centering and must be named separately.
+
+Shared AdamW peak3e-4,true8-epoch warmup3e-5->3e-4,cosine to3e-5,explicit SSM no-decay,WD0.012 otherwise,batch4,FP32,clip1,EMA0.9998; loss position1+scale0.5+velocity20+difference0.5. W128 uses80 epochs/dp0.25; W25660/dp0.30. These moderate regularization choices are hypotheses, not empirically optimized values. GT twins change only input/evaluator protocol and output metadata.
+
+Use per-epoch monitored-best EMA P1 and same-checkpoint P2,save fixed final weights separately. Do not use GT2D scores to claim the256 detector model reached36.x. Fresh initialization/no resume; no automatic test-based early stop. Test exposure and single seed must be disclosed. Prior W128 and R3 were cancelled, not valid completed controls.
+
+Before PASS resolve all configs and exact parameter/drop-path schedules, compare each GT/det pair,verify source/data hash and frozen protocol; reuse existing GT coordinate/flip/root audit when identical; perform actual per-size B1/B2/B4 compiled finite gradient/loss and optimizer/checkpoint lifecycle checks. Previous W128 reserved14.7GiB and R3~21GiB are historical context, not this gate. Use otherwise idle GPU for large-model launch; do not change batch/precision silently. Do not combine simultaneous large runs under prior small-run concurrency authorization.

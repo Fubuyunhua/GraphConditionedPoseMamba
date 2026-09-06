@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "final_two_sizes_20260906",
+    "created_at": "2026-09-06"
+  },
+  "baseline": {
+    "id": "Historical-capacity-evidence",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_stable_r3_60e.yaml",
+    "dataset": "H36M-SH T243/S81; paired GT label-xy inputs",
+    "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+    "split": "S1,S5,S6,S7,S8 train; S9,S11 test",
+    "primary_metric": "historical partial best EMA P1 reference only",
+    "metric": "MPJPE",
+    "direction": "min",
+    "source_identity": "R3 0e23c5d; W128 historical source in scaling ledger",
+    "checkpoint": "reference only; fresh initialization for all four",
+    "seed_policy": [
+      0
+    ],
+    "command": "historical records in model_scaling and w256_d16 ledgers"
+  },
+  "audit": {
+    "verdict": "BLOCKED",
+    "report": ".experiments/final_two_sizes_20260906/00_model_audit.md",
+    "blocking_findings": [
+      "new resolved config and real GPU preflight required",
+      "predecessors still active"
+    ],
+    "accepted_risks": [
+      "single-seed exploration",
+      "test-monitored selection",
+      "historical reference runs incomplete"
+    ]
+  },
+  "execution_authorization": {
+    "authorized": true,
+    "scope": "User redesigns two widths and matching GT2D; replaces unstarted prior size candidates"
+  },
+  "experiments": [
+    {
+      "id": "FINAL-W128-DET2D-S0",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "Stabilized optimization with moderate stochastic depth improves accuracy at the chosen capacity",
+      "baseline_id": "Historical-W128-partial",
+      "delta": "W128/D20,DropPath0.25,R3 optimizer; det2d; full fresh budget",
+      "controls": "Within same-width detector/GT pairs keep optimization,seed,budget,architecture identical; GT uses inherited known-input-xy evaluator. Across sizes this is recipe optimization, not causal width-only ablation.",
+      "seeds": [
+        0
+      ],
+      "budget": "80 epochs; one fresh run",
+      "primary_metric": "minimum test-monitored EMA P1 over epochs1-80, det2d",
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "fixed80 EMA/raw",
+        "parameters",
+        "runtime",
+        "per-action"
+      ],
+      "acceptance": "completed valid run; report performance under its named input protocol",
+      "falsification": "No reliable improvement or failed technical gate; retain negative results and do not launch an unregistered sweep",
+      "stopping_rule": "fixed full budget unless technical failure or explicit user stop; no automatic retry or best-seed selection",
+      "dependencies": [
+        "CURRENT_MPI_AND_SMALL_GT2D_COMPLETE",
+        "NECESSARY_H36M_PAIRED_REPEATS",
+        "FINAL_SIZE_PREFLIGHT"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_final_w128_d20_det2d.yaml",
+        "config_sha256": "def0feb009fa5f93468719d16fa0346e2f63a7c4fc64e3b2438023886a8da457",
+        "parameters": 6836355,
+        "source": "freeze exact deployed successor; inherited model architecture already CPU-count verified"
+      },
+      "result": null
+    },
+    {
+      "id": "FINAL-W128-GT2D-S0",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "Stabilized optimization with moderate stochastic depth improves accuracy at the chosen capacity",
+      "baseline_id": "Historical-W128-partial",
+      "delta": "W128/D20,DropPath0.25,R3 optimizer; gt2d; full fresh budget",
+      "controls": "Within same-width detector/GT pairs keep optimization,seed,budget,architecture identical; GT uses inherited known-input-xy evaluator. Across sizes this is recipe optimization, not causal width-only ablation.",
+      "seeds": [
+        0
+      ],
+      "budget": "80 epochs; one fresh run",
+      "primary_metric": "minimum test-monitored EMA P1 over epochs1-80, gt2d",
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "fixed80 EMA/raw",
+        "parameters",
+        "runtime",
+        "per-action"
+      ],
+      "acceptance": "completed valid run; report performance under its named input protocol",
+      "falsification": "No reliable improvement or failed technical gate; retain negative results and do not launch an unregistered sweep",
+      "stopping_rule": "fixed full budget unless technical failure or explicit user stop; no automatic retry or best-seed selection",
+      "dependencies": [
+        "CURRENT_MPI_AND_SMALL_GT2D_COMPLETE",
+        "NECESSARY_H36M_PAIRED_REPEATS",
+        "FINAL_SIZE_PREFLIGHT"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_final_w128_d20_gt2d.yaml",
+        "config_sha256": "a46a93f4f7e438dd42f6819acfc5b8ae5d289cbb776de2972368cb03154e7043",
+        "parameters": 6836355,
+        "source": "freeze exact deployed successor; inherited model architecture already CPU-count verified"
+      },
+      "result": null
+    },
+    {
+      "id": "FINAL-W256-DET2D-S0",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "Stabilized optimization with moderate stochastic depth improves accuracy at the chosen capacity",
+      "baseline_id": "Historical-W256-partial",
+      "delta": "W256/D16,DropPath0.3,R3 optimizer; det2d; full fresh budget",
+      "controls": "Within same-width detector/GT pairs keep optimization,seed,budget,architecture identical; GT uses inherited known-input-xy evaluator. Across sizes this is recipe optimization, not causal width-only ablation.",
+      "seeds": [
+        0
+      ],
+      "budget": "60 epochs; one fresh run",
+      "primary_metric": "minimum test-monitored EMA P1 over epochs1-60, det2d",
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "fixed60 EMA/raw",
+        "parameters",
+        "runtime",
+        "per-action"
+      ],
+      "acceptance": "detected-input P1<37.0 is the aspirational36.x target; never guarantee it",
+      "falsification": "No reliable improvement or failed technical gate; retain negative results and do not launch an unregistered sweep",
+      "stopping_rule": "fixed full budget unless technical failure or explicit user stop; no automatic retry or best-seed selection",
+      "dependencies": [
+        "CURRENT_MPI_AND_SMALL_GT2D_COMPLETE",
+        "NECESSARY_H36M_PAIRED_REPEATS",
+        "FINAL_SIZE_PREFLIGHT"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_final_w256_d16_det2d.yaml",
+        "config_sha256": "c7e3b552e1a92d6858fd6020e2d7e95c6a3edd35920fe8e928417a30a50d2e38",
+        "parameters": 20192451,
+        "source": "freeze exact deployed successor; inherited model architecture already CPU-count verified"
+      },
+      "result": null
+    },
+    {
+      "id": "FINAL-W256-GT2D-S0",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "Stabilized optimization with moderate stochastic depth improves accuracy at the chosen capacity",
+      "baseline_id": "Historical-W256-partial",
+      "delta": "W256/D16,DropPath0.3,R3 optimizer; gt2d; full fresh budget",
+      "controls": "Within same-width detector/GT pairs keep optimization,seed,budget,architecture identical; GT uses inherited known-input-xy evaluator. Across sizes this is recipe optimization, not causal width-only ablation.",
+      "seeds": [
+        0
+      ],
+      "budget": "60 epochs; one fresh run",
+      "primary_metric": "minimum test-monitored EMA P1 over epochs1-60, gt2d",
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "fixed60 EMA/raw",
+        "parameters",
+        "runtime",
+        "per-action"
+      ],
+      "acceptance": "completed valid run; report performance under its named input protocol",
+      "falsification": "No reliable improvement or failed technical gate; retain negative results and do not launch an unregistered sweep",
+      "stopping_rule": "fixed full budget unless technical failure or explicit user stop; no automatic retry or best-seed selection",
+      "dependencies": [
+        "CURRENT_MPI_AND_SMALL_GT2D_COMPLETE",
+        "NECESSARY_H36M_PAIRED_REPEATS",
+        "FINAL_SIZE_PREFLIGHT"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_final_w256_d16_gt2d.yaml",
+        "config_sha256": "5a4f29eb9e43a3dd26555fa06475d95fbd7081568d65a9176536b38e1aaa6c8d",
+        "parameters": 20192451,
+        "source": "freeze exact deployed successor; inherited model architecture already CPU-count verified"
+      },
+      "result": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "FINAL-001",
+      "decision": "Keep proven W128D20 and W256D16 capacity; replace old unstarted M/L/XL candidates with exactly four named runs. No MPI baseline, no extra third size.",
+      "evidence": "W128 partial best37.659301 at45/65,6.836M params; R3 partial best37.430162 at32/54,20.192M; late train/test divergence."
+    }
+  ]
+}
