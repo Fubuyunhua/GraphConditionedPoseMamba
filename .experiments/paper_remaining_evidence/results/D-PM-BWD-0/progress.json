@@ -1,16 +1,16 @@
 {
   "status": "RUNNING",
-  "completed_epochs": 65,
-  "active_epoch": 66,
+  "completed_epochs": 67,
+  "active_epoch": 68,
   "budget": 80,
   "launch_time": "2026-09-06T09:11:21+08:00",
   "launcher_pid": 1102568,
   "train_pid": 1102590,
   "run_directory": "/scratch/home/caiwei/GraphConditionedPoseMamba_CORRECTED_A0_20260906/runs/paper_remaining_evidence/posemamba_corrected_backward_seed0_2026_09_06_T_09_11_21",
-  "latest": {"epoch": 65, "loss": 0.010276, "ema_p1_mm": 40.742445, "ema_p2_mm": 33.528766, "minutes": 9.22},
+  "latest": {"epoch": 67, "loss": 0.010237, "ema_p1_mm": 40.869383, "ema_p2_mm": 33.575275, "minutes": 9.22},
   "best": {"epoch": 52, "ema_p1_mm": 40.660688, "ema_p2_mm": 33.532125},
   "mean_epoch_minutes_before_mpi_concurrency": 4.3838,
-  "mean_epoch_minutes_during_mpi_concurrency": 8.80,
+  "mean_epoch_minutes_during_mpi_concurrency": 8.856,
   "error_matches": 0,
   "interpretation": "Healthy but materially slower during user-authorized MPI Full concurrency; no final diagnostic conclusion."
 }
