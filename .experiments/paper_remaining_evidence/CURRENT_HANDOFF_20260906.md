@@ -1,3 +1,5 @@
+> Current concurrency: user explicitly authorized M-FULL alongside corrected-A0. M-FULL PID1131838 at `/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906`, output `runs/mpi_full_seed0`; original corrected PID1102590 remains. No third formal run. After both finish run M-A0, then existing repeats/capacity queue. See PARALLEL_MPI_FULL_20260906.md and ledger; older serial/M-A0-first wording is superseded.
+
 > Latest scope: user confirmed GT2D means Human3.6M ground-truth2D to3D. After existing required paper studies execute the bounded size/GT2D family in `.experiments/capacity_gt2d_20260906/02_experiment_plan.md` and master ledger execution_order. Reuse existing XL detector once; do not stop the automation before XL-GT2D completes.
 
 > Queue update: use [PRIORITY_UPDATE_20260906.md](PRIORITY_UPDATE_20260906.md). MPI now precedes H36M repeats; one registered accuracy candidate follows required evidence. Earlier queue order below is superseded.

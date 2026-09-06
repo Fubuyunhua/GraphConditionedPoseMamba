@@ -341,8 +341,9 @@
       "stopping_rule": "technical invalidity only",
       "dependencies": [
         "D-PM-BWD-0",
-        "USER_AUTHORIZATION_20260906_PRIORITY",
-        "MPI_A0_PREFLIGHT"
+        "M-FULL",
+        "MPI_A0_PREFLIGHT",
+        "USER_AUTHORIZATION_20260906_PRIORITY"
       ],
       "artifacts": {
         "config": "configs/pose3d_3dhp/posemamba_3dhp_w64_d6_m1_released_protocol_v2.yaml",
@@ -353,7 +354,7 @@
     {
       "id": "M-FULL",
       "track": "IMPROVEMENT",
-      "status": "PLANNED",
+      "status": "RUNNING",
       "hypothesis": "Full improves over released A0 on the second dataset",
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "train Full on MPI-INF-3DHP repaired protocol",
@@ -373,13 +374,20 @@
       "falsification": "Full equals or underperforms released A0",
       "stopping_rule": "technical invalidity only",
       "dependencies": [
-        "M-A0",
-        "USER_AUTHORIZATION_20260906_PRIORITY",
-        "MPI_FULL_PREFLIGHT"
+        "USER_EXPLICIT_PARALLEL_20260906",
+        "MPI_FULL_CONCURRENT_B4_PASS"
       ],
       "artifacts": {
         "config": "configs/pose3d_3dhp/graph_posemamba_3dhp_w64_d8_protocol_v2_memopt.yaml",
-        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b"
+        "source": "git:ad4e2fa66492737a3fcd88d9142a88731724f30b",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906",
+        "checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906/runs/mpi_full_seed0",
+        "log": "/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906/launch_logs/mpi_full_seed0.log",
+        "train_pid": 1131838,
+        "launcher_pid": 1131831,
+        "launch_time": "2026-09-06T05:33:34.658353+00:00",
+        "deployment_source": "git:3920d956ba46deb8d02498e4ad6373c7bbba8a39",
+        "preflight": ".experiments/paper_remaining_evidence/results/M-FULL/parallel_preflight.json"
       },
       "result": null
     }
@@ -409,6 +417,13 @@
       "id": "D-CAPACITY-GT2D-20260906",
       "decision": "User explicitly adds GT2D training and at least two sizes. Append bounded capacity/GT2D family after required paper studies; existing XL detector candidate is reused exactly once.",
       "evidence": ".experiments/capacity_gt2d_20260906/ledger.json"
+    },
+    {
+      "id": "D-MPI-PARALLEL-20260906",
+      "timestamp": "2026-09-06T05:33:34.658353+00:00",
+      "decision": "User explicitly requested direct concurrent0.8M3DHP launch. Start M-FULL while corrected-A0 continues; only these two concurrently, then M-A0.",
+      "evidence": "Fresh B4 finite CUDA/protocol gate,789715 params,launch manifest and both live PIDs; retain frozen scientific recipe",
+      "document": ".experiments/paper_remaining_evidence/PARALLEL_MPI_FULL_20260906.md"
     }
   ],
   "execution_authorization": {
@@ -416,9 +431,8 @@
     "scope": "User authorizes reordered serial queue: current corrected-A0 -> MPI pair -> necessary paired repeats -> one audited accuracy candidate; GitHub synchronization continues."
   },
   "execution_order": [
-    "D-PM-BWD-0",
+    "D-PM-BWD-0 + M-FULL (current authorized pair)",
     "M-A0",
-    "M-FULL",
     "R-A0-1",
     "R-A2-1",
     "R-FULL-1",
@@ -433,5 +447,14 @@
     "L-GT2D-S0",
     "ACC-D16-DP030-S0",
     "XL-GT2D-S0"
-  ]
+  ],
+  "active_concurrency": {
+    "authorized": true,
+    "scope": [
+      "D-PM-BWD-0",
+      "M-FULL"
+    ],
+    "max_formal_jobs": 2,
+    "after_pair": "M-A0 then existing repeats and capacity/GT2D; do not duplicate Full"
+  }
 }

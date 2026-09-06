@@ -10,7 +10,7 @@ R-A0-1,PoseMamba released,1,790083,,,,80,,,NOT_RUN,
 R-A2-1,Graph Feature Fusion,1,800083,,,,80,,,NOT_RUN,
 R-FULL-1,Full,1,800083,,,,80,,,NOT_RUN,
 M-A0-0,PoseMamba released MPI-INF-3DHP,0,779715,,,,120,,,NOT_RUN,fixed epoch120 only
-M-FULL-0,Full MPI-INF-3DHP,0,789715,,,,120,,,NOT_RUN,fixed epoch120 only
+M-FULL-0,Full MPI-INF-3DHP,0,789715,,,,120,,,RUNNING,User-authorized concurrent with corrected A0; fixed120; shared-GPU timings excluded from efficiency comparison
 R-A0-2,PoseMamba released,2,790083,,,,80,,,NOT_RUN,
 R-A2-2,Graph Feature Fusion,2,800083,,,,80,,,NOT_RUN,
 R-FULL-2,Full,2,800083,,,,80,,,NOT_RUN,
