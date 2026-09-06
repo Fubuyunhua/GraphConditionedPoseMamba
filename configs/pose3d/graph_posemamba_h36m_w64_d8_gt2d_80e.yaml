@@ -1,0 +1,25 @@
+_base_: graph_posemamba_h36m_w64_d8_0p8m_memopt_speed.yaml
+
+config: configs/pose3d/graph_posemamba_h36m_w64_d8_gt2d_80e.yaml
+checkpoint: runs/capacity_gt2d_20260906/s-gt2d_seed0
+pretrained: runs/capacity_gt2d_20260906/s-gt2d_seed0
+resume: ''
+evaluate: ''
+seed: 0
+dim_feat: 64
+depth: 8
+epochs: 80
+gt_2d: true
+synthetic: false
+train_2d: false
+no_conf: false
+noise: false
+mask_ratio: 0.0
+mask_T_ratio: 0.0
+scale_range_pretrain: null
+no_eval: true
+checkpoint_frequency: 10
+enable_linear_warmup: false
+honor_no_weight_decay: false
+max_grad_norm: 0.0
+track_parameter_update_norm: false

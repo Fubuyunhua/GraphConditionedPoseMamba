@@ -1,0 +1,21 @@
+_base_: graph_posemamba_h36m_w256_d16_accuracy_dp030_60e.yaml
+
+config: configs/pose3d/graph_posemamba_h36m_w256_d10_accuracy_60e.yaml
+checkpoint: runs/capacity_gt2d_20260906/l-det2d_seed0
+pretrained: runs/capacity_gt2d_20260906/l-det2d_seed0
+resume: ''
+evaluate: ''
+seed: 0
+dim_feat: 256
+depth: 10
+epochs: 60
+gt_2d: false
+synthetic: false
+train_2d: false
+no_conf: false
+noise: false
+mask_ratio: 0.0
+mask_T_ratio: 0.0
+scale_range_pretrain: null
+no_eval: true
+checkpoint_frequency: 10

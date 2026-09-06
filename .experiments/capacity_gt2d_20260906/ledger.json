@@ -1,0 +1,274 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "capacity_gt2d_20260906",
+    "created_at": "2026-09-06"
+  },
+  "baseline": {
+    "id": "FULL-W64-D8-DET2D-SEED0",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m_memopt_speed.yaml",
+    "dataset": "H36M-SH xy/confidence T243/S81; GT2D uses normalized image-space label xy",
+    "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+    "split": "S1,S5,S6,S7,S8 train; S9,S11 test",
+    "primary_metric": "test-monitored best EMA P1, historical reference only",
+    "metric": "MPJPE",
+    "direction": "min",
+    "checkpoint": "epoch53 EMA reference only; no candidate resumes it",
+    "source_identity": "scientific baseline ad4e2fa; record deployed successor",
+    "command": "historical Full, see paper evidence ledger",
+    "seed_policy": [
+      0
+    ]
+  },
+  "audit": {
+    "verdict": "BLOCKED",
+    "report": ".experiments/capacity_gt2d_20260906/00_model_audit.md",
+    "blocking_findings": [
+      "Per-model compiled GPU gate and checkpoint lifecycle pending",
+      "GT cached coordinate provenance/root/flip evaluation audit pending",
+      "Predecessor experiments pending"
+    ],
+    "accepted_risks": [
+      "Single-seed exploration",
+      "Legacy GT2D evaluator copies known input xy; not raw three-coordinate prediction",
+      "Cross-size S80 versus M/L/XL60 recipe differs"
+    ],
+    "cpu_preflight": ".experiments/capacity_gt2d_20260906/cpu_preflight.json"
+  },
+  "experiments": [
+    {
+      "id": "S-GT2D-S0",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "A separately trained true-2D-input model reduces dependence on detector error under the disclosed GT2D evaluator",
+      "baseline_id": "FULL-W64-D8-DET2D-SEED0",
+      "delta": "W64/D8; GT2D label xy plus confidence1 and legacy input-xy passthrough at evaluation",
+      "controls": "Within each M/L/XL detector-GT pair only GT2D input/evaluator protocol differs; capacity family is improvement not architecture-only ablation; S retains legacy80e optimizer",
+      "seeds": [
+        0
+      ],
+      "budget": "80 epochs, one fresh run",
+      "primary_metric": "fixed epoch80 EMA P1 under explicitly named GT2D-with-input-xy evaluator",
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "per-action",
+        "training loss",
+        "VRAM",
+        "throughput"
+      ],
+      "acceptance": "Finite complete run under frozen protocol; assess improvement only within compatible input/endpoint definitions",
+      "falsification": "No capacity benefit within comparable results; GT does not support assumed error reduction",
+      "stopping_rule": "Technical failure pauses queue; no test-based stopping, seed replacement, or automatic retry",
+      "dependencies": [
+        "MPI_PAIR",
+        "REQUIRED_PAIRED_REPEATS",
+        "CAPACITY_GT2D_PREFLIGHT"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_w64_d8_gt2d_80e.yaml",
+        "config_sha256": "b4b590f047c9b0fe851ea1840af01d3573b20ef9bc029ca246421ab57349f601",
+        "expected_parameters": 800083,
+        "source": "freeze full deployed commit before run",
+        "checkpoint_prefix": "runs/capacity_gt2d_20260906/s-gt2d_seed0"
+      },
+      "result": null
+    },
+    {
+      "id": "M-DET2D-S0",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "Increased capacity with stabilized optimization improves detected-input accuracy; GT2D separately measures known-2D depth lifting",
+      "baseline_id": "FULL-W64-D8-DET2D-SEED0",
+      "delta": "W128/D20; detector xy/confidence with R3-derived optimizer and DropPath0.30",
+      "controls": "Within each M/L/XL detector-GT pair only GT2D input/evaluator protocol differs; capacity family is improvement not architecture-only ablation; S retains legacy80e optimizer",
+      "seeds": [
+        0
+      ],
+      "budget": "60 epochs, one fresh run",
+      "primary_metric": "fixed epoch60 EMA P1 under explicitly named detector-input evaluator",
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "per-action",
+        "training loss",
+        "VRAM",
+        "throughput"
+      ],
+      "acceptance": "Finite complete run under frozen protocol; assess improvement only within compatible input/endpoint definitions",
+      "falsification": "No capacity benefit within comparable results; GT does not support assumed error reduction",
+      "stopping_rule": "Technical failure pauses queue; no test-based stopping, seed replacement, or automatic retry",
+      "dependencies": [
+        "MPI_PAIR",
+        "REQUIRED_PAIRED_REPEATS",
+        "CAPACITY_GT2D_PREFLIGHT"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_w128_d20_accuracy_60e.yaml",
+        "config_sha256": "c891b8729bd9bfedcd82ee98dbf115af234aa112b812246f2491aa77a1745add",
+        "expected_parameters": 6836355,
+        "source": "freeze full deployed commit before run",
+        "checkpoint_prefix": "runs/capacity_gt2d_20260906/m-det2d_seed0"
+      },
+      "result": null
+    },
+    {
+      "id": "M-GT2D-S0",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "A separately trained true-2D-input model reduces dependence on detector error under the disclosed GT2D evaluator",
+      "baseline_id": "FULL-W64-D8-DET2D-SEED0",
+      "delta": "W128/D20; GT2D label xy plus confidence1 and legacy input-xy passthrough at evaluation",
+      "controls": "Within each M/L/XL detector-GT pair only GT2D input/evaluator protocol differs; capacity family is improvement not architecture-only ablation; S retains legacy80e optimizer",
+      "seeds": [
+        0
+      ],
+      "budget": "60 epochs, one fresh run",
+      "primary_metric": "fixed epoch60 EMA P1 under explicitly named GT2D-with-input-xy evaluator",
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "per-action",
+        "training loss",
+        "VRAM",
+        "throughput"
+      ],
+      "acceptance": "Finite complete run under frozen protocol; assess improvement only within compatible input/endpoint definitions",
+      "falsification": "No capacity benefit within comparable results; GT does not support assumed error reduction",
+      "stopping_rule": "Technical failure pauses queue; no test-based stopping, seed replacement, or automatic retry",
+      "dependencies": [
+        "MPI_PAIR",
+        "REQUIRED_PAIRED_REPEATS",
+        "CAPACITY_GT2D_PREFLIGHT"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_w128_d20_accuracy_gt2d_60e.yaml",
+        "config_sha256": "ebb673f71180b4df7f4232b077fafdcb2902ffe5cab7028a92ef885c3492ad8e",
+        "expected_parameters": 6836355,
+        "source": "freeze full deployed commit before run",
+        "checkpoint_prefix": "runs/capacity_gt2d_20260906/m-gt2d_seed0"
+      },
+      "result": null
+    },
+    {
+      "id": "L-DET2D-S0",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "Increased capacity with stabilized optimization improves detected-input accuracy; GT2D separately measures known-2D depth lifting",
+      "baseline_id": "FULL-W64-D8-DET2D-SEED0",
+      "delta": "W256/D10; detector xy/confidence with R3-derived optimizer and DropPath0.30",
+      "controls": "Within each M/L/XL detector-GT pair only GT2D input/evaluator protocol differs; capacity family is improvement not architecture-only ablation; S retains legacy80e optimizer",
+      "seeds": [
+        0
+      ],
+      "budget": "60 epochs, one fresh run",
+      "primary_metric": "fixed epoch60 EMA P1 under explicitly named detector-input evaluator",
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "per-action",
+        "training loss",
+        "VRAM",
+        "throughput"
+      ],
+      "acceptance": "Finite complete run under frozen protocol; assess improvement only within compatible input/endpoint definitions",
+      "falsification": "No capacity benefit within comparable results; GT does not support assumed error reduction",
+      "stopping_rule": "Technical failure pauses queue; no test-based stopping, seed replacement, or automatic retry",
+      "dependencies": [
+        "MPI_PAIR",
+        "REQUIRED_PAIRED_REPEATS",
+        "CAPACITY_GT2D_PREFLIGHT"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_w256_d10_accuracy_60e.yaml",
+        "config_sha256": "a9fc007b6a08dc8da69fd6cc20ee4c81e798c0087bb67caf203a7bbabf9d9e0e",
+        "expected_parameters": 12646107,
+        "source": "freeze full deployed commit before run",
+        "checkpoint_prefix": "runs/capacity_gt2d_20260906/l-det2d_seed0"
+      },
+      "result": null
+    },
+    {
+      "id": "L-GT2D-S0",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "A separately trained true-2D-input model reduces dependence on detector error under the disclosed GT2D evaluator",
+      "baseline_id": "FULL-W64-D8-DET2D-SEED0",
+      "delta": "W256/D10; GT2D label xy plus confidence1 and legacy input-xy passthrough at evaluation",
+      "controls": "Within each M/L/XL detector-GT pair only GT2D input/evaluator protocol differs; capacity family is improvement not architecture-only ablation; S retains legacy80e optimizer",
+      "seeds": [
+        0
+      ],
+      "budget": "60 epochs, one fresh run",
+      "primary_metric": "fixed epoch60 EMA P1 under explicitly named GT2D-with-input-xy evaluator",
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "per-action",
+        "training loss",
+        "VRAM",
+        "throughput"
+      ],
+      "acceptance": "Finite complete run under frozen protocol; assess improvement only within compatible input/endpoint definitions",
+      "falsification": "No capacity benefit within comparable results; GT does not support assumed error reduction",
+      "stopping_rule": "Technical failure pauses queue; no test-based stopping, seed replacement, or automatic retry",
+      "dependencies": [
+        "MPI_PAIR",
+        "REQUIRED_PAIRED_REPEATS",
+        "CAPACITY_GT2D_PREFLIGHT"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_w256_d10_accuracy_gt2d_60e.yaml",
+        "config_sha256": "84f0cadb1a980b2c09a721f0fd1ccb62e56982cc12465181f63fb2b00e8f88e9",
+        "expected_parameters": 12646107,
+        "source": "freeze full deployed commit before run",
+        "checkpoint_prefix": "runs/capacity_gt2d_20260906/l-gt2d_seed0"
+      },
+      "result": null
+    },
+    {
+      "id": "XL-GT2D-S0",
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "hypothesis": "A separately trained true-2D-input model reduces dependence on detector error under the disclosed GT2D evaluator",
+      "baseline_id": "FULL-W64-D8-DET2D-SEED0",
+      "delta": "W256/D16; GT2D label xy plus confidence1 and legacy input-xy passthrough at evaluation",
+      "controls": "Within each M/L/XL detector-GT pair only GT2D input/evaluator protocol differs; capacity family is improvement not architecture-only ablation; S retains legacy80e optimizer",
+      "seeds": [
+        0
+      ],
+      "budget": "60 epochs, one fresh run",
+      "primary_metric": "fixed epoch60 EMA P1 under explicitly named GT2D-with-input-xy evaluator",
+      "secondary_metrics": [
+        "same-checkpoint P2",
+        "per-action",
+        "training loss",
+        "VRAM",
+        "throughput"
+      ],
+      "acceptance": "Finite complete run under frozen protocol; assess improvement only within compatible input/endpoint definitions",
+      "falsification": "No capacity benefit within comparable results; GT does not support assumed error reduction",
+      "stopping_rule": "Technical failure pauses queue; no test-based stopping, seed replacement, or automatic retry",
+      "dependencies": [
+        "MPI_PAIR",
+        "REQUIRED_PAIRED_REPEATS",
+        "CAPACITY_GT2D_PREFLIGHT"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_accuracy_gt2d_60e.yaml",
+        "config_sha256": "9ecb68c1757743c8928a2a6217491c29f0454cda43688b54b1e79da2d3390865",
+        "expected_parameters": 20192451,
+        "source": "freeze full deployed commit before run",
+        "checkpoint_prefix": "runs/capacity_gt2d_20260906/xl-gt2d_seed0"
+      },
+      "result": null
+    }
+  ],
+  "execution_authorization": {
+    "authorized": true,
+    "scope": "User explicitly requested GT2D and at least two additional parameter sizes plus matching GT2D runs"
+  },
+  "decisions": [
+    {
+      "id": "CAP-GT-001",
+      "decision": "Use W128/D20 and W256/D10 intermediate sizes with stabilized R3 optimizer; include existing W256/D16 candidate and its GT2D twin without duplicate XL detector run. Preserve anatomical graph/control/independent recurrence.",
+      "evidence": "W128/D20 partial best37.6593, D16 partial best37.4302 but late overfit, W256/D10 had no completed epoch; no new mechanism claimed."
+    }
+  ]
+}

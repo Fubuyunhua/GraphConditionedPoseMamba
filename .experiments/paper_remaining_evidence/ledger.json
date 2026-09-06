@@ -404,6 +404,11 @@
       "decision": "Move MPI pair immediately after current corrected-A0, retain six necessary paired repeats, then one registered high-accuracy trial; no extra structural ablations.",
       "evidence": "Explicit user instruction and single-seed A2-Full gap0.213664 mm.",
       "document": ".experiments/paper_remaining_evidence/PRIORITY_UPDATE_20260906.md"
+    },
+    {
+      "id": "D-CAPACITY-GT2D-20260906",
+      "decision": "User explicitly adds GT2D training and at least two sizes. Append bounded capacity/GT2D family after required paper studies; existing XL detector candidate is reused exactly once.",
+      "evidence": ".experiments/capacity_gt2d_20260906/ledger.json"
     }
   ],
   "execution_authorization": {
@@ -421,6 +426,12 @@
     "R-A2-2",
     "R-FULL-2",
     "BRIEF_REQUIRED_EVALUATION_AND_EFFICIENCY",
-    "ACC-D16-DP030-S0"
+    "S-GT2D-S0",
+    "M-DET2D-S0",
+    "M-GT2D-S0",
+    "L-DET2D-S0",
+    "L-GT2D-S0",
+    "ACC-D16-DP030-S0",
+    "XL-GT2D-S0"
   ]
 }

@@ -1,3 +1,5 @@
+> Latest scope: user confirmed GT2D means Human3.6M ground-truth2D to3D. After existing required paper studies execute the bounded size/GT2D family in `.experiments/capacity_gt2d_20260906/02_experiment_plan.md` and master ledger execution_order. Reuse existing XL detector once; do not stop the automation before XL-GT2D completes.
+
 > **2026-09-06 update:** R3 was stopped by user at 54/60. E-RWG-0 completed with best EMA `40.416912/33.822350 mm` and Rewired is `+0.571750 mm` P1 worse than anatomical Full for seed0. E-NR-0 completed with best EMA `40.568980/33.802451 mm` and joined no-reset is `+0.723818 mm` P1 worse than Full for seed0. Corrected PoseMamba passed its B4 gate and began formal 80-epoch training at 09:11:21. See [.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md](.experiments/paper_remaining_evidence/CURRENT_HANDOFF_20260906.md).
 
 # GraphConditionedPoseMamba 研究接手文档

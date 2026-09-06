@@ -1,0 +1,163 @@
+{
+  "status": "PASS_CPU_PARAMETERS_CONFIG_AND_GT_SAMPLES",
+  "gpu_forward_backward": "NOT_RUN; preserve current GPU training",
+  "rows": [
+    {
+      "config": "w64_d8_gt2d_80e",
+      "parameters": 800083,
+      "dim": 64,
+      "depth": 8,
+      "gt_2d": true,
+      "epochs": 80,
+      "drop_path": 0.2,
+      "learning_rate": 0.0005,
+      "linear_warmup": false,
+      "train": {
+        "samples": 17748,
+        "shape": [
+          243,
+          17,
+          3
+        ],
+        "xy_equal_label": true,
+        "confidence_one": true
+      },
+      "test": {
+        "samples": 2228,
+        "shape": [
+          243,
+          17,
+          3
+        ],
+        "xy_equal_label": true,
+        "confidence_one": true
+      }
+    },
+    {
+      "config": "w128_d20_accuracy_60e",
+      "parameters": 6836355,
+      "dim": 128,
+      "depth": 20,
+      "gt_2d": false,
+      "epochs": 60,
+      "drop_path": 0.3,
+      "learning_rate": 0.0003,
+      "linear_warmup": true
+    },
+    {
+      "config": "w128_d20_accuracy_gt2d_60e",
+      "parameters": 6836355,
+      "dim": 128,
+      "depth": 20,
+      "gt_2d": true,
+      "epochs": 60,
+      "drop_path": 0.3,
+      "learning_rate": 0.0003,
+      "linear_warmup": true,
+      "train": {
+        "samples": 17748,
+        "shape": [
+          243,
+          17,
+          3
+        ],
+        "xy_equal_label": true,
+        "confidence_one": true
+      },
+      "test": {
+        "samples": 2228,
+        "shape": [
+          243,
+          17,
+          3
+        ],
+        "xy_equal_label": true,
+        "confidence_one": true
+      }
+    },
+    {
+      "config": "w256_d10_accuracy_60e",
+      "parameters": 12646107,
+      "dim": 256,
+      "depth": 10,
+      "gt_2d": false,
+      "epochs": 60,
+      "drop_path": 0.3,
+      "learning_rate": 0.0003,
+      "linear_warmup": true
+    },
+    {
+      "config": "w256_d10_accuracy_gt2d_60e",
+      "parameters": 12646107,
+      "dim": 256,
+      "depth": 10,
+      "gt_2d": true,
+      "epochs": 60,
+      "drop_path": 0.3,
+      "learning_rate": 0.0003,
+      "linear_warmup": true,
+      "train": {
+        "samples": 17748,
+        "shape": [
+          243,
+          17,
+          3
+        ],
+        "xy_equal_label": true,
+        "confidence_one": true
+      },
+      "test": {
+        "samples": 2228,
+        "shape": [
+          243,
+          17,
+          3
+        ],
+        "xy_equal_label": true,
+        "confidence_one": true
+      }
+    },
+    {
+      "config": "w256_d16_accuracy_dp030_60e",
+      "parameters": 20192451,
+      "dim": 256,
+      "depth": 16,
+      "gt_2d": false,
+      "epochs": 60,
+      "drop_path": 0.3,
+      "learning_rate": 0.0003,
+      "linear_warmup": true
+    },
+    {
+      "config": "w256_d16_accuracy_gt2d_60e",
+      "parameters": 20192451,
+      "dim": 256,
+      "depth": 16,
+      "gt_2d": true,
+      "epochs": 60,
+      "drop_path": 0.3,
+      "learning_rate": 0.0003,
+      "linear_warmup": true,
+      "train": {
+        "samples": 17748,
+        "shape": [
+          243,
+          17,
+          3
+        ],
+        "xy_equal_label": true,
+        "confidence_one": true
+      },
+      "test": {
+        "samples": 2228,
+        "shape": [
+          243,
+          17,
+          3
+        ],
+        "xy_equal_label": true,
+        "confidence_one": true
+      }
+    }
+  ]
+}

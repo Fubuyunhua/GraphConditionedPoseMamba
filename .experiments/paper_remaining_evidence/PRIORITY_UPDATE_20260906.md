@@ -1,3 +1,5 @@
+> Latest scope: user confirmed GT2D means Human3.6M ground-truth2D to3D. After existing required paper studies execute the bounded size/GT2D family in `.experiments/capacity_gt2d_20260906/02_experiment_plan.md` and master ledger execution_order. Reuse existing XL detector once; do not stop the automation before XL-GT2D completes.
+
 # Priority and scope update — 2026-09-06
 
 User instruction: give a simple ablation judgment, prioritize 3DHP next, retain only necessary remaining experiments, then design and start a highest-accuracy candidate using the accumulated evidence. Execution and GitHub synchronization are authorized. This supersedes the earlier order placing H36M seed1 before MPI. Preserve the currently running corrected-A0 diagnostic through its registered endpoint.

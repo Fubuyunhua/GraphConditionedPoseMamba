@@ -70,7 +70,12 @@
         "R-A0",
         "R-A2",
         "R-FULL",
-        "ACC_PREFLIGHT_PASS"
+        "ACC_PREFLIGHT_PASS",
+        "S-GT2D-S0",
+        "M-DET2D-S0",
+        "M-GT2D-S0",
+        "L-DET2D-S0",
+        "L-GT2D-S0"
       ],
       "artifacts": {
         "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_accuracy_dp030_60e.yaml",
@@ -87,6 +92,10 @@
       "timestamp": "2026-09-06T12:38:00+08:00",
       "decision": "One bounded DropPath candidate after minimum paper evidence; see03_decisions.md",
       "evidence": "R3 train/test divergence and current ablation direction"
+    },
+    {
+      "id": "ACC-002",
+      "decision": "Latest user expands bounded family; execute this XL detector once after M/L pairs and before XL GT2D, not as a duplicate."
     }
   ]
 }

@@ -1,3 +1,5 @@
+> Latest scope: user confirmed GT2D means Human3.6M ground-truth2D to3D. After existing required paper studies execute the bounded size/GT2D family in `.experiments/capacity_gt2d_20260906/02_experiment_plan.md` and master ledger execution_order. Reuse existing XL detector once; do not stop the automation before XL-GT2D completes.
+
 > Queue update: use [PRIORITY_UPDATE_20260906.md](PRIORITY_UPDATE_20260906.md). MPI now precedes H36M repeats; one registered accuracy candidate follows required evidence. Earlier queue order below is superseded.
 
 # Current handoff — 2026-09-06
