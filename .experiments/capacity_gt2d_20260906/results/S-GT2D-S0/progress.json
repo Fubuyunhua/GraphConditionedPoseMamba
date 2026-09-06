@@ -1,11 +1,13 @@
 {
   "status": "RUNNING",
-  "completed_epochs": 0,
-  "active_epoch": 1,
-  "observed_batches": 387,
-  "observed_train_it_per_sec": 14.24,
-  "gpu_utilization_percent": 97,
-  "gpu_used_mib": 5091,
-  "timestamp": "2026-09-06T19:17:17+08:00",
-  "train_pid": 1203060
+  "completed_epochs": 6,
+  "active_epoch": 7,
+  "latest": {"epoch": 6, "minutes": 5.18, "learning_rate": 0.000475, "train_loss": 0.018129, "ema_p1_mm": 33.674673, "ema_p2_mm": 28.345518},
+  "best": {"epoch": 6, "ema_p1_mm": 33.674673, "ema_p2_mm": 28.345518},
+  "gpu_utilization_percent": 96,
+  "process_gpu_used_mib": 3734,
+  "total_gpu_used_mib": 5319,
+  "timestamp": "2026-09-06T19:54:46+08:00",
+  "train_pid": 1203060,
+  "error_matches": 0
 }

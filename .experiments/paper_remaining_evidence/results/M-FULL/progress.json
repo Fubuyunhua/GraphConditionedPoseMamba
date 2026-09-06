@@ -1,7 +1,7 @@
 {
   "status": "RUNNING",
-  "completed_epochs": 19,
-  "active_epoch": 20,
+  "completed_epochs": 22,
+  "active_epoch": 23,
   "train_pid": 1136724,
   "policy": "best_ema_test_monitored_first120",
   "best": {
@@ -10,13 +10,13 @@
     "raw_p2_mm": 13.066587370167607,
     "raw_pck_150_percent": 99.29616368286445,
     "raw_auc_0_150_percent": 88.1341517476556,
-    "ema_epoch": 18,
-    "ema_p1_mm": 17.29697346123405,
-    "ema_p2_mm": 12.065554645496865,
-    "ema_pck_150_percent": 99.19590792838875,
-    "ema_auc_0_150_percent": 88.88555839727194
+    "ema_epoch": 22,
+    "ema_p1_mm": 16.329954723855725,
+    "ema_p2_mm": 10.903498671241428,
+    "ema_pck_150_percent": 99.36777493606138,
+    "ema_auc_0_150_percent": 89.3500767263427
   },
-  "latest": {"epoch": 19, "learning_rate": 0.00016690275229001758, "minutes": 12.6717, "train_loss": 0.05145211262480219, "raw_p1_mm": 18.40397508289503, "raw_p2_mm": 13.066587370167607, "ema_p1_mm": 17.660095652207083, "ema_p2_mm": 12.51273321077098},
+  "latest": {"epoch": 22, "learning_rate": 0.00016194557364425174, "minutes": 24.0018, "train_loss": 0.04788612624807836, "raw_p1_mm": 18.695557904284932, "raw_p2_mm": 13.303103537683901, "ema_p1_mm": 16.329954723855725, "ema_p2_mm": 10.903498671241428},
   "epoch1_replay_included": true,
   "error_matches": 0
 }
