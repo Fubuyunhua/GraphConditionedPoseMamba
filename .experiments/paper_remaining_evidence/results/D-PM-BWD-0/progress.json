@@ -1,12 +1,16 @@
 {
   "status": "RUNNING",
-  "completed_epochs": 0,
+  "completed_epochs": 61,
+  "active_epoch": 62,
   "budget": 80,
   "launch_time": "2026-09-06T09:11:21+08:00",
   "launcher_pid": 1102568,
   "train_pid": 1102590,
   "run_directory": "/scratch/home/caiwei/GraphConditionedPoseMamba_CORRECTED_A0_20260906/runs/paper_remaining_evidence/posemamba_corrected_backward_seed0_2026_09_06_T_09_11_21",
-  "first_trace_iterations_per_second": 16.9,
-  "immediate_error_matches": 0,
-  "interpretation": "Exact-backward formal epoch 1 is running; no diagnostic conclusion."
+  "latest": {"epoch": 61, "loss": 0.010388, "ema_p1_mm": 40.721101, "ema_p2_mm": 33.528808, "minutes": 9.23},
+  "best": {"epoch": 52, "ema_p1_mm": 40.660688, "ema_p2_mm": 33.532125},
+  "mean_epoch_minutes_before_mpi_concurrency": 4.3838,
+  "mean_epoch_minutes_during_mpi_concurrency": 8.46,
+  "error_matches": 0,
+  "interpretation": "Healthy but materially slower during user-authorized MPI Full concurrency; no final diagnostic conclusion."
 }
