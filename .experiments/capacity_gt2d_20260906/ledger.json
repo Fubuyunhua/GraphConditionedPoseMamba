@@ -47,7 +47,7 @@
     {
       "id": "S-GT2D-S0",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "hypothesis": "A separately trained true-2D-input model reduces dependence on detector error under the disclosed GT2D evaluator",
       "baseline_id": "FULL-W64-D8-DET2D-SEED0",
       "delta": "W64/D8; GT2D label xy plus confidence1 and legacy input-xy passthrough at evaluation",
@@ -83,9 +83,30 @@
         "train_pid": 1203060,
         "launcher_pid": 1203038,
         "launch_time": "2026-09-06T19:16:44+08:00",
-        "preflight": ".experiments/capacity_gt2d_20260906/results/S-GT2D-S0/PREFLIGHT_PASS.json"
+        "preflight": ".experiments/capacity_gt2d_20260906/results/S-GT2D-S0/PREFLIGHT_PASS.json",
+        "checkpoint_audit": ".experiments/capacity_gt2d_20260906/results/S-GT2D-S0/checkpoint_audit.json",
+        "analysis": ".experiments/capacity_gt2d_20260906/results/S-GT2D-S0/analysis.md",
+        "remote_verification": "/scratch/home/caiwei/GraphConditionedPoseMamba_H36M_GT2D_S_20260906/verification/S-GT2D-S0-final"
       },
-      "result": null
+      "result": {
+        "completed_epochs": 80,
+        "natural_exit_code": 0,
+        "best_epoch": 78,
+        "best_ema_p1_mm": 16.81631067387498,
+        "best_ema_p2_mm": 13.979448044175278,
+        "best_raw_p1_mm": 17.59451761205113,
+        "best_raw_p2_mm": 14.284725354774073,
+        "fixed_epoch": 80,
+        "fixed_ema_p1_mm": 16.96422913557216,
+        "fixed_ema_p2_mm": 14.020911043349624,
+        "fixed_raw_p1_mm": 18.65848708268305,
+        "fixed_raw_p2_mm": 14.890873267007066,
+        "optimizer_steps": 354960,
+        "ema_updates": 354960,
+        "peak_reserved_mib": 3034,
+        "mean_epoch_minutes": 5.14525,
+        "recommendation": "KEEP_GT2D_DEPTH_LIFTING_RESULT"
+      }
     },
     {
       "id": "M-DET2D-S0",
