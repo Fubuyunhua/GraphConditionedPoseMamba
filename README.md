@@ -1,3 +1,5 @@
+> Repository maintenance: main is the unified branch. Former development branches are preserved by archive tags; see [branch consolidation](docs/BRANCH_CONSOLIDATION_20260907.md).
+
 # Graph-Conditioned Factorized PoseMamba
 
 > Private research snapshot, 2026-09-02. Keep this repository private until
