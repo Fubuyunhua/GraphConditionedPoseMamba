@@ -1,5 +1,26 @@
 # FINAL-W128-DET2D-S0
 
+## Latest manual synchronization: 2026-09-07 17:22 Asia/Shanghai
+
+Completed20/80, epoch21 active. Best/latest EMA P1/P2=39.642792/33.077151 mm.
+Loss0.012001, LR0.000282, preclip gradient norm1.526173, throughput4.619914 it/s.
+No matched traceback/CUDA/OOM. Continue the registered budget.
+
+| Epoch | EMA P1 mm | Paired P2 mm | Training minutes |
+|---|---:|---:|---:|
+|17|40.140396|33.532746|15.11|
+|18|39.964236|33.387747|15.98|
+|19|39.876537|33.298448|16.00|
+|20|39.642792|33.077151|16.01|
+
+Complete recent epoch intervals including evaluation/save are17.28/17.22 minutes.
+GPU92%,18641/32607 MiB total; training15462 MiB; other PID1572944 uses3162 MiB.
+Temperature61C, power426.44W. Partial single-seed results and shared timing do not
+establish final accuracy or publication efficiency. Frozen source identity unchanged.
+Scheduled monitoring was deleted by the user; this is a manual sync to main.
+
+## Historical snapshot (epoch11)
+
 `RUNNING`. The actual W128/D20 configuration, parameter count, optimizer
 groups, warmup/cosine schedule and B1/B2/B4 finite-gradient memory gates passed.
 Fresh seed0 training began at10:52:11 Asia/Shanghai alongside MPI Full under
