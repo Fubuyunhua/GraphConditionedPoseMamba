@@ -1,0 +1,16 @@
+{
+  "status": "RUNNING",
+  "completed_epochs": 0,
+  "active_epoch": 1,
+  "launch_time": "2026-09-07T10:52:11+08:00",
+  "launcher_pid": 1407924,
+  "train_pid": 1407974,
+  "parallel_with_pid": 1136724,
+  "run_directory": "/scratch/home/caiwei/GraphConditionedPoseMamba_FINAL_W128_DET2D_20260907/runs/final_two_sizes_20260906/w128_det2d_seed0_2026_09_07_T_10_52_11",
+  "observed_training_it_per_sec": 2.90,
+  "process_gpu_used_mib": 15018,
+  "total_gpu_used_mib": 16603,
+  "gpu_utilization_percent": 92,
+  "error_matches": 0,
+  "interpretation": "Formal epoch1 is running under user-authorized MPI concurrency; no accuracy result yet."
+}

@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "created_at": "2026-09-07T10:51:22+08:00",
+  "deployment_source": "e6d5f23ce1711b991534e094d78d10d9bfc99ff7",
+  "parallel_with_pid": 1136724,
+  "gpu_free_mib_before_gate": 30530,
+  "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+  "config_sha256": "161b074fde34c67f22d57624554f32d64604087590429bb26617907c4d6ae010",
+  "parameters": 6836355,
+  "optimizer_groups": [
+    {"name": "decay", "parameter_count": 6509955, "weight_decay": 0.012},
+    {"name": "no_decay", "parameter_count": 326400, "weight_decay": 0.0}
+  ],
+  "stages": {
+    "B1": {"compiled": false, "batch_size": 1, "loss": 2.845707416534424, "grad_norm": 85.24748229980469, "peak_reserved_mib": 3734},
+    "B2": {"compiled": false, "batch_size": 2, "loss": 2.373340606689453, "grad_norm": 49.157554626464844, "peak_reserved_mib": 7252},
+    "B4": {"compiled": true, "batch_size": 4, "loss": 2.0232346057891846, "grad_norm": 47.24882507324219, "peak_reserved_mib": 14228}
+  },
+  "gates": {
+    "effective_config": true,
+    "parameter_count": true,
+    "optimizer_groups": true,
+    "warmup_cosine_schedule": true,
+    "finite_loss_and_gradients": true,
+    "memory_with_concurrent_mpi": true,
+    "checkpoint_and_evaluation_lifecycle": true
+  }
+}

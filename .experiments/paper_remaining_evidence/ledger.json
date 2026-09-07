@@ -482,15 +482,19 @@
     {
       "id": "SEEDS-LAST-20260906",
       "decision": "User explicitly puts different random-seed experiments last; final two-width detector/GT2D phases now precede all six paired repeats. MPI baseline stays cancelled."
+    },
+    {
+      "id": "D-W128-PARALLEL-20260907",
+      "decision": "User explicitly requests parallel downstream work because MPI is slow. Start FINAL-W128-DET2D-S0 alongside MPI after concurrent memory/numerical PASS; no third job.",
+      "document": ".experiments/final_two_sizes_20260906/PARALLEL_W128_WITH_MPI_20260907.md"
     }
   ],
   "execution_authorization": {
     "time": "2026-09-06T00:49:26+08:00",
-    "scope": "User authorizes reordered serial queue: current corrected-A0 -> MPI pair -> necessary paired repeats -> one audited accuracy candidate; GitHub synchronization continues."
+    "scope": "User authorizes current MPI plus FINAL-W128 parallel pair, followed by the remaining final-size models and seeds-last repeats; GitHub synchronization continues."
   },
   "execution_order": [
-    "M-FULL + S-GT2D-S0 (current pair)",
-    "FINAL-W128-DET2D-S0",
+    "M-FULL + FINAL-W128-DET2D-S0 (current pair; S-GT2D completed)",
     "FINAL-W256-DET2D-S0",
     "FINAL-W128-GT2D-S0",
     "FINAL-W256-GT2D-S0",
@@ -505,9 +509,9 @@
     "authorized": true,
     "scope": [
       "M-FULL",
-      "S-GT2D-S0"
+      "FINAL-W128-DET2D-S0"
     ],
     "max_formal_jobs": 2,
-    "after_pair": "remaining H36M paired repeats and capacity/GT2D; MPI A0 cancelled; skip completed small GT2D"
+    "after_pair": "FINAL-W256-DET2D-S0, then same-width GT fine-tunes, then H36M paired repeats; MPI A0 cancelled; skip completed small GT2D"
   }
 }
