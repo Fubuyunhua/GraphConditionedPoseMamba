@@ -1,18 +1,18 @@
 {
   "status": "RUNNING",
-  "completed_epochs": 1,
-  "active_epoch": 2,
+  "completed_epochs": 3,
+  "active_epoch": 4,
   "launch_time": "2026-09-07T10:52:11+08:00",
   "launcher_pid": 1407924,
   "train_pid": 1407974,
   "parallel_with_pid": 1136724,
   "run_directory": "/scratch/home/caiwei/GraphConditionedPoseMamba_FINAL_W128_DET2D_20260907/runs/final_two_sizes_20260906/w128_det2d_seed0_2026_09_07_T_10_52_11",
-  "latest": {"epoch": 1, "minutes": 26.81, "learning_rate": 0.000064, "train_loss": 0.088476, "ema_p1_mm": 278.200153, "ema_p2_mm": 149.088322},
-  "best": {"epoch": 1, "ema_p1_mm": 278.200153, "ema_p2_mm": 149.088322},
-  "observed_training_it_per_sec": 2.90,
-  "process_gpu_used_mib": 15018,
-  "total_gpu_used_mib": 17047,
-  "gpu_utilization_percent": 98,
+  "latest": {"epoch": 3, "minutes": 19.92, "learning_rate": 0.000131, "train_loss": 0.039913, "ema_p1_mm": 110.452345, "ema_p2_mm": 78.709754},
+  "best": {"epoch": 3, "ema_p1_mm": 110.452345, "ema_p2_mm": 78.709754},
+  "observed_training_it_per_sec": 3.712,
+  "process_gpu_used_mib": 15462,
+  "total_gpu_used_mib": 17763,
+  "gpu_utilization_percent": 100,
   "error_matches": 0,
-  "interpretation": "Epoch1 completed under user-authorized MPI concurrency; initialization-stage accuracy is not a model conclusion."
+  "interpretation": "MPI stopped after aligned epoch80; W128 continues with an unrelated wh process present. Early accuracy is not a final conclusion."
 }

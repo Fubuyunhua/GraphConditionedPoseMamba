@@ -1,0 +1,15 @@
+{
+  "status": "PASS_INTEGRITY_REPLAY_PENDING_OTHER_USER_GPU",
+  "effective_epochs": 80,
+  "stop_status": "STOPPED_BY_USER_AT_ALIGNED_EPOCH80",
+  "launcher_exit_code": 143,
+  "checkpoints": {
+    "best_epoch.bin": {"epoch": 70, "type": "raw", "finite": true, "sha256": "b532017dd79a487049f9d96556b5ee9c5d74ed4ac4f30b2168c0c1f31e37ea74"},
+    "best_ema_epoch.bin": {"epoch": 43, "type": "ema", "finite": true, "sha256": "b04d4bbd5edff07ef23a86b602c7ef36232a34db014b104b3d4aaa3badfbecd3"},
+    "raw_fixed_epoch80_user_stop.bin": {"epoch": 80, "type": "raw", "finite": true, "sha256": "d397db5f76fb9e1f95af606e7631c2095139946f9b480cc7d5a760823eff665d"},
+    "ema_fixed_epoch80_user_stop.bin": {"epoch": 80, "type": "ema", "finite": true, "sha256": "754077a57356d33b72a52cb3373d78f978b0fb7b646854dfb7a07c380e85c35e"},
+    "latest_epoch.bin": {"epoch": 80, "type": "raw", "finite": true, "sha256": "d397db5f76fb9e1f95af606e7631c2095139946f9b480cc7d5a760823eff665d"},
+    "latest_ema_epoch.bin": {"epoch": 80, "type": "ema", "finite": true, "sha256": "754077a57356d33b72a52cb3373d78f978b0fb7b646854dfb7a07c380e85c35e"}
+  },
+  "metrics_sha256": "34101b8fd2d867e9d51431956b1e37d399e12e3a22644d24a792a6c74fdd6d44"
+}

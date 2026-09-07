@@ -10,7 +10,7 @@ R-A0-1,PoseMamba released,1,790083,,,,80,,,NOT_RUN,
 R-A2-1,Graph Feature Fusion,1,800083,,,,80,,,NOT_RUN,
 R-FULL-1,Full,1,800083,,,,80,,,NOT_RUN,
 M-A0-0,PoseMamba released MPI-INF-3DHP,0,779715,,,,120,,,CANCELLED,Explicit user cancellation before launch; no result; do not run
-M-FULL-0,Full MPI-INF-3DHP,0,789715,1,47.07302046336299,38.721892668848454,120,,,RUNNING,RUNNING interim epoch1 replay; per-epoch test-monitored best EMA; paired PCK/AUC in policy_change; fixed120 secondary
+M-FULL-0,Full MPI-INF-3DHP,0,789715,43,15.33070155682771,8.781069186252097,80,16.20551724939761,8.030134167588276,COMPLETED_USER_ALIGNED,user stop after complete epoch80; test-monitored best EMA; MPI baseline cancelled
 R-A0-2,PoseMamba released,2,790083,,,,80,,,NOT_RUN,
 R-A2-2,Graph Feature Fusion,2,800083,,,,80,,,NOT_RUN,
 R-FULL-2,Full,2,800083,,,,80,,,NOT_RUN,

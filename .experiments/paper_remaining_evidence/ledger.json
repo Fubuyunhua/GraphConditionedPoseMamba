@@ -383,7 +383,7 @@
     {
       "id": "M-FULL",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "hypothesis": "Full improves over released A0 on the second dataset",
       "baseline_id": "A3-FULL-W64-D8-SEED0",
       "delta": "train Full on MPI-INF-3DHP repaired protocol",
@@ -425,9 +425,32 @@
         "policy_audit": ".experiments/paper_remaining_evidence/results/M-FULL/policy_change/migration.json",
         "stop_policy": ".experiments/paper_remaining_evidence/MPI_STOP_AT_80_20260907.md",
         "stop_watcher": "scripts/stop_mpi_full_after_epoch80_20260907.py",
-        "stop_marker": "/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906/verification/user_stop_at_epoch80.json"
+        "stop_marker": "/scratch/home/caiwei/GraphConditionedPoseMamba_MPI_FULL_20260906/verification/user_stop_at_epoch80.json",
+        "checkpoint_audit": ".experiments/paper_remaining_evidence/results/M-FULL/checkpoint_audit_epoch80.json",
+        "analysis": ".experiments/paper_remaining_evidence/results/M-FULL/analysis.md"
       },
-      "result": null
+      "result": {
+        "completion_status": "COMPLETED_USER_ALIGNED_EPOCH80",
+        "effective_epochs": 80,
+        "launcher_exit_code": 143,
+        "best_ema_epoch": 43,
+        "best_ema_mpjpe_mm": 15.33070155682771,
+        "best_ema_p_mpjpe_mm": 8.781069186252097,
+        "best_ema_pck150_percent": 99.62557544757034,
+        "best_ema_auc_percent": 89.96811594202899,
+        "best_raw_epoch": 70,
+        "best_raw_mpjpe_mm": 15.60493771163277,
+        "best_raw_p_mpjpe_mm": 9.319566230566606,
+        "fixed80_ema_mpjpe_mm": 16.20551724939761,
+        "fixed80_ema_p_mpjpe_mm": 8.030134167588276,
+        "fixed80_ema_pck150_percent": 99.73401534526855,
+        "fixed80_ema_auc_percent": 89.3031884057971,
+        "fixed80_raw_mpjpe_mm": 16.46312449695753,
+        "fixed80_raw_p_mpjpe_mm": 8.916045353848002,
+        "checkpoint_integrity": "PASS",
+        "strict_replay": "PENDING_OTHER_USER_GPU_PROCESS",
+        "recommendation": "KEEP_DISCLOSED_TEST_MONITORED_NO_MATCHED_MPI_BASELINE"
+      }
     }
   ],
   "decisions": [
@@ -503,7 +526,7 @@
     "scope": "User authorizes current MPI plus FINAL-W128 parallel pair, followed by the remaining final-size models and seeds-last repeats; GitHub synchronization continues."
   },
   "execution_order": [
-    "M-FULL + FINAL-W128-DET2D-S0 (current pair; S-GT2D completed)",
+    "FINAL-W128-DET2D-S0 (current; MPI and S-GT2D completed)",
     "FINAL-W256-DET2D-S0",
     "FINAL-W128-GT2D-S0",
     "FINAL-W256-GT2D-S0",
@@ -517,10 +540,10 @@
   "active_concurrency": {
     "authorized": true,
     "scope": [
-      "M-FULL",
       "FINAL-W128-DET2D-S0"
     ],
-    "max_formal_jobs": 2,
+    "max_formal_jobs": 1,
+    "external_gpu_process": "wh PID1469157 observed; never stop or count as a project experiment",
     "after_pair": "FINAL-W256-DET2D-S0, then same-width GT fine-tunes, then H36M paired repeats; MPI A0 cancelled; skip completed small GT2D"
   }
 }

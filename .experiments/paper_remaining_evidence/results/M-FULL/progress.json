@@ -1,9 +1,8 @@
 {
-  "status": "RUNNING",
-  "completed_epochs": 79,
-  "active_epoch": 80,
+  "status": "COMPLETED_USER_ALIGNED",
+  "completed_epochs": 80,
   "train_pid": 1136724,
-  "policy": "best_ema_test_monitored_first120",
+  "policy": "best_ema_test_monitored_first80",
   "best": {
     "raw_epoch": 70,
     "raw_p1_mm": 15.60493771163277,
@@ -16,10 +15,14 @@
     "ema_pck_150_percent": 99.62557544757034,
     "ema_auc_0_150_percent": 89.96811594202899
   },
-  "latest": {"epoch": 79, "learning_rate": 0.00009132194954878296, "minutes": 25.4803, "train_loss": 0.030516998334135834, "raw_p1_mm": 20.069620205091393, "raw_p2_mm": 11.699228998391524, "ema_p1_mm": 16.27750136848118, "ema_p2_mm": 8.138240871346515},
+  "latest": {"epoch": 80, "learning_rate": 0.00009040873005329513, "minutes": 25.6175, "train_loss": 0.030150440069788235, "raw_p1_mm": 16.46312449695753, "raw_p2_mm": 8.916045353848002, "ema_p1_mm": 16.20551724939761, "ema_p2_mm": 8.030134167588276},
   "effective_stop_epoch": 80,
   "stop_policy": "user-aligned epoch80 after complete raw/EMA checkpoint writes",
   "stop_watcher_pid": 1433503,
+  "stop_time": "2026-09-07T11:59:15+08:00",
+  "launcher_exit_code": 143,
+  "checkpoint_integrity": "PASS",
+  "strict_replay": "PENDING_OTHER_USER_GPU_PROCESS",
   "epoch1_replay_included": true,
   "error_matches": 0
 }

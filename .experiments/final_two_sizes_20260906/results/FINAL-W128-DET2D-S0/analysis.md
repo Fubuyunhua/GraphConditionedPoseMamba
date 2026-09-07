@@ -3,7 +3,9 @@
 `RUNNING`. The actual W128/D20 configuration, parameter count, optimizer
 groups, warmup/cosine schedule and B1/B2/B4 finite-gradient memory gates passed.
 Fresh seed0 training began at10:52:11 Asia/Shanghai alongside MPI Full under
-explicit user authorization. Epoch1 completed in26.81 minutes with loss
-0.088476, LR0.000064 and initialization-stage EMA P1/P2
-`278.200153/149.088322 mm`; epoch2 is running. Shared timing is engineering
-telemetry, and the first-epoch metric is not an accuracy conclusion.
+explicit user authorization. MPI stopped after its aligned epoch80. W128
+completed epoch3 at `110.452345/78.709754 mm`, loss0.039913 and LR0.000131;
+epoch4 is running. Epoch time improved from26.81 minutes during MPI concurrency
+to19.92 minutes after it stopped. An unrelated `wh` process is now also on the
+GPU and is not controlled. Early metrics and shared timing are not final
+accuracy or publication-efficiency conclusions.
