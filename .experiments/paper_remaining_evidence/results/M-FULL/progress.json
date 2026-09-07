@@ -1,7 +1,7 @@
 {
   "status": "RUNNING",
-  "completed_epochs": 75,
-  "active_epoch": 76,
+  "completed_epochs": 79,
+  "active_epoch": 80,
   "train_pid": 1136724,
   "policy": "best_ema_test_monitored_first120",
   "best": {
@@ -16,7 +16,10 @@
     "ema_pck_150_percent": 99.62557544757034,
     "ema_auc_0_150_percent": 89.96811594202899
   },
-  "latest": {"epoch": 75, "learning_rate": 0.00009506800840114145, "minutes": 12.6827, "train_loss": 0.030667902815340573, "raw_p1_mm": 16.99135862217779, "raw_p2_mm": 9.189135887063069, "ema_p1_mm": 16.055626575304114, "ema_p2_mm": 8.018546215057373},
+  "latest": {"epoch": 79, "learning_rate": 0.00009132194954878296, "minutes": 25.4803, "train_loss": 0.030516998334135834, "raw_p1_mm": 20.069620205091393, "raw_p2_mm": 11.699228998391524, "ema_p1_mm": 16.27750136848118, "ema_p2_mm": 8.138240871346515},
+  "effective_stop_epoch": 80,
+  "stop_policy": "user-aligned epoch80 after complete raw/EMA checkpoint writes",
+  "stop_watcher_pid": 1433503,
   "epoch1_replay_included": true,
   "error_matches": 0
 }
