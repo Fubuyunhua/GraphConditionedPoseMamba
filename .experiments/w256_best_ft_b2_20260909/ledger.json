@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "w256_best_ft_b2_20260909",
+    "created_at": "2026-09-09"
+  },
+  "baseline": {
+    "id": "R3-BEST-EMA-E32",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_stable_r3_60e.yaml",
+    "dataset": "H36M-SH detector T243/S81",
+    "split": "S1,S5,S6,S7,S8 train; S9,S11 test",
+    "metric": "MPJPE",
+    "primary_metric": "EMA MPJPE",
+    "direction": "min",
+    "source_identity": "0e23c5d01eb5e6c81c66bc17a621d38787e7c46d",
+    "checkpoint": "R3 best_ema_epoch.bin epoch32 SHA256 c2175c027329e2d323bba5ceb3e613d2391f8dbf48a9e5cf6477eaf83bce7c7f",
+    "seed_policy": [
+      0
+    ],
+    "command": "Historical R3 source preserved; best EMA 37.430162/31.520564"
+  },
+  "audit": {
+    "verdict": "PASS",
+    "report": ".experiments/w256_best_ft_b2_20260909/00_model_audit.md",
+    "accepted_risks": [
+      "single seed",
+      "test-monitored selection",
+      "additional compute after historical54epochs"
+    ],
+    "blocking_findings": [],
+    "runtime_gate": "PASS: real B1/B2 gradients, strict EMA roundtrip, resets and initial full replay 37.430258/31.520638"
+  },
+  "experiments": [
+    {
+      "id": "R3-BEST-FT-B2-S0",
+      "track": "IMPROVEMENT",
+      "status": "RUNNING",
+      "hypothesis": "Small learning-rate batch2 adaptation from best R3 EMA improves held-out pose accuracy",
+      "baseline_id": "R3-BEST-EMA-E32",
+      "delta": "weights-only finetune15epochs batch2 peak1.5e-5 warmup1 floor1.5e-6 EMA sqrt(.9998); optimizer and EMA reset",
+      "controls": "Same architecture, detector dataset, metric, source DropPath.20, losses, weight decay exemptions, clip1; actual eval batch2 shares batch_size with training; full initial replay required; do not infer batch-only causality",
+      "seeds": [
+        0
+      ],
+      "budget": "15 fine-tuning epochs; source R3 consumed54epochs and best checkpoint at32",
+      "primary_metric": "test-monitored best EMA P1 epochs1-15 compared to retained epoch0",
+      "secondary_metrics": [
+        "paired P2",
+        "fixed15",
+        "position loss",
+        "runtime",
+        "initial replay"
+      ],
+      "acceptance": "Any gain observed; >=0.2mm provisional meaningful threshold, repeats required for significance",
+      "falsification": "No improvement after15epochs; preserve source as preferred model",
+      "stopping_rule": "15epochs or technical failure or explicit user stop; no automatic retry/extension",
+      "dependencies": [
+        "USER_REQUEST_20260909",
+        "STRICT_R3_REPLAY",
+        "PREFLIGHT_PASS"
+      ],
+      "artifacts": {
+        "source": "2611f4bf68b575ed535a1e1ee47ae686ada93474",
+        "train_pid": 1885417,
+        "start_time": "2026-09-09T02:32:34+08:00",
+        "config_sha256": "a605f331feccc20095a62933779b42247fb54aa2c2cbbfdd6414b319cb01f62a",
+        "initializer_sha256": "355cd543bef2a46d497c8b825c9af427009f6989719dd8c19fe61cad63ce3967",
+        "config": "configs/pose3d/graph_posemamba_h36m_w256_r3_best_ft_b2_15e.yaml",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_R3_BEST_FT_B2_20260909",
+        "log": "launch_logs/finetune.log",
+        "checkpoint": "runs/w256_r3_best_ft_b2_20260909/seed0",
+        "initializer": "initializers/r3_best_ema.bin"
+      },
+      "result": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "FT-001",
+      "decision": "User explicitly stops FINAL W256 and requests batch2 fine-tuning from earlier best; no changes to other users' jobs or baseline weights."
+    }
+  ]
+}

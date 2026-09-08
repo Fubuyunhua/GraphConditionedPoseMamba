@@ -1,4 +1,6 @@
-> Latest amendment: use `.experiments/final_two_sizes_20260906/GT_FINETUNE_AND_SEEDS_LAST.md`. All random-seed repeats move LAST. Detector models train fresh; each GT2D model fine-tunes from its SAME-width best EMA for30 epochs at LR3e-5, not from scratch or across widths. Earlier budgets/order below are historical.
+> 2026-09-09 latest user priority: FINAL W128 stopped78/80, FINAL W256 stopped39/60. User requests historical R3 best EMA epoch32 batch2 fine-tuning15epochs; see `.experiments/w256_best_ft_b2_20260909/ledger.json`. Remote root `/scratch/home/caiwei/GraphConditionedPoseMamba_W256_R3_BEST_FT_B2_20260909`, log `launch_logs/finetune.log`. Scheduled monitoring remains deleted. Do not resume cancelled runs or launch older queued jobs from historical paragraphs. Maintain GitHub main only.
+
+> Earlier amendment: use `.experiments/final_two_sizes_20260906/GT_FINETUNE_AND_SEEDS_LAST.md`. All random-seed repeats move LAST. Detector models train fresh; each GT2D model fine-tunes from its SAME-width best EMA for30 epochs at LR3e-5, not from scratch or across widths. Earlier budgets/order below are historical.
 
 > Latest redesign: remaining large models are ONLY W128D20(80e,dp0.25) and W256D16(60e,dp0.30), each detector2D and GT2D, as registered in `.experiments/final_two_sizes_20260906/ledger.json`. Old unstarted capacity/accuracy candidates are superseded CANCELLED. Existing MPI and small-GT jobs unchanged; MPI baseline remains cancelled.
 

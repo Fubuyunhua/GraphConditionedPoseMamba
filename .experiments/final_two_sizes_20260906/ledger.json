@@ -139,7 +139,7 @@
     {
       "id": "FINAL-W256-DET2D-S0",
       "track": "IMPROVEMENT",
-      "status": "PLANNED",
+      "status": "CANCELLED",
       "hypothesis": "Stabilized optimization with moderate stochastic depth improves accuracy at the chosen capacity",
       "baseline_id": "Historical-W256-partial",
       "delta": "W256/D16,DropPath0.3,R3 optimizer; det2d; full fresh budget",
@@ -169,7 +169,16 @@
         "parameters": 20192451,
         "source": "freeze exact deployed successor; inherited model architecture already CPU-count verified"
       },
-      "result": null
+      "result": {
+        "reason": "USER_STOP_FOR_BEST_R3_B2_FINETUNE",
+        "completed_epochs": 39,
+        "interrupted_epoch": 40,
+        "best_ema_epoch": 30,
+        "best_ema_p1": 37.994901,
+        "best_ema_p2": 31.926142,
+        "last_ema_p1": 38.113283,
+        "last_ema_p2": 32.010392
+      }
     },
     {
       "id": "FINAL-W256-GT2D-S0",
@@ -225,6 +234,10 @@
       "id": "FINAL-003",
       "decision": "User requests immediate parallel downstream work because MPI alone underutilizes the GPU. Launch only FINAL-W128-DET2D-S0 alongside MPI after concurrent B1/B2/B4 PASS; do not add W256 as a third job.",
       "evidence": ".experiments/final_two_sizes_20260906/PARALLEL_W128_WITH_MPI_20260907.md"
+    },
+    {
+      "id": "FINAL-004",
+      "decision": "User cancels FINAL W256 during40 after39 complete and prioritizes historical R3 best EMA batch2 fine-tuning; see w256_best_ft_b2_20260909/ledger.json. No periodic scheduler active."
     }
   ]
 }

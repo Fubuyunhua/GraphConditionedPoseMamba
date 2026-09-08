@@ -526,8 +526,7 @@
     "scope": "User authorizes current MPI plus FINAL-W128 parallel pair, followed by the remaining final-size models and seeds-last repeats; GitHub synchronization continues."
   },
   "execution_order": [
-    "FINAL-W128-DET2D-S0 (current; MPI and S-GT2D completed)",
-    "FINAL-W256-DET2D-S0",
+    "R3-BEST-FT-B2-S0 (current; user stopped FINAL W128 at78 and FINAL W256 at39; dedicated ledger w256_best_ft_b2_20260909)",
     "FINAL-W128-GT2D-S0",
     "FINAL-W256-GT2D-S0",
     "R-A0-1",
@@ -540,10 +539,10 @@
   "active_concurrency": {
     "authorized": true,
     "scope": [
-      "FINAL-W128-DET2D-S0"
+      "R3-BEST-FT-B2-S0"
     ],
     "max_formal_jobs": 1,
-    "external_gpu_process": "wh PID1469157 observed; never stop or count as a project experiment",
-    "after_pair": "FINAL-W256-DET2D-S0, then same-width GT fine-tunes, then H36M paired repeats; MPI A0 cancelled; skip completed small GT2D"
+    "external_gpu_process": "No other GPU process at FT preflight; never stop other users' processes",
+    "after_pair": "Prior GT and seed plans remain recorded but are not launched by this one-shot FT script. Scheduled automation deleted by user."
   }
 }

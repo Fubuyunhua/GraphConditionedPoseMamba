@@ -3,7 +3,9 @@
 ID R3-BEST-FT-B2-S0, IMPROVEMENT, user authorized2026-09-09.
 One15-epoch run,batch2,FP32,all layers trainable,seed0,AdamW peak1.5e-5,
 warmup1e from1.5e-6,cosine floor1.5e-6,WD.012 with SSM exemptions,clip1,
-DropPath.20,EMA.9998999949995,unchanged data/augmentation/losses/eval batch4.
+DropPath.20,EMA.9998999949995,unchanged data/augmentation/losses. Effective eval
+batch2 because trainer uses batch_size for both loaders; nominal test_batch_size4
+is inactive. Require full initial replay parity before training.
 No resume; CLI --pretrained initializers --selection r3_best_ema.bin.
 
 Primary: best EMA P1 across fine-tuning epochs1-15, always compared with untouched
