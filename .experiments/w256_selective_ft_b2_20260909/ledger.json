@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "w256_selective_ft_b2_20260909",
+    "created_at": "2026-09-09"
+  },
+  "baseline": {
+    "id": "R3-BEST-EMA-E32",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w256_d16_stable_r3_60e.yaml",
+    "dataset": "H36M-SH detector T243/S81",
+    "split": "S1,S5,S6,S7,S8 train; S9,S11 test",
+    "metric": "MPJPE",
+    "primary_metric": "EMA MPJPE",
+    "direction": "min",
+    "source_identity": "0e23c5d01eb5e6c81c66bc17a621d38787e7c46d",
+    "checkpoint": "R3 best_ema_epoch.bin epoch32 SHA256 c2175c027329e2d323bba5ceb3e613d2391f8dbf48a9e5cf6477eaf83bce7c7f",
+    "seed_policy": [
+      0
+    ],
+    "command": "Historical R3 source preserved; best EMA 37.430162/31.520564"
+  },
+  "audit": {
+    "verdict": "PASS",
+    "report": ".experiments/w256_selective_ft_b2_20260909/PLAN_AND_AUDIT.md",
+    "accepted_risks": [
+      "single seed",
+      "test-monitored selection",
+      "added adaptation budget"
+    ],
+    "runtime_gate": "PASS: unit tests, B1/B2 frozen raw/EMA identity, selected updates, LR ratios, roundtrip; initial replay37.430258/31.520638"
+  },
+  "experiments": [
+    {
+      "id": "R3-SELECTIVE-FT-B2-S0",
+      "track": "IMPROVEMENT",
+      "status": "RUNNING",
+      "hypothesis": "Restricting updates to final block and head limits representation drift",
+      "baseline_id": "R3-BEST-EMA-E32",
+      "delta": "Freeze all except blocks.15 and head; frozen modules eval; frozen EMA skip; blockLR1e-6/head5e-6; five epochs with one warmup then cosine .1 minimum",
+      "controls": "Same original R3 EMA initializer, batch2, FP32, loss, active last-block DP.20, dataset/evaluator, WD and clip. New optimizer and EMA count0.",
+      "seeds": [
+        0
+      ],
+      "budget": "5epochs; source R3 consumed54; previous separate FT consumed10",
+      "primary_metric": "best EMA P1 epochs1-5 compared with original epoch0",
+      "secondary_metrics": [
+        "paired P2",
+        "fixed5",
+        "frozen-state checks",
+        "runtime",
+        "initial replay"
+      ],
+      "acceptance": "Any gain observed; >=0.2mm provisional meaningful threshold, repeats required for significance",
+      "falsification": "No improvement at five epochs; retain original best",
+      "stopping_rule": "5epochs, technical failure or explicit user stop; no automatic extensions",
+      "dependencies": [
+        "USER_REQUEST_20260909",
+        "STRICT_R3_REPLAY",
+        "PREFLIGHT_PASS"
+      ],
+      "artifacts": {
+        "source": "dd7c69749410fb65b239fafbafe896a05659124f",
+        "train_pid": 1888402,
+        "start_time": "2026-09-09T07:24:05+08:00",
+        "trainable_parameters": 1259007,
+        "total_parameters": 20192451,
+        "config_sha256": "0561fa6e48ee1db251e0906d42a9762415be54acb751a7821bef9851e519e33a",
+        "config": "configs/pose3d/graph_posemamba_h36m_w256_selective_ft_b2_5e.yaml",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_SELECTIVE_FT_B2_20260909",
+        "log": "launch_logs/finetune.log",
+        "checkpoint": "runs/w256_selective_ft_b2_20260909/seed0",
+        "initializer": "initializers/r3_best_ema.bin"
+      },
+      "result": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "SELECTIVE-001",
+      "decision": "User authorizes proposed last-block/head five-epoch adaptation, stopping previous all-parameter FT. Preserve original37.430mm EMA."
+    }
+  ]
+}

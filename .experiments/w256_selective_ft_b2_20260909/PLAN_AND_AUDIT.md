@@ -1,5 +1,9 @@
 # Selective best-EMA fine-tuning: audit, model logic and registered plan
 
+Runtime verdict PASS: unit tests and actual B1/B2 gates passed; frozen raw/EMA
+bitwise identity and final-block/head updates verified. Initial full replay
+37.430258/31.520638 mm. Formal PID1888402 started2026-09-09 07:24:05 Asia/Shanghai.
+
 User authorizes2026-09-09 stopping the previous full-model batch2 fine-tune and
 launching the proposed constrained adaptation. Previous run completed10/15,
 best FT epoch1=37.499918/31.543617; last10=37.904487/31.708000. Original R3

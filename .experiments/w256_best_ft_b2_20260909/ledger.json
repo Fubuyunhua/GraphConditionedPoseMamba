@@ -35,7 +35,7 @@
     {
       "id": "R3-BEST-FT-B2-S0",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "CANCELLED",
       "hypothesis": "Small learning-rate batch2 adaptation from best R3 EMA improves held-out pose accuracy",
       "baseline_id": "R3-BEST-EMA-E32",
       "delta": "weights-only finetune15epochs batch2 peak1.5e-5 warmup1 floor1.5e-6 EMA sqrt(.9998); optimizer and EMA reset",
@@ -72,7 +72,17 @@
         "checkpoint": "runs/w256_r3_best_ft_b2_20260909/seed0",
         "initializer": "initializers/r3_best_ema.bin"
       },
-      "result": null
+      "result": {
+        "reason": "User starts selective adaptation instead",
+        "completed_epochs": 10,
+        "interrupted_epoch": 11,
+        "exit_code": 143,
+        "best_ema_epoch": 1,
+        "best_ema_p1": 37.499918,
+        "best_ema_p2": 31.543617,
+        "last_ema_p1": 37.904487,
+        "last_ema_p2": 31.708
+      }
     }
   ],
   "decisions": [
