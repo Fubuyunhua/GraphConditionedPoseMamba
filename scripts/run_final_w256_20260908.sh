@@ -6,10 +6,8 @@ exec 9>verification/launch.lock
 flock -n 9
 test ! -e verification/formal_started
 old=/scratch/home/caiwei/GraphConditionedPoseMamba_FINAL_W128_DET2D_20260907
-echo 'Waiting for W128 complete80 and idle GPU'
-while kill -0 1407974 2>/dev/null; do sleep 30; done
-test "$(cat "$old/verification/formal_exit_code.txt")" = 0
-grep -aq '\[80\] time' "$old/launch_logs/final_w128_det2d_seed0.log"
+echo 'User requested immediate W128 stop; require its GPU process to exit'
+! kill -0 1407974 2>/dev/null
 test -z "$(nvidia-smi --query-compute-apps=pid --format=csv,noheader)"
 bash scripts/preflight_final_w256_20260908.sh .
 touch verification/formal_started
