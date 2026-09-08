@@ -350,6 +350,8 @@ class EMAModel:
         with torch.no_grad():
             grouped = {}
             for k, v in model.state_dict().items():
+                if k in getattr(model, '_selective_frozen_names', ()):
+                    continue
                 if not v.is_floating_point():
                     continue
                 if k not in self.shadow:
@@ -517,6 +519,8 @@ def train_epoch(
     lr_schedule=None,
 ):
     model_pos.train()
+    from lib.utils.selective_finetune import selective_train_mode
+    selective_train_mode(_unwrap_compiled_model(model_pos))
     metric_sums = None
     metric_count = 0
     metric_keys = None
@@ -892,6 +896,9 @@ def train_with_config(args, opts):
     if args.partial_train:
         model_pos = partial_train_layers(model_pos, args.partial_train)
 
+    from lib.utils.selective_finetune import configure_selective
+    configure_selective(_unwrap_compiled_model(model_pos), args)
+
     if compile_model:
         if not hasattr(torch, "compile"):
             raise RuntimeError("compile_model=True requires torch.compile support")
@@ -936,7 +943,12 @@ def train_with_config(args, opts):
                 getattr(args, "honor_no_weight_decay", False)
             ),
         )
+        from lib.utils.selective_finetune import selective_lr_groups
+        optimizer_groups = selective_lr_groups(_unwrap_compiled_model(model_pos), optimizer_groups, args)
         optimizer = optim.AdamW(optimizer_groups, lr=lr)
+        log.info('INFO: Effective optimizer group learning rates: ' + str([
+            (g.get('group_name'), g['lr']) for g in optimizer.param_groups
+        ]))
         group_summary = ", ".join(
             f"{group.get('group_name', 'unnamed')}="
             f"{sum(parameter.numel() for parameter in group['params']):,} params "

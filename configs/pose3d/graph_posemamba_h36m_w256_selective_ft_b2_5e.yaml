@@ -1,0 +1,12 @@
+_base_: graph_posemamba_h36m_w256_r3_best_ft_b2_15e.yaml
+config: configs/pose3d/graph_posemamba_h36m_w256_selective_ft_b2_5e.yaml
+checkpoint: runs/w256_selective_ft_b2_20260909/seed0
+epochs: 5
+selective_last_block_head: true
+learning_rate: 0.000001
+head_learning_rate: 0.000005
+warmup_epochs: 1
+warmup_start_factor: 0.1
+min_lr_ratio: 0.1
+test_batch_size: 2
+checkpoint_frequency: 1
