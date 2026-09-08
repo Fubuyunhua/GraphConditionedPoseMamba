@@ -49,7 +49,7 @@
     {
       "id": "FINAL-W128-DET2D-S0",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "CANCELLED",
       "hypothesis": "Stabilized optimization with moderate stochastic depth improves accuracy at the chosen capacity",
       "baseline_id": "Historical-W128-partial",
       "delta": "W128/D20,DropPath0.25,R3 optimizer; det2d; full fresh budget",
@@ -87,7 +87,16 @@
         "train_pid": 1407974,
         "launch_time": "2026-09-07T10:52:11+08:00"
       },
-      "result": null
+      "result": {
+        "reason": "USER_IMMEDIATE_STOP_20260908",
+        "completed_epochs": 78,
+        "best_ema_epoch": 35,
+        "best_ema_p1": 38.36729,
+        "best_ema_p2": 32.194942,
+        "last_ema_p1": 39.168961,
+        "last_ema_p2": 32.589325,
+        "exit_code": 143
+      }
     },
     {
       "id": "FINAL-W128-GT2D-S0",

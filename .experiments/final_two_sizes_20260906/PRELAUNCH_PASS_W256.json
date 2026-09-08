@@ -1,0 +1,185 @@
+{
+  "status": "PASS",
+  "created_at": "2026-09-08T01:18:15+00:00",
+  "source_commit": "69738574c7394274421c809932bdc312add9f066",
+  "config_sha256": "22dc1f6f70deedb68a6979899c6dc0f298d9249ff0595a80c94f9b469f3a2a35",
+  "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+  "gpu_free_before_mib": 32109,
+  "parameters": 20192451,
+  "optimizer_groups": [
+    {
+      "name": "decay",
+      "parameter_count": 19670211,
+      "weight_decay": 0.012
+    },
+    {
+      "name": "no_decay",
+      "parameter_count": 522240,
+      "weight_decay": 0.0
+    }
+  ],
+  "no_decay_parameter_count": 522240,
+  "settings": {
+    "epochs": 60,
+    "learning_rate": 0.0003,
+    "warmup_epochs": 8,
+    "warmup_start_factor": 0.1,
+    "lr_schedule_mode": "cosine",
+    "min_lr_ratio": 0.1,
+    "honor_no_weight_decay": true,
+    "max_grad_norm": 1.0,
+    "track_parameter_update_norm": true
+  },
+  "stages": {
+    "B1": {
+      "compiled": false,
+      "compile_mode": "eager",
+      "cuda_graph": false,
+      "real_data": true,
+      "batch_size": 1,
+      "seed": 20260902,
+      "activation_checkpoint_blocks": false,
+      "linear_warmup_enabled": true,
+      "lr_schedule_mode": "cosine",
+      "min_lr_ratio": 0.1,
+      "optimizer_groups": [
+        {
+          "name": "decay",
+          "parameter_count": 19670211,
+          "weight_decay": 0.012
+        },
+        {
+          "name": "no_decay",
+          "parameter_count": 522240,
+          "weight_decay": 0.0
+        }
+      ],
+      "warmup_steps": 141984,
+      "optimizer_lr_after_steps": 3.0001901636111366e-05,
+      "warmup_seconds": 2.5056658999528736,
+      "warmup_peak_allocated_mib": 5639.87744140625,
+      "warmup_peak_reserved_mib": 5812.0,
+      "steps": 1,
+      "elapsed_seconds": 0.12169092404656112,
+      "milliseconds_per_step": 121.69092404656112,
+      "iterations_per_second": 8.217539704254214,
+      "measured_peak_allocated_mib": 5853.39697265625,
+      "measured_peak_reserved_mib": 6212.0,
+      "loss": 1.2328877449035645,
+      "grad_norm_preclip": 54.873741149902344,
+      "grad_norm_max": 54.873741149902344,
+      "grad_clip_fraction": 1.0
+    },
+    "B2": {
+      "compiled": false,
+      "compile_mode": "eager",
+      "cuda_graph": false,
+      "real_data": true,
+      "batch_size": 2,
+      "seed": 20260902,
+      "activation_checkpoint_blocks": false,
+      "linear_warmup_enabled": true,
+      "lr_schedule_mode": "cosine",
+      "min_lr_ratio": 0.1,
+      "optimizer_groups": [
+        {
+          "name": "decay",
+          "parameter_count": 19670211,
+          "weight_decay": 0.012
+        },
+        {
+          "name": "no_decay",
+          "parameter_count": 522240,
+          "weight_decay": 0.0
+        }
+      ],
+      "warmup_steps": 70992,
+      "optimizer_lr_after_steps": 3.0003803299009732e-05,
+      "warmup_seconds": 2.4907347629778087,
+      "warmup_peak_allocated_mib": 10883.23095703125,
+      "warmup_peak_reserved_mib": 11606.0,
+      "steps": 1,
+      "elapsed_seconds": 0.19762941799126565,
+      "milliseconds_per_step": 197.62941799126565,
+      "iterations_per_second": 5.059975433638101,
+      "measured_peak_allocated_mib": 11093.9599609375,
+      "measured_peak_reserved_mib": 12486.0,
+      "loss": 1.1467506885528564,
+      "grad_norm_preclip": 41.24775695800781,
+      "grad_norm_max": 41.24775695800781,
+      "grad_clip_fraction": 1.0
+    },
+    "B4": {
+      "compiled": true,
+      "compile_mode": "reduce-overhead",
+      "cuda_graph": false,
+      "real_data": true,
+      "batch_size": 4,
+      "seed": 20260902,
+      "activation_checkpoint_blocks": false,
+      "linear_warmup_enabled": true,
+      "lr_schedule_mode": "cosine",
+      "min_lr_ratio": 0.1,
+      "optimizer_groups": [
+        {
+          "name": "decay",
+          "parameter_count": 19670211,
+          "weight_decay": 0.012
+        },
+        {
+          "name": "no_decay",
+          "parameter_count": 522240,
+          "weight_decay": 0.0
+        }
+      ],
+      "warmup_steps": 35496,
+      "optimizer_lr_after_steps": 3.000760670516974e-05,
+      "warmup_seconds": 62.15970069589093,
+      "warmup_peak_allocated_mib": 18762.18994140625,
+      "warmup_peak_reserved_mib": 20238.0,
+      "steps": 1,
+      "elapsed_seconds": 1.0430778940208256,
+      "milliseconds_per_step": 1043.0778940208256,
+      "iterations_per_second": 0.9587011724936761,
+      "measured_peak_allocated_mib": 18913.41845703125,
+      "measured_peak_reserved_mib": 20242.0,
+      "loss": 1.4373337030410767,
+      "grad_norm_preclip": 42.96396255493164,
+      "grad_norm_max": 42.96396255493164,
+      "grad_clip_fraction": 1.0
+    }
+  },
+  "gates": {
+    "parameter_count": true,
+    "optimizer_two_groups": true,
+    "optimizer_no_decay_nonempty": true,
+    "optimizer_no_decay_zero": true,
+    "optimizer_decay_preserved": true,
+    "optimizer_group_coverage": true,
+    "r3_settings": true,
+    "B1_batch": true,
+    "B1_compile": true,
+    "B1_cosine": true,
+    "B1_finite": true,
+    "B1_clip_fraction": true,
+    "B1_warmup_lr": true,
+    "B1_memory": true,
+    "B1_groups": true,
+    "B2_batch": true,
+    "B2_compile": true,
+    "B2_cosine": true,
+    "B2_finite": true,
+    "B2_clip_fraction": true,
+    "B2_warmup_lr": true,
+    "B2_memory": true,
+    "B2_groups": true,
+    "B4_batch": true,
+    "B4_compile": true,
+    "B4_cosine": true,
+    "B4_finite": true,
+    "B4_clip_fraction": true,
+    "B4_warmup_lr": true,
+    "B4_memory": true,
+    "B4_groups": true
+  }
+}
