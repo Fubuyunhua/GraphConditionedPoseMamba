@@ -1,0 +1,8 @@
+_base_: graph_posemamba_h36m_final_w256_d16_gt2d.yaml
+config: configs/pose3d/graph_posemamba_h36m_w256_best_gt2d_30e.yaml
+checkpoint: runs/w256_best_gt2d_20260909/seed0
+drop_path_rate: 0.2
+selective_last_block_head: false
+partial_train: null
+finetune: true
+checkpoint_frequency: 5
