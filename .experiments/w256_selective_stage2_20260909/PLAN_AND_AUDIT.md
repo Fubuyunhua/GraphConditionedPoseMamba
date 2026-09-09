@@ -1,5 +1,9 @@
 # Stage2 bounded selective fine-tuning
 
+Runtime PASS: B1/B2 finite, frozen raw/EMA exact, selected blocks/head changed,
+LR groups and strict roundtrip verified; initial replay37.416286/31.507343.
+Formal PID1961722 starts2026-09-09 12:16:25 Asia/Shanghai,2,516,731 trainable parameters.
+
 User authorizes further training on2026-09-09. Source is stage1 best EMA epoch4,
 37.416286/31.507343mm, SHA31540f2570a41de072e68456dfe7960a4d6e62e6dcd0d38f3519e00ad006ea54.
 Stage1 completed5e with exit0 at08:14; gain.014mm was negligible, not a breakthrough.

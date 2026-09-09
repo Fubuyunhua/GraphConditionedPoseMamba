@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "w256_selective_stage2_20260909",
+    "created_at": "2026-09-09"
+  },
+  "baseline": {
+    "id": "STAGE1-BEST-EMA-E4",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w256_selective_ft_b2_5e.yaml",
+    "dataset": "H36M-SH detector T243/S81",
+    "split": "S1,S5,S6,S7,S8 train; S9,S11 test",
+    "metric": "MPJPE",
+    "primary_metric": "EMA MPJPE",
+    "direction": "min",
+    "source_identity": "dd7c697",
+    "checkpoint": "Stage1 best EMA epoch4 SHA31540f2570a41de072e68456dfe7960a4d6e62e6dcd0d38f3519e00ad006ea54",
+    "seed_policy": [
+      0
+    ],
+    "command": "Stage1 completed5e; best37.416286/31.507343"
+  },
+  "audit": {
+    "verdict": "PASS",
+    "report": ".experiments/w256_selective_stage2_20260909/PLAN_AND_AUDIT.md",
+    "accepted_risks": [
+      "test-monitored",
+      "single seed",
+      "shared GPU"
+    ],
+    "runtime_gate": "PASS: frozen raw/EMA, selected14/15/head updates, LR, finite B1/B2, roundtrip, initial replay37.416286/31.507343"
+  },
+  "experiments": [
+    {
+      "id": "R3-SELECTIVE-STAGE2-S0",
+      "track": "IMPROVEMENT",
+      "status": "RUNNING",
+      "hypothesis": "Two last blocks permit useful adjustment while earlier14 remain frozen",
+      "baseline_id": "STAGE1-BEST-EMA-E4",
+      "delta": "Last2 blocks+head; blockLR5e-7/head2e-6; eight epochs from stage1 best EMA",
+      "controls": "Same dataset, batch2, FP32, loss, WD, clip and EMA; frozen14 eval; reset optimizer/EMA",
+      "seeds": [
+        0
+      ],
+      "budget": "8epochs additional; source R3 consumed54 and stage1 5",
+      "primary_metric": "best EMA P1 epochs1-8 vs epoch0",
+      "secondary_metrics": [
+        "paired P2",
+        "fixed8",
+        "frozen verification",
+        "runtime"
+      ],
+      "acceptance": "Any gain observed; >=0.2mm provisional meaningful threshold, repeats required for significance",
+      "falsification": "No improvement after8; retain source",
+      "stopping_rule": "8epochs, technical failure or explicit user stop",
+      "dependencies": [
+        "USER_REQUEST",
+        "STAGE1_BEST_REPLAY",
+        "PREFLIGHT_PASS"
+      ],
+      "artifacts": {
+        "source": "421f2666d6d0836b297f3a72b48c7fa1294a1b7f",
+        "train_pid": 1961722,
+        "start_time": "2026-09-09T12:16:25+08:00",
+        "trainable_parameters": 2516731,
+        "config_sha256": "659e4e470762635b6b412d63e4783d73261b9ee3b5658d390d3602cdb0b3b332",
+        "initializer_sha256": "635f9df41d59533ab0275c9b8af72fd2217185062b0ea57a1e3a10e48411e50f",
+        "config": "configs/pose3d/graph_posemamba_h36m_w256_selective_stage2_8e.yaml",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_SELECTIVE_STAGE2_20260909",
+        "log": "launch_logs/finetune.log",
+        "checkpoint": "runs/w256_selective_stage2_20260909/seed0"
+      },
+      "result": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "STAGE2-001",
+      "decision": "User authorizes further bounded fine-tuning; start from verified stage1 best and expand last-block scope to two."
+    }
+  ]
+}

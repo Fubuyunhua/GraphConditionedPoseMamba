@@ -526,7 +526,7 @@
     "scope": "User authorizes current MPI plus FINAL-W128 parallel pair, followed by the remaining final-size models and seeds-last repeats; GitHub synchronization continues."
   },
   "execution_order": [
-    "R3-SELECTIVE-FT-B2-S0 (current; user stopped full-parameter FT at10/15; dedicated ledger w256_selective_ft_b2_20260909)",
+    "R3-SELECTIVE-STAGE2-S0 (current; stage1 completed5; dedicated ledger w256_selective_stage2_20260909)",
     "FINAL-W128-GT2D-S0",
     "FINAL-W256-GT2D-S0",
     "R-A0-1",
@@ -539,7 +539,7 @@
   "active_concurrency": {
     "authorized": true,
     "scope": [
-      "R3-SELECTIVE-FT-B2-S0"
+      "R3-SELECTIVE-STAGE2-S0"
     ],
     "max_formal_jobs": 1,
     "external_gpu_process": "No other GPU process at FT preflight; never stop other users' processes",

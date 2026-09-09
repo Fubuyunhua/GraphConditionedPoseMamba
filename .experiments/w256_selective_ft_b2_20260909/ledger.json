@@ -34,7 +34,7 @@
     {
       "id": "R3-SELECTIVE-FT-B2-S0",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "hypothesis": "Restricting updates to final block and head limits representation drift",
       "baseline_id": "R3-BEST-EMA-E32",
       "delta": "Freeze all except blocks.15 and head; frozen modules eval; frozen EMA skip; blockLR1e-6/head5e-6; five epochs with one warmup then cosine .1 minimum",
@@ -72,7 +72,16 @@
         "checkpoint": "runs/w256_selective_ft_b2_20260909/seed0",
         "initializer": "initializers/r3_best_ema.bin"
       },
-      "result": null
+      "result": {
+        "completed_epochs": 5,
+        "exit_code": 0,
+        "best_ema_epoch": 4,
+        "best_ema_p1": 37.416286,
+        "best_ema_p2": 31.507343,
+        "fixed5_p1": 37.42283,
+        "fixed5_p2": 31.510855,
+        "recommendation": "KEEP as negligible-gain reference"
+      }
     }
   ],
   "decisions": [
