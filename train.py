@@ -886,6 +886,20 @@ def train_with_config(args, opts):
                 model_backbone.load_state_dict(checkpoint['model_pos'], strict=True)
         model_pos = model_backbone
         
+    if bool(getattr(args, 'require_fresh_initialization', False)):
+        import hashlib
+        if checkpoint is not None or opts.resume or opts.evaluate or args.finetune:
+            raise RuntimeError('Fresh-only run refuses any checkpoint initialization')
+        digest = hashlib.sha256()
+        for key, value in _unwrap_compiled_model(model_backbone).state_dict().items():
+            digest.update(key.encode())
+            digest.update(value.detach().cpu().numpy().tobytes())
+        with open(args.fresh_initialization_manifest) as handle:
+            expected = json.load(handle)['initial_model_sha256']
+        if digest.hexdigest() != expected:
+            raise RuntimeError('Fresh seed initialization fingerprint mismatch')
+        log.info('INFO: Fresh random initialization VERIFIED; no checkpoint loaded; SHA256=' + digest.hexdigest())
+
     if ema_helper is not None and checkpoint is not None:
         if checkpoint.get('ema_shadow') is not None:
             ema_helper.shadow = _move_state_dict_to_model_devices(checkpoint['ema_shadow'], model_backbone)
