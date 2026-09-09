@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "w256_best_gt2d_20260909",
+    "created_at": "2026-09-09"
+  },
+  "baseline": {
+    "id": "STAGE1-BEST-DETECTOR-EMA",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w256_selective_ft_b2_5e.yaml",
+    "dataset": "H36M-SH detector T243/S81",
+    "split": "S1,S5,S6,S7,S8 train; S9,S11 test",
+    "metric": "MPJPE",
+    "primary_metric": "Initial GT2D P1=31.8478628894, P2=26.1232963320; detector37.416286 not comparable",
+    "direction": "min",
+    "source_identity": "dd7c697",
+    "checkpoint": "Stage1 best EMA epoch4 SHA31540f2570a41de072e68456dfe7960a4d6e62e6dcd0d38f3519e00ad006ea54",
+    "seed_policy": [
+      0
+    ],
+    "command": "Stage1 completed5e; best37.416286/31.507343"
+  },
+  "audit": {
+    "verdict": "PASS",
+    "report": ".experiments/w256_best_gt2d_20260909/PLAN_AND_AUDIT.md",
+    "accepted_risks": [
+      "single seed",
+      "GT known-xy depth recovery protocol",
+      "test-monitored"
+    ],
+    "runtime_gate": "PASS strict load/export, all trainable, GT xy/confidence, reset, B1/B2/B4 finite gradients and EMA roundtrip, initial fullGT31.847863/26.123296"
+  },
+  "experiments": [
+    {
+      "id": "GT-W256-BEST-S0",
+      "track": "IMPROVEMENT",
+      "status": "RUNNING",
+      "hypothesis": "Same-width detector pretrained features adapt to GT xy inputs",
+      "baseline_id": "STAGE1-BEST-DETECTOR-EMA",
+      "delta": "GT input; all parameters trainable; batch4;30epochs;LR3e-5 with3warmup; EMA.9998 and reset",
+      "controls": "Same source width and DP.20, data split, loss, root/flip. GT evaluator uses known input xy; report separately.",
+      "seeds": [
+        0
+      ],
+      "budget": "30GT adaptation epochs, plus54R3 and5stage1 source development",
+      "primary_metric": "GT test-monitored best EMA P1 epochs1-30",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed30",
+        "initialGT",
+        "runtime"
+      ],
+      "acceptance": "Any gain observed; >=0.2mm provisional meaningful threshold, repeats required for significance",
+      "falsification": "No gain relative initialGT; retain evidence",
+      "stopping_rule": "30epochs, technical failure or user stop",
+      "dependencies": [
+        "USER_GT_REQUEST",
+        "STRICT_SOURCE",
+        "GT_PREFLIGHT"
+      ],
+      "artifacts": {
+        "source": "8be2ac00385766faddf62d6508b757e9321a2e1e",
+        "train_pid": 1991232,
+        "start_time": "2026-09-09T16:53:32+08:00",
+        "config_sha256": "669371ee56fa8822ffd915fcd42fba03bb6a6abeabd5af01a5b0e54b3d657326",
+        "initializer_sha256": "b8e5cdbefae63fd8bc0318c2108bc2d9dd0b5f1227ef0f99d91aaf015de6d21a",
+        "config": "configs/pose3d/graph_posemamba_h36m_w256_best_gt2d_30e.yaml",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_W256_BEST_GT2D_20260909",
+        "log": "launch_logs/gt2d.log",
+        "checkpoint": "runs/w256_best_gt2d_20260909/seed0"
+      },
+      "result": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "GT-001",
+      "decision": "User directly prioritizes W256 GT2D, same-width best detector stage1EMA; full unfreeze; no periodic automation."
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 # W256 corresponding GT2D experiment
 
+Runtime PASS: all gates passed, initialGT31.847863/26.123296. Formal PID1991232
+started2026-09-09 16:53:32 Asia/Shanghai, all20,192,451 parameters,4437steps/epoch.
+
 User requests immediate GT2D counterpart2026-09-09. Source is same-width best
 detector-input EMA, stage1 epoch4,37.416286/31.507343, SHA31540f2570a41de072e68456dfe7960a4d6e62e6dcd0d38f3519e00ad006ea54.
 Stage2 completed8 with exit0, best37.418864, so source remains stage1 best.

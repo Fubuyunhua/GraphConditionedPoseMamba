@@ -34,7 +34,7 @@
     {
       "id": "R3-SELECTIVE-STAGE2-S0",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "hypothesis": "Two last blocks permit useful adjustment while earlier14 remain frozen",
       "baseline_id": "STAGE1-BEST-EMA-E4",
       "delta": "Last2 blocks+head; blockLR5e-7/head2e-6; eight epochs from stage1 best EMA",
@@ -70,7 +70,16 @@
         "log": "launch_logs/finetune.log",
         "checkpoint": "runs/w256_selective_stage2_20260909/seed0"
       },
-      "result": null
+      "result": {
+        "epochs": 8,
+        "exit_code": 0,
+        "best_ema_epoch": 1,
+        "best_ema_p1": 37.418864,
+        "best_ema_p2": 31.508464,
+        "fixed8_p1": 37.425162,
+        "fixed8_p2": 31.509828,
+        "recommendation": "REJECT as accuracy improvement; source remains better"
+      }
     }
   ],
   "decisions": [
