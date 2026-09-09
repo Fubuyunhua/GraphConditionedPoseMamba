@@ -6,7 +6,11 @@ def configure_selective(model, args):
         raise ValueError('Selective mode requires finetune and no partial_train')
     if not hasattr(model, 'blocks') or len(model.blocks) != 16 or not hasattr(model, 'head'):
         raise ValueError('Selective mode requires the registered W256/D16 model')
-    prefixes = ('blocks.15.', 'head.')
+    count = int(getattr(args, 'selective_train_blocks', 1))
+    if count not in (1, 2):
+        raise ValueError('Registered selective modes allow only one or two final blocks')
+    model._selective_block_start = len(model.blocks) - count
+    prefixes = tuple(f'blocks.{i}.' for i in range(model._selective_block_start, len(model.blocks))) + ('head.',)
     for name, parameter in model.named_parameters():
         parameter.requires_grad_(name.startswith(prefixes))
     model._selective_finetune = True
@@ -19,7 +23,8 @@ def selective_train_mode(model):
     if not getattr(model, '_selective_finetune', False):
         return
     model.eval()
-    model.blocks[-1].train()
+    for block in model.blocks[model._selective_block_start:]:
+        block.train()
     model.head.train()
 
 
@@ -30,7 +35,7 @@ def selective_lr_groups(model, groups, args):
     result = []
     for group in groups:
         for label, prefix, lr in (
-            ('last_block', 'blocks.15.', args.learning_rate),
+            ('last_block', tuple(f'blocks.{i}.' for i in range(model._selective_block_start, len(model.blocks))), args.learning_rate),
             ('head', 'head.', args.head_learning_rate),
         ):
             parameters = [p for p in group['params'] if names[id(p)].startswith(prefix)]
