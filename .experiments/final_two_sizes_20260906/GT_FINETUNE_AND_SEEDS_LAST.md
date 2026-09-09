@@ -1,5 +1,9 @@
 # GT2D fine-tuning and seeds-last amendment
 
+SUPERSEDED2026-09-09: user explicitly rejects GT fine-tuning and requests W128
+from scratch80epochs. Follow w128_gt2d_scratch_20260909/ledger.json. The old
+fine-tuning instructions below are historical and must not trigger future GT jobs.
+
 User explicitly moves different-seed experiments last. Preserve current MPI and small-GT jobs, then128 detected-input80e ->256 detected-input60e ->128 GT2D fine-tune30e ->256 GT2D fine-tune30e -> six H36M A0/A2/Full seed1/2 repeats. Old repeat-first or GT-from-scratch budgets in the historical plan are superseded.
 
 128 and256 have different tensor dimensions and layer counts. Do not load128 weights into256 with strict=False, pad/slice weights, distill or invent an architecture migration. Each GT model starts from the same-width detector model's best EMA selected under its registered policy. Detector training remains fresh, with the25636.x target unchanged. GT scores cannot substantiate detector36.x.

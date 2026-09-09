@@ -526,8 +526,7 @@
     "scope": "User authorizes current MPI plus FINAL-W128 parallel pair, followed by the remaining final-size models and seeds-last repeats; GitHub synchronization continues."
   },
   "execution_order": [
-    "GT-W256-BEST-S0 (current; stage2 completed8; dedicated ledger w256_best_gt2d_20260909; replaces former FINAL-W256-GT2D-S0)",
-    "FINAL-W128-GT2D-S0",
+    "GT-W128-SCRATCH-S0 (current; user rejects GT finetuning; dedicated ledger w128_gt2d_scratch_20260909)",
     "R-A0-1",
     "R-A2-1",
     "R-FULL-1",
@@ -538,7 +537,7 @@
   "active_concurrency": {
     "authorized": true,
     "scope": [
-      "GT-W256-BEST-S0"
+      "GT-W128-SCRATCH-S0"
     ],
     "max_formal_jobs": 1,
     "external_gpu_process": "No other GPU process at FT preflight; never stop other users' processes",

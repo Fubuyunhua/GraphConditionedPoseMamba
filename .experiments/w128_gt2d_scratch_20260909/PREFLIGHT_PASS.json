@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "initialization": "random seed0; no checkpoint loading",
+  "initial_model_sha256": "cfe4a27267c7ea07ca2b3564a695d13fdd8fdbf6cd36a0bcc79131355fcb145a",
+  "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+  "config_sha256": "8ed8763a8883d7a1e617a57b0961c7d3ed498f426c9aa76b65209ee2afa1329c",
+  "source_commit": "220a479447f5c4dcd60f3fb3446067d10076ac97",
+  "parameters": 6836355,
+  "stages": {
+    "B1": {
+      "loss": 2.117345094680786,
+      "grad_norm": 27.82855224609375,
+      "peak_reserved_mib": 3708.0,
+      "roundtrip": true,
+      "random_initialization_verified": true
+    },
+    "B2": {
+      "loss": 1.9780341386795044,
+      "grad_norm": 25.518274307250977,
+      "peak_reserved_mib": 7240.0,
+      "roundtrip": true,
+      "random_initialization_verified": true
+    },
+    "B4": {
+      "loss": 2.106459140777588,
+      "grad_norm": 23.602067947387695,
+      "peak_reserved_mib": 14668.0,
+      "roundtrip": true,
+      "random_initialization_verified": true
+    }
+  }
+}

@@ -34,7 +34,7 @@
     {
       "id": "GT-W256-BEST-S0",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "CANCELLED",
       "hypothesis": "Same-width detector pretrained features adapt to GT xy inputs",
       "baseline_id": "STAGE1-BEST-DETECTOR-EMA",
       "delta": "GT input; all parameters trainable; batch4;30epochs;LR3e-5 with3warmup; EMA.9998 and reset",
@@ -69,7 +69,14 @@
         "log": "launch_logs/gt2d.log",
         "checkpoint": "runs/w256_best_gt2d_20260909/seed0"
       },
-      "result": null
+      "result": {
+        "reason": "User rejects pretrained GT and requires W128 scratch",
+        "completed_epochs": 9,
+        "interrupted_epoch": 10,
+        "exit_code": 143,
+        "last_ema_p1": 19.968368,
+        "last_ema_p2": 16.242261
+      }
     }
   ],
   "decisions": [

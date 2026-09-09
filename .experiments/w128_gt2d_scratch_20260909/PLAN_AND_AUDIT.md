@@ -1,5 +1,8 @@
 # W128 GT2D from scratch: user correction
 
+Runtime PASS: random-init hash matched in formal trainer, B1/B2/B4 gates passed.
+PID2004698 starts2026-09-09 21:31:59. No checkpoint loaded.
+
 User explicitly rejects detector-pretrained GT fine-tuning and requests W128
 GT2D random initialization. Stop W256 GT fine-tune after9 complete epochs,
 interrupt10, preserve weights and markCANCELLED, not a valid completed30e result.

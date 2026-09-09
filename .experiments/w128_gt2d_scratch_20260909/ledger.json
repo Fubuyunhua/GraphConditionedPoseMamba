@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "w128_gt2d_scratch_20260909",
+    "created_at": "2026-09-09"
+  },
+  "baseline": {
+    "id": "W128-GT-SCRATCH",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w128_gt2d_scratch_80e.yaml",
+    "dataset": "H36M-SH GTxy+c1 T243/S81",
+    "split": "S1,S5,S6,S7,S8 train; S9,S11 test",
+    "primary_metric": "GT MPJPE",
+    "direction": "min",
+    "checkpoint": "NONE: random seed0 constructor only",
+    "source_identity": "220a479",
+    "seed_policy": [
+      0
+    ],
+    "command": "train.py --config configs/pose3d/graph_posemamba_h36m_w128_gt2d_scratch_80e.yaml --checkpoint runs/w128_gt2d_scratch_20260909/seed0 --seed 0"
+  },
+  "audit": {
+    "verdict": "PASS",
+    "report": ".experiments/w128_gt2d_scratch_20260909/PLAN_AND_AUDIT.md",
+    "accepted_risks": [
+      "single seed",
+      "GT knownxy protocol",
+      "test-monitored"
+    ],
+    "runtime_gate": "PASS B1/B2/B4, GT coords, random initialization; formal fresh-only SHA cfe4a27267c7ea07ca2b3564a695d13fdd8fdbf6cd36a0bcc79131355fcb145a matched"
+  },
+  "experiments": [
+    {
+      "id": "GT-W128-SCRATCH-S0",
+      "track": "IMPROVEMENT",
+      "status": "RUNNING",
+      "hypothesis": "GT2D from-scratch optimization avoids dependence on detector pretraining",
+      "baseline_id": "W128-GT-SCRATCH",
+      "delta": "User replaces W256 GT adaptation with fresh W128D20,80epochs,LR5e-4 exponential.99",
+      "controls": "GT data and evaluator unchanged; source capacity and training route differ, not causal initialization ablation",
+      "seeds": [
+        0
+      ],
+      "budget": "80epochs from scratch",
+      "primary_metric": "GT test-monitored best EMA P1 over80epochs",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed80",
+        "fresh initialization hash",
+        "runtime"
+      ],
+      "acceptance": "Any gain observed; >=0.2mm provisional meaningful threshold, repeats required for significance",
+      "falsification": "No reliable accuracy gain, preserve results",
+      "stopping_rule": "80epochs, technical failure or user stop",
+      "dependencies": [
+        "USER_SCRATCH_REQUEST",
+        "FRESH_INIT_HASH",
+        "GT_PREFLIGHT"
+      ],
+      "artifacts": {
+        "source": "220a479",
+        "train_pid": 2004698,
+        "start_time": "2026-09-09T21:31:59+08:00",
+        "initialization": "RANDOM_SEED0_NO_CHECKPOINT",
+        "config": "configs/pose3d/graph_posemamba_h36m_w128_gt2d_scratch_80e.yaml",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_W128_GT2D_SCRATCH_20260909",
+        "log": "launch_logs/gt_scratch.log",
+        "checkpoint": "runs/w128_gt2d_scratch_20260909/seed0"
+      },
+      "result": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "SCRATCH-001",
+      "decision": "User explicitly rejects GT fine-tuning; finetune/resume/pretrained all disabled and full random constructor fingerprint enforced."
+    }
+  ]
+}
