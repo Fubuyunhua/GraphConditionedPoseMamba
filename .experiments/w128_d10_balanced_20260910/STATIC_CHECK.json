@@ -1,0 +1,16 @@
+{
+  "status": "STATIC_PASS",
+  "date": "2026-09-10",
+  "parameters": 3435395,
+  "dim_feat": 128,
+  "depth": 10,
+  "batch_size": 8,
+  "epochs": 80,
+  "learning_rate": 0.0005,
+  "ema_decay": 0.99960004,
+  "variants": ["det2d", "gt2d"],
+  "initialization": "fresh seed0 required; no checkpoint",
+  "checked": ["YAML inheritance", "CPU constructor count", "GT flags", "EMA sample-window scaling", "fresh-only flags"],
+  "gpu_preflight": "NOT_RUN",
+  "training": "NOT_STARTED"
+}

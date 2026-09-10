@@ -1,0 +1,9 @@
+_base_: graph_posemamba_h36m_w128_d10_balanced_det2d_80e.yaml
+config: configs/pose3d/graph_posemamba_h36m_w128_d10_balanced_gt2d_80e.yaml
+checkpoint: runs/w128_d10_balanced_20260910/gt2d_seed0
+fresh_initialization_manifest: verification/w128_d10_balanced_gt2d_preflight.json
+gt_2d: true
+finetune: false
+pretrained: ''
+resume: ''
+evaluate: ''

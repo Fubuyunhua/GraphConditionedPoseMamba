@@ -1,0 +1,32 @@
+# SAMA-inspired capacity/batch/budget; GCPM architecture and empirical loss/LR recipe.
+_base_: graph_posemamba_h36m_w128_gt2d_scratch_80e.yaml
+config: configs/pose3d/graph_posemamba_h36m_w128_d10_balanced_det2d_80e.yaml
+checkpoint: runs/w128_d10_balanced_20260910/det2d_seed0
+fresh_initialization_manifest: verification/w128_d10_balanced_det2d_preflight.json
+dim_feat: 128
+depth: 10
+epochs: 80
+batch_size: 8
+test_batch_size: 8
+gt_2d: false
+finetune: false
+pretrained: ''
+resume: ''
+evaluate: ''
+partial_train: null
+selective_last_block_head: false
+require_fresh_initialization: true
+learning_rate: 0.0005
+enable_linear_warmup: false
+warmup_epochs: 0
+lr_decay: 0.99
+weight_decay: 0.012
+honor_no_weight_decay: false
+drop_path_rate: 0.2
+max_grad_norm: 1.0
+grad_clip_error_if_nonfinite: true
+use_ema: true
+# Batch4 -> batch8: preserve EMA decay per processed sample, (.9998)^2.
+ema_decay: 0.99960004
+seed: 0
+checkpoint_frequency: 5
