@@ -528,6 +528,9 @@
   "execution_order": [
     "BALANCED-DET-S0 (parallel current; W128D10 H36M detected input, user corrected from GT; ledger w128_d10_balanced_20260910)",
     "GT-W128-SCRATCH-S0 (current; user rejects GT finetuning; dedicated ledger w128_gt2d_scratch_20260909)",
+    "ABL-DELTA-ONLY-S0 (priority; W64D8 80e; routing/config/preflight pending)",
+    "ABL-BC-ONLY-S0 (priority; W64D8 80e; routing/config/preflight pending)",
+    "BALANCED-GT-S0-R2 (newly authorized W128D10 GT scratch80e; never resume cancelled initial attempt)",
     "R-A0-1",
     "R-A2-1",
     "R-FULL-1",
@@ -543,6 +546,6 @@
     ],
     "max_formal_jobs": 2,
     "external_gpu_process": "No other GPU process at FT preflight; never stop other users' processes",
-    "after_pair": "Prior GT and seed plans remain recorded but are not launched by this one-shot FT script. Scheduled automation deleted by user."
+    "after_pair": "Delta-only and B/C-only ablations first, then newly authorized W128D10 GT scratch, then seeds. SAMA deferred by user. See PRIORITY_20260910.md; no recurring scheduler."
   }
 }
