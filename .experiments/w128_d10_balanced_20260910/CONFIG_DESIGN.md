@@ -1,5 +1,8 @@
 # W128/D10 balanced candidate: generated, not launched
 
+Latest2026-09-10: user authorized parallel DETECTOR input run; see
+PARALLEL_DET_LAUNCH.md. GT candidate is not the requested run. Below is design history.
+
 User asks for a reasonable0.8M–6.8M configuration informed by SAMA and prior GCPM
 experiments. CPU constructor count verifies3,435,395 parameters. No architecture
 source change. Both detector and GT configs are strictly fresh seed0; no fine-tuning.

@@ -1,5 +1,9 @@
 # User-authorized parallel GT launch
 
+SUPERSEDED: user corrected target to H36M detector input. D10 GT briefly started
+then stopped during epoch1; zero complete epochs. Do not restart this GT launch.
+Use PARALLEL_DET_LAUNCH.md and detected-input launcher instead.
+
 2026-09-10 user specifies W128/D10 after requesting immediate parallel launch.
 Context is current GT2D; launch BALANCED-GT-S0 only, not detector variant or SAMA.
 Keep existing W128/D20 PID2004698 untouched. D10 batch8,80epochs,fresh seed0,

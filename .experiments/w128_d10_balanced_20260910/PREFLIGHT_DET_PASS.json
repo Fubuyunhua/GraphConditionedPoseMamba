@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "initialization": "random seed0; no checkpoint loading",
+  "initial_model_sha256": "7506c395336ddd719843a4709c1b6b1ec29dfbaab31b493dbbc70d7c18f8e49b",
+  "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+  "config_sha256": "af50ff95e9e4461f8a787ce087854a30c83dad8ebdba8c24b1157cfec698159b",
+  "source_commit": "9bc4642b3885b46b2f1fc6dc94d750128e1fd564",
+  "parameters": 3435395,
+  "parallel_with_pid": 2004698,
+  "stages": {
+    "B1": {
+      "loss": 2.6301310062408447,
+      "grad_norm": 28.313568115234375,
+      "peak_reserved_mib": 1888.0,
+      "roundtrip": true,
+      "random_initialization_verified": true,
+      "tail_batch4_compiled_check": false
+    },
+    "B2": {
+      "loss": 2.9418632984161377,
+      "grad_norm": 26.162715911865234,
+      "peak_reserved_mib": 3670.0,
+      "roundtrip": true,
+      "random_initialization_verified": true,
+      "tail_batch4_compiled_check": false
+    },
+    "B4": {
+      "loss": 2.8859105110168457,
+      "grad_norm": 24.138416290283203,
+      "peak_reserved_mib": 7700.0,
+      "roundtrip": true,
+      "random_initialization_verified": true,
+      "tail_batch4_compiled_check": false
+    },
+    "B8": {
+      "loss": 2.2838271379470827,
+      "grad_norm": 20.429330507914226,
+      "peak_reserved_mib": 13760.0,
+      "roundtrip": true,
+      "random_initialization_verified": true,
+      "tail_batch4_compiled_check": true
+    }
+  }
+}

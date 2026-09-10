@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "w128_d10_balanced_20260910",
+    "created_at": "2026-09-10"
+  },
+  "baseline": {
+    "id": "HIST-W128-D20",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w128_d20_scale_80e.yaml",
+    "dataset": "H36M-SH detector T243/S81",
+    "split": "S1,S5,S6,S7,S8 train;S9,S11 test",
+    "primary_metric": "EMA MPJPE",
+    "direction": "min",
+    "checkpoint": "Historical best37.659301 at45; no checkpoint initialized",
+    "source_identity": "historical source d30993d; new source9bc4642",
+    "seed_policy": [
+      0
+    ],
+    "command": "new run train.py --config balanced_det2d --seed0"
+  },
+  "audit": {
+    "verdict": "PASS",
+    "report": ".experiments/w128_d10_balanced_20260910/PARALLEL_DET_LAUNCH.md",
+    "accepted_risks": [
+      "shared GPU",
+      "single seed",
+      "test-monitored"
+    ],
+    "runtime_gate": "PASS B1/B2/B4/B8 and compiled tail4; peak13760MiB; fresh fingerprint verified"
+  },
+  "experiments": [
+    {
+      "id": "BALANCED-GT-S0",
+      "track": "IMPROVEMENT",
+      "status": "CANCELLED",
+      "hypothesis": "Initial GT interpretation superseded",
+      "baseline_id": "HIST-W128-D20",
+      "delta": "Wrong input target corrected by user",
+      "controls": "Existing H36M detector data, architecture family, loss, LR5e-4 exponential.99,DP.20; fresh seed0; not depth-only causal comparison",
+      "seeds": [
+        0
+      ],
+      "budget": "80epochs batch8",
+      "primary_metric": "test-monitored best EMA P1",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed80",
+        "shared throughput",
+        "memory"
+      ],
+      "acceptance": "Completed valid run; no promised precision",
+      "falsification": "No useful gain/cost tradeoff; retain negative result",
+      "stopping_rule": "80epochs or technical failure or user stop; no batch reduction/retry",
+      "dependencies": [
+        "USER_DETECTOR_CORRECTION",
+        "PARALLEL_MEMORY_GATE",
+        "FRESH_FINGERPRINT"
+      ],
+      "artifacts": {
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_W128_D10_GT_PARALLEL_20260910",
+        "log": "launch_logs/gt_parallel.log"
+      },
+      "result": {
+        "reason": "USER_CORRECTION_TO_DETECTOR",
+        "completed_epochs": 0,
+        "train_pid": 2025903
+      }
+    },
+    {
+      "id": "BALANCED-DET-S0",
+      "track": "IMPROVEMENT",
+      "status": "RUNNING",
+      "hypothesis": "Intermediate GCPM capacity balances detector accuracy and cost",
+      "baseline_id": "HIST-W128-D20",
+      "delta": "W128D10 batch8 sample-matched EMA.99960004,80epochs",
+      "controls": "Existing H36M detector data, architecture family, loss, LR5e-4 exponential.99,DP.20; fresh seed0; not depth-only causal comparison",
+      "seeds": [
+        0
+      ],
+      "budget": "80epochs batch8",
+      "primary_metric": "test-monitored best EMA P1",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed80",
+        "shared throughput",
+        "memory"
+      ],
+      "acceptance": "Completed valid run; no promised precision",
+      "falsification": "No useful gain/cost tradeoff; retain negative result",
+      "stopping_rule": "80epochs or technical failure or user stop; no batch reduction/retry",
+      "dependencies": [
+        "USER_DETECTOR_CORRECTION",
+        "PARALLEL_MEMORY_GATE",
+        "FRESH_FINGERPRINT"
+      ],
+      "artifacts": {
+        "source": "9bc4642b3885b46b2f1fc6dc94d750128e1fd564",
+        "train_pid": 2027023,
+        "start_time": "2026-09-10T10:12:16+08:00",
+        "config_sha256": "af50ff95e9e4461f8a787ce087854a30c83dad8ebdba8c24b1157cfec698159b",
+        "config": "configs/pose3d/graph_posemamba_h36m_w128_d10_balanced_det2d_80e.yaml",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_W128_D10_DET_PARALLEL_20260910",
+        "log": "launch_logs/det_parallel.log",
+        "checkpoint": "runs/w128_d10_balanced_20260910/det2d_seed0"
+      },
+      "result": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "BAL-001",
+      "decision": "User corrects parallel target to H36M detector; keep D20 GT running; cancel D10 GT without complete epoch."
+    }
+  ]
+}

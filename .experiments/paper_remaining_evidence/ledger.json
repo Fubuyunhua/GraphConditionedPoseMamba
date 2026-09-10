@@ -526,6 +526,7 @@
     "scope": "User authorizes current MPI plus FINAL-W128 parallel pair, followed by the remaining final-size models and seeds-last repeats; GitHub synchronization continues."
   },
   "execution_order": [
+    "BALANCED-DET-S0 (parallel current; W128D10 H36M detected input, user corrected from GT; ledger w128_d10_balanced_20260910)",
     "GT-W128-SCRATCH-S0 (current; user rejects GT finetuning; dedicated ledger w128_gt2d_scratch_20260909)",
     "R-A0-1",
     "R-A2-1",
@@ -537,9 +538,10 @@
   "active_concurrency": {
     "authorized": true,
     "scope": [
-      "GT-W128-SCRATCH-S0"
+      "GT-W128-SCRATCH-S0",
+      "BALANCED-DET-S0"
     ],
-    "max_formal_jobs": 1,
+    "max_formal_jobs": 2,
     "external_gpu_process": "No other GPU process at FT preflight; never stop other users' processes",
     "after_pair": "Prior GT and seed plans remain recorded but are not launched by this one-shot FT script. Scheduled automation deleted by user."
   }
