@@ -1,0 +1,5 @@
+_base_: conditioning_full_reference_80e.yaml
+config: configs/pose3d/ablation_condition_delta_only_80e.yaml
+checkpoint: runs/conditioning_20260911/delta_seed0
+fresh_initialization_manifest: verification/delta/PREFLIGHT_PASS.json
+graph_conditioning_targets: delta

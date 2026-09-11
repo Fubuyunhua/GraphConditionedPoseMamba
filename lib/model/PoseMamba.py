@@ -196,6 +196,7 @@ class GraphConditionedPoseBlock(nn.Module):
         mlp_ratio=2.0,
         drop_path=0.0,
         norm_layer=nn.LayerNorm,
+        graph_conditioning_targets="all",
     ):
         super().__init__()
         if graph_injection_mode is None:
@@ -225,6 +226,11 @@ class GraphConditionedPoseBlock(nn.Module):
         self.use_graph_mixer = bool(use_graph_mixer)
         self.graph_injection_mode = graph_injection_mode
         self.graph_conditioned_ssm = expected_conditioned
+        self.graph_conditioning_targets = str(graph_conditioning_targets).lower()
+        if self.graph_conditioning_targets not in {'all', 'delta', 'bc', 'none'}:
+            raise ValueError('Invalid graph conditioning targets')
+        if self.graph_conditioning_targets != 'all' and (not factorized_spatial_temporal or graph_injection_mode != 'control'):
+            raise ValueError('Partial conditioning requires factorized control route')
         self.reuse_graph_context = bool(reuse_graph_context)
         self.factorized_spatial_temporal = bool(factorized_spatial_temporal)
         self.coupled_ssm_forward_type = str(coupled_ssm_forward_type)
@@ -297,6 +303,8 @@ class GraphConditionedPoseBlock(nn.Module):
                 forward_type=self.coupled_ssm_forward_type,
                 k_group=4,
             )
+        self.spatial_ssm.graph_conditioning_targets = self.graph_conditioning_targets
+        self.temporal_ssm.graph_conditioning_targets = self.graph_conditioning_targets
         mlp_hidden_dim = int(hidden_dim * mlp_ratio)
         self.mlp = Mlp(
             in_features=hidden_dim,
@@ -485,6 +493,7 @@ class GraphConditionedPoseMamba(nn.Module):
         graph_topology_mode="anatomical",
         graph_rewire_seed=3407,
         recurrence_scope="independent",
+        graph_conditioning_targets="all",
     ):
         super().__init__()
         if int(num_joints) != 17:
@@ -521,6 +530,7 @@ class GraphConditionedPoseMamba(nn.Module):
                     use_graph_mixer=use_graph_mixer,
                     use_symmetry_edges=use_symmetry_edges,
                     graph_conditioned_ssm=graph_conditioned_ssm,
+                    graph_conditioning_targets=graph_conditioning_targets,
                     graph_injection_mode=graph_injection_mode,
                     reuse_graph_context=reuse_graph_context,
                     factorized_spatial_temporal=factorized_spatial_temporal,
@@ -595,6 +605,7 @@ class GraphConditionedPoseMamba(nn.Module):
         return {
             "model": "GraphConditionedPoseMamba",
             "graph_injection_mode": self.blocks[0].graph_injection_mode,
+            "graph_conditioning_targets": self.blocks[0].graph_conditioning_targets,
             "graph_topology_mode": self.graph_topology_mode,
             "graph_rewire_seed": self.graph_rewire_seed,
             "graph_topology_hash": self.graph_topology_hash,

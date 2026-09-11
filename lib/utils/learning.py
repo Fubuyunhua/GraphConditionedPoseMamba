@@ -56,6 +56,7 @@ def load_backbone(args):
         use_symmetry_edges=getattr(args, "use_symmetry_edges", True),
         graph_hidden_ratio=getattr(args, "graph_hidden_ratio", 0.5),
         graph_conditioned_ssm=getattr(args, "graph_conditioned_ssm", True),
+        graph_conditioning_targets=getattr(args, "graph_conditioning_targets", "all"),
         graph_injection_mode=getattr(args, "graph_injection_mode", None),
         reuse_graph_context=getattr(args, "reuse_graph_context", True),
         factorized_spatial_temporal=getattr(

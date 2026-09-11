@@ -664,15 +664,27 @@ class BiSTSSM_v2:
         else:
             xs = CrossScan.apply(x)
             context_xs = xs if context is None else CrossScan.apply(context)
+            conditioning_target = getattr(self, 'graph_conditioning_targets', 'all')
+            def route_dbl(projected):
+                if conditioning_target == 'all':
+                    return projected
+                from lib.model.conditioning_routes import route_projection
+                if no_einsum:
+                    content_projected = F.conv1d(xs.reshape(B, -1, L), x_proj_weight.reshape(-1, D, 1), bias=(x_proj_bias.reshape(-1) if x_proj_bias is not None else None), groups=K).reshape(B,K,-1,L)
+                else:
+                    content_projected = torch.einsum('b k d l, k c d -> b k c l', xs, x_proj_weight)
+                    if x_proj_bias is not None:
+                        content_projected = content_projected + x_proj_bias.view(1,K,-1,1)
+                return route_projection(content_projected, projected, R, N, conditioning_target)
             if no_einsum:
                 x_dbl = F.conv1d(context_xs.view(B, -1, L), x_proj_weight.view(-1, D, 1), bias=(x_proj_bias.view(-1) if x_proj_bias is not None else None), groups=K)
-                dts, Bs, Cs = torch.split(x_dbl.view(B, K, -1, L), [R, N, N], dim=2)
+                dts, Bs, Cs = torch.split(route_dbl(x_dbl.view(B, K, -1, L)), [R, N, N], dim=2)
                 dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * D, -1, 1), groups=K)
             else:
                 x_dbl = torch.einsum("b k d l, k c d -> b k c l", context_xs, x_proj_weight)
                 if x_proj_bias is not None:
                     x_dbl = x_dbl + x_proj_bias.view(1, K, -1, 1)
-                dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
+                dts, Bs, Cs = torch.split(route_dbl(x_dbl), [R, N, N], dim=2)
                 dts = torch.einsum("b k r l, k d r -> b k d l", dts, dt_projs_weight)
 
             xs = xs.view(B, K, D, L)

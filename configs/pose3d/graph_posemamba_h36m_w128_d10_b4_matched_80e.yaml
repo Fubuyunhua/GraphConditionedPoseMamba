@@ -1,0 +1,7 @@
+_base_: conditioning_full_reference_80e.yaml
+config: configs/pose3d/graph_posemamba_h36m_w128_d10_b4_matched_80e.yaml
+checkpoint: runs/conditioning_20260911/d10_b4_seed0
+fresh_initialization_manifest: verification/d10_b4/PREFLIGHT_PASS.json
+dim_feat: 128
+depth: 10
+graph_conditioning_targets: all
