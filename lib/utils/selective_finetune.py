@@ -4,8 +4,8 @@ def configure_selective(model, args):
         return
     if not args.finetune or args.partial_train:
         raise ValueError('Selective mode requires finetune and no partial_train')
-    if not hasattr(model, 'blocks') or len(model.blocks) != 16 or not hasattr(model, 'head'):
-        raise ValueError('Selective mode requires the registered W256/D16 model')
+    if not hasattr(model, 'blocks') or len(model.blocks) not in (10, 16) or not hasattr(model, 'head'):
+        raise ValueError('Selective mode requires a registered D10 or D16 model')
     count = int(getattr(args, 'selective_train_blocks', 1))
     if count not in (1, 2):
         raise ValueError('Registered selective modes allow only one or two final blocks')

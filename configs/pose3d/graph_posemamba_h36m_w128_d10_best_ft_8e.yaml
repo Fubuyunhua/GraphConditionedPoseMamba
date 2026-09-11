@@ -1,0 +1,17 @@
+_base_: graph_posemamba_h36m_w128_d10_balanced_det2d_80e.yaml
+config: configs/pose3d/graph_posemamba_h36m_w128_d10_best_ft_8e.yaml
+checkpoint: runs/w128_d10_best_ft_20260911/seed0
+finetune: true
+require_fresh_initialization: false
+fresh_initialization_manifest: null
+selective_last_block_head: true
+selective_train_blocks: 2
+epochs: 8
+learning_rate: 0.000002
+head_learning_rate: 0.00001
+enable_linear_warmup: true
+warmup_epochs: 1
+warmup_start_factor: 0.1
+lr_schedule_mode: cosine
+min_lr_ratio: 0.1
+checkpoint_frequency: 1

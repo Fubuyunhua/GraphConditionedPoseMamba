@@ -16,6 +16,19 @@ class Tiny(torch.nn.Module):
         return self.head(x)
 
 class SelectiveTests(unittest.TestCase):
+    def test_d10_selection(self):
+        m=Tiny()
+        m.blocks=torch.nn.ModuleList(list(m.blocks)[:10])
+        a=SimpleNamespace(selective_last_block_head=True,selective_train_blocks=2,
+            finetune=True,partial_train=None,learning_rate=2e-6,head_learning_rate=1e-5)
+        configure_selective(m,a)
+        m.train();selective_train_mode(m)
+        self.assertTrue(all(p.requires_grad==n.startswith(('blocks.8.','blocks.9.','head.')) for n,p in m.named_parameters()))
+        self.assertFalse(m.blocks[7].training)
+        self.assertTrue(m.blocks[8].training and m.blocks[9].training)
+        groups=selective_lr_groups(m,build_adamw_parameter_groups(m,.012),a)
+        self.assertEqual([g['lr'] for g in groups],[2e-6,1e-5])
+
     def test_two_blocks(self):
         m = Tiny()
         a = SimpleNamespace(selective_last_block_head=True, selective_train_blocks=2,
