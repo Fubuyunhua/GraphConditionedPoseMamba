@@ -33,7 +33,7 @@
     {
       "id": "W128-D10-BEST-FT-S0",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "CANCELLED",
       "hypothesis": "Constrained small updates may improve best detector weights",
       "baseline_id": "D10-BEST-E63",
       "delta": "Only blocks8/9+head; blockLR2e-6/head1e-5,8e,batch8,fresh optimizer/EMA",
@@ -68,7 +68,15 @@
         "log": "launch_logs/finetune.log",
         "checkpoint": "runs/w128_d10_best_ft_20260911/seed0"
       },
-      "result": null
+      "result": {
+        "reason": "User requests immediate scratch training instead",
+        "completed_epochs": 5,
+        "best_ema_epoch": 1,
+        "best_ema_p1": 39.378514,
+        "best_ema_p2": 32.79156,
+        "last_ema_p1": 39.426866,
+        "last_ema_p2": 32.838631
+      }
     }
   ],
   "decisions": [

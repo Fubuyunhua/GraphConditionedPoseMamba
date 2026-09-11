@@ -105,7 +105,7 @@
     },
     {
       "track": "IMPROVEMENT",
-      "status": "PLANNED",
+      "status": "RUNNING",
       "baseline_id": "FULL-W64D8-SEED0",
       "controls": "same0.8M training protocol with different model size; not batch-only test versus previous clippedbatch8",
       "seeds": [
@@ -131,7 +131,9 @@
       "delta": "W128D10 fresh,batch4,EMA.9998,no clipping,matched0.8M recipe",
       "artifacts": {
         "config": "configs/pose3d/graph_posemamba_h36m_w128_d10_b4_matched_80e.yaml",
-        "conditional_state": "PREFLIGHT_PASS_WAITING_FOR_8E_FT_OUTCOME",
+        "conditional_state": "USER_OVERRIDE_START_IMMEDIATELY",
+        "train_pid": 2061243,
+        "start_time": "2026-09-11T09:30:44+08:00",
         "launch_if_best_ft_p1_ge": 39.18356650289372,
         "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_CONDITIONING_20260911",
         "log": "launch_logs/d10_b4.log",

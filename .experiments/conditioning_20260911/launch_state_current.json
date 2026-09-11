@@ -1,0 +1,11 @@
+{
+  "delta_launcher": 2060482,
+  "bc_launcher": 2060483,
+  "delta_train_pid": 2060515,
+  "bc_train_pid": 2060514,
+  "d10_b4": "STARTED_FROM_SCRATCH_USER_OVERRIDE",
+  "d10_b4_train_pid": 2061243,
+  "start_time": "2026-09-11T09:30:44+08:00",
+  "conditional_controller": "STOPPED_USER_OVERRIDE",
+  "previous_ft": "CANCELLED_AFTER_5_EPOCHS"
+}

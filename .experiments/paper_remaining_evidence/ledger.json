@@ -526,10 +526,9 @@
     "scope": "User authorizes current MPI plus FINAL-W128 parallel pair, followed by the remaining final-size models and seeds-last repeats; GitHub synchronization continues."
   },
   "execution_order": [
-    "W128-D10-BEST-FT-S0 (current latest user request; D10 detector and D20GT completed80; ledger w128_d10_best_ft_20260911)",
     "ABL-DELTA-ONLY-S0 (RUNNING PID2060515; conditioning_20260911)",
     "ABL-BC-ONLY-S0 (RUNNING PID2060514; conditioning_20260911)",
-    "D10-B4-MATCHED-S0 (conditional automatic scratch restart after8e FT if gain<.2mm; preflightPASS)",
+    "D10-B4-MATCHED-S0 (RUNNING PID2061243; user stopped FT after5 and starts immediately)",
     "BALANCED-GT-S0-R2 (newly authorized W128D10 GT scratch80e; never resume cancelled initial attempt)",
     "R-A0-1",
     "R-A2-1",
@@ -541,7 +540,7 @@
   "active_concurrency": {
     "authorized": true,
     "scope": [
-      "W128-D10-BEST-FT-S0",
+      "D10-B4-MATCHED-S0",
       "ABL-DELTA-ONLY-S0",
       "ABL-BC-ONLY-S0"
     ],

@@ -1,5 +1,10 @@
 # D10 batch4 matched-recipe scratch run
 
+2026-09-11 09:30:44 Asia/Shanghai: user cancels waiting/FT and commands immediate
+scratch launch. PID2061243,epoch1/80,random-init hash7506c395... verified,4437batches
+per epoch,354960total updates. Delta/BC remain running. Old conditional controller
+PID2059492 stopped, FT PID2058759 stopped after5complete epochs. Below is historical.
+
 PREFLIGHT PASS, not formally started at09:26. Conditional controller waits for
 current8e FT to finish and checks bestP1<39.1835665 (>=.2mm gain from initial).
 Otherwise automatically launches this NEW random seed0 run. No checkpoint resume.
