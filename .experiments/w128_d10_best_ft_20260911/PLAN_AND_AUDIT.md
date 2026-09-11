@@ -1,5 +1,8 @@
 # Best-epoch W128/D10 detected-input fine-tuning
 
+Runtime PASS: source strict replay39.3835665/32.7786591mm, frozen and LR/gradient/
+roundtrip checks passed; actual680835 trainable. Formal PID2058759,09:08:02 China time.
+
 User requests further fine-tuning from best epoch,2026-09-11. The observed39.383528mm
 is the best of one recipe, not an established capacity ceiling. No guaranteed gain.
 Source: D10 detector best EMA epoch63,pairedP2=32.778690, sourceSHA

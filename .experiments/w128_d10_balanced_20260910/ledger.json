@@ -70,7 +70,7 @@
     {
       "id": "BALANCED-DET-S0",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "hypothesis": "Intermediate GCPM capacity balances detector accuracy and cost",
       "baseline_id": "HIST-W128-D20",
       "delta": "W128D10 batch8 sample-matched EMA.99960004,80epochs",
@@ -104,7 +104,15 @@
         "log": "launch_logs/det_parallel.log",
         "checkpoint": "runs/w128_d10_balanced_20260910/det2d_seed0"
       },
-      "result": null
+      "result": {
+        "completed_epochs": 80,
+        "exit_code": 0,
+        "best_ema_epoch": 63,
+        "best_ema_p1": 39.383528,
+        "best_ema_p2": 32.77869,
+        "fixed80_p1": 39.498925,
+        "fixed80_p2": 32.825685
+      }
     }
   ],
   "decisions": [

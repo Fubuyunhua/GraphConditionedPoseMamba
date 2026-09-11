@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "w128_d10_best_ft_20260911",
+    "created_at": "2026-09-11"
+  },
+  "baseline": {
+    "id": "D10-BEST-E63",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w128_d10_balanced_det2d_80e.yaml",
+    "dataset": "H36M-SH detector T243/S81",
+    "split": "S1,S5,S6,S7,S8 train;S9,S11 test",
+    "primary_metric": "EMA MPJPE",
+    "direction": "min",
+    "checkpoint": "best EMA epoch63 SHA cb5a9153f473e9280ba95b78b5276f4d0645336ef9287eed6d8b0b424425ee59",
+    "source_identity": "9bc4642",
+    "seed_policy": [
+      0
+    ],
+    "command": "Best39.383528/32.778690 from completed80e source"
+  },
+  "audit": {
+    "verdict": "PASS",
+    "report": ".experiments/w128_d10_best_ft_20260911/PLAN_AND_AUDIT.md",
+    "accepted_risks": [
+      "single seed",
+      "test-monitored",
+      "added fine-tuning budget"
+    ],
+    "runtime_gate": "PASS strict initial replay39.3835665/32.7786591, B1/B8+tail4, frozen state, group LR and checkpoint roundtrip"
+  },
+  "experiments": [
+    {
+      "id": "W128-D10-BEST-FT-S0",
+      "track": "IMPROVEMENT",
+      "status": "RUNNING",
+      "hypothesis": "Constrained small updates may improve best detector weights",
+      "baseline_id": "D10-BEST-E63",
+      "delta": "Only blocks8/9+head; blockLR2e-6/head1e-5,8e,batch8,fresh optimizer/EMA",
+      "controls": "Same data,loss,DP,WD,clip,batch and EMA decay; frozen modules eval",
+      "seeds": [
+        0
+      ],
+      "budget": "8fine-tune epochs in addition to80source",
+      "primary_metric": "Best EMA P1 vs epoch0",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed8",
+        "frozen-state checks",
+        "initial replay"
+      ],
+      "acceptance": "Completed valid run; no promised precision",
+      "falsification": "No improvement, retain original",
+      "stopping_rule": "8epochs/failure/user; no auto extensions",
+      "dependencies": [
+        "USER_REQUEST",
+        "STRICT_E63_REPLAY",
+        "PREFLIGHT"
+      ],
+      "artifacts": {
+        "source": "192a5de1bad1f87967b3de93400fd69248a08912",
+        "train_pid": 2058759,
+        "start_time": "2026-09-11T09:08:02+08:00",
+        "trainable_parameters": 680835,
+        "config_sha256": "149d07681befb7368c292381beff28e49f069f54d7e36f7bd2771ea4a7104d84",
+        "config": "configs/pose3d/graph_posemamba_h36m_w128_d10_best_ft_8e.yaml",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_W128_D10_BEST_FT_20260911",
+        "log": "launch_logs/finetune.log",
+        "checkpoint": "runs/w128_d10_best_ft_20260911/seed0"
+      },
+      "result": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D10FT-001",
+      "decision": "User requests best-epoch fine-tuning; retain full source and bound new run8epochs."
+    }
+  ]
+}

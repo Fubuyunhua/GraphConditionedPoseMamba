@@ -33,7 +33,7 @@
     {
       "id": "GT-W128-SCRATCH-S0",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "hypothesis": "GT2D from-scratch optimization avoids dependence on detector pretraining",
       "baseline_id": "W128-GT-SCRATCH",
       "delta": "User replaces W256 GT adaptation with fresh W128D20,80epochs,LR5e-4 exponential.99",
@@ -67,7 +67,16 @@
         "log": "launch_logs/gt_scratch.log",
         "checkpoint": "runs/w128_gt2d_scratch_20260909/seed0"
       },
-      "result": null
+      "result": {
+        "completed_epochs": 80,
+        "exit_code": 0,
+        "best_ema_epoch": 65,
+        "best_ema_p1": 11.309951,
+        "best_ema_p2": 10.057641,
+        "fixed80_p1": 11.597471,
+        "fixed80_p2": 10.436568,
+        "validation": "training log verified; independent post-run replay pending"
+      }
     }
   ],
   "decisions": [

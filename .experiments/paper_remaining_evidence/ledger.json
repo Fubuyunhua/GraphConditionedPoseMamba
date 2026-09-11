@@ -526,8 +526,7 @@
     "scope": "User authorizes current MPI plus FINAL-W128 parallel pair, followed by the remaining final-size models and seeds-last repeats; GitHub synchronization continues."
   },
   "execution_order": [
-    "BALANCED-DET-S0 (parallel current; W128D10 H36M detected input, user corrected from GT; ledger w128_d10_balanced_20260910)",
-    "GT-W128-SCRATCH-S0 (current; user rejects GT finetuning; dedicated ledger w128_gt2d_scratch_20260909)",
+    "W128-D10-BEST-FT-S0 (current latest user request; D10 detector and D20GT completed80; ledger w128_d10_best_ft_20260911)",
     "ABL-DELTA-ONLY-S0 (priority; W64D8 80e; routing/config/preflight pending)",
     "ABL-BC-ONLY-S0 (priority; W64D8 80e; routing/config/preflight pending)",
     "BALANCED-GT-S0-R2 (newly authorized W128D10 GT scratch80e; never resume cancelled initial attempt)",
@@ -541,8 +540,7 @@
   "active_concurrency": {
     "authorized": true,
     "scope": [
-      "GT-W128-SCRATCH-S0",
-      "BALANCED-DET-S0"
+      "W128-D10-BEST-FT-S0"
     ],
     "max_formal_jobs": 2,
     "external_gpu_process": "No other GPU process at FT preflight; never stop other users' processes",

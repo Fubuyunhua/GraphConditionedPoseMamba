@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "source_checkpoint": "/scratch/home/caiwei/GraphConditionedPoseMamba_W128_D10_DET_PARALLEL_20260910/runs/w128_d10_balanced_20260910/det2d_seed0_2026_09_10_T_10_12_15/best_ema_epoch.bin",
+  "source_sha256": "cb5a9153f473e9280ba95b78b5276f4d0645336ef9287eed6d8b0b424425ee59",
+  "initializer_sha256": "896aa6ca8165b56f834c76d7d5ef03722e56c5a08d7f142cb8e8472294907a0c",
+  "config_sha256": "149d07681befb7368c292381beff28e49f069f54d7e36f7bd2771ea4a7104d84",
+  "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+  "source_commit": "192a5de1bad1f87967b3de93400fd69248a08912",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "stages": {
+    "B1": {
+      "loss": 0.018731575459241867,
+      "grad_norm": 0.4259442687034607,
+      "peak_reserved_mib": 1226.0,
+      "strict_roundtrip": true,
+      "optimizer_reset": true,
+      "ema_reset": true,
+      "compiled": false
+    },
+    "B8": {
+      "loss": 0.01873452514410019,
+      "grad_norm": 0.2438650925954183,
+      "peak_reserved_mib": 4090.0,
+      "strict_roundtrip": true,
+      "optimizer_reset": true,
+      "ema_reset": true,
+      "compiled": true
+    }
+  },
+  "trainable_parameters": 680835
+}
