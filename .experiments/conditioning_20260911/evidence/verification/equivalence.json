@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "legacy_full_output_max_abs": 0.0,
+  "legacy_full_gradient_max_abs": 3.0231603886932135e-08,
+  "none_equals_a1_on_shared_weights": true,
+  "full_parameters": 800083,
+  "a1_parameters": 749891,
+  "note": "A1 reuses functional baseline but initialization/allocated graph parameters differ; not strict matched factorial interaction evidence"
+}

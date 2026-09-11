@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "job": "bc",
+  "parameters": 800083,
+  "initial_model_sha256": "0bacf361b9c26aa810193239e14e8a36c0dcf5e69c1d876f8fc1aef56cd42b20",
+  "config_sha256": "ac02ca29f473a3ab9e644773f51875302919e07900dfade1a8893f49b7a5bd4c",
+  "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+  "source_commit": "549493650bce7de5feffeb0839cd6ca9565f3c56",
+  "stages": {
+    "B1": {
+      "loss": 1.6955091953277588,
+      "graph_gradient_l1": 5.509200427994074,
+      "peak_reserved_mib": 772.0,
+      "roundtrip": true
+    },
+    "B2": {
+      "loss": 1.6698166131973267,
+      "graph_gradient_l1": 5.058616446764063,
+      "peak_reserved_mib": 1502.0,
+      "roundtrip": true
+    },
+    "B4": {
+      "loss": 1.582029104232788,
+      "graph_gradient_l1": 4.340850801927445,
+      "peak_reserved_mib": 3232.0,
+      "roundtrip": true
+    }
+  }
+}

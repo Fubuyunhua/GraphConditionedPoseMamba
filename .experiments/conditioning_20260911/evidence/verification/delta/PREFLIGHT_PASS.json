@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "job": "delta",
+  "parameters": 800083,
+  "initial_model_sha256": "0bacf361b9c26aa810193239e14e8a36c0dcf5e69c1d876f8fc1aef56cd42b20",
+  "config_sha256": "6477807c2a15518e690d86e6cff686986f246b5884cafb009809a4746aa2e96e",
+  "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+  "source_commit": "549493650bce7de5feffeb0839cd6ca9565f3c56",
+  "stages": {
+    "B1": {
+      "loss": 1.6962106227874756,
+      "graph_gradient_l1": 0.23639857300929634,
+      "peak_reserved_mib": 772.0,
+      "roundtrip": true
+    },
+    "B2": {
+      "loss": 1.6694544553756714,
+      "graph_gradient_l1": 0.20150097355190155,
+      "peak_reserved_mib": 1502.0,
+      "roundtrip": true
+    },
+    "B4": {
+      "loss": 1.5814409255981445,
+      "graph_gradient_l1": 0.1440178404125163,
+      "peak_reserved_mib": 3280.0,
+      "roundtrip": true
+    }
+  }
+}

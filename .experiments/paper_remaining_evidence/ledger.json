@@ -527,8 +527,9 @@
   },
   "execution_order": [
     "W128-D10-BEST-FT-S0 (current latest user request; D10 detector and D20GT completed80; ledger w128_d10_best_ft_20260911)",
-    "ABL-DELTA-ONLY-S0 (priority; W64D8 80e; routing/config/preflight pending)",
-    "ABL-BC-ONLY-S0 (priority; W64D8 80e; routing/config/preflight pending)",
+    "ABL-DELTA-ONLY-S0 (RUNNING PID2060515; conditioning_20260911)",
+    "ABL-BC-ONLY-S0 (RUNNING PID2060514; conditioning_20260911)",
+    "D10-B4-MATCHED-S0 (conditional automatic scratch restart after8e FT if gain<.2mm; preflightPASS)",
     "BALANCED-GT-S0-R2 (newly authorized W128D10 GT scratch80e; never resume cancelled initial attempt)",
     "R-A0-1",
     "R-A2-1",
@@ -540,9 +541,11 @@
   "active_concurrency": {
     "authorized": true,
     "scope": [
-      "W128-D10-BEST-FT-S0"
+      "W128-D10-BEST-FT-S0",
+      "ABL-DELTA-ONLY-S0",
+      "ABL-BC-ONLY-S0"
     ],
-    "max_formal_jobs": 2,
+    "max_formal_jobs": 3,
     "external_gpu_process": "No other GPU process at FT preflight; never stop other users' processes",
     "after_pair": "Delta-only and B/C-only ablations first, then newly authorized W128D10 GT scratch, then seeds. SAMA deferred by user. See PRIORITY_20260910.md; no recurring scheduler."
   }

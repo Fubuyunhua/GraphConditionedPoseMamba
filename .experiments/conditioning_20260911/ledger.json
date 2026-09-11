@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "conditioning_20260911",
+    "created_at": "2026-09-11"
+  },
+  "baseline": {
+    "id": "FULL-W64D8-SEED0",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/conditioning_full_reference_80e.yaml",
+    "dataset": "H36M-SH detector T243/S81",
+    "split": "S1,S5,S6,S7,S8 train;S9,S11 test",
+    "primary_metric": "MPJPE",
+    "direction": "min",
+    "checkpoint": "Historical Full best39.845162/33.232240; no initializer loaded",
+    "source_identity": "immutable Full fixture from192a5de checkout; new5494936",
+    "seed_policy": [
+      0
+    ],
+    "command": "Independent scripts; Full/A1 reference reuse guarded by parity"
+  },
+  "audit": {
+    "verdict": "PASS",
+    "report": ".experiments/conditioning_20260911/PLAN_AND_AUDIT.md",
+    "accepted_risks": [
+      "test-monitored",
+      "single seed",
+      "shared GPU",
+      "A1 differing allocated parameters/initialization"
+    ],
+    "runtime_gate": "49tests and Full/A1 equivalence PASS; all3 jobs B1/B2/B4 PASS; delta/bc formal fresh hashes verified"
+  },
+  "experiments": [
+    {
+      "track": "ABLATION",
+      "status": "RUNNING",
+      "baseline_id": "FULL-W64D8-SEED0",
+      "controls": "W64D8,seed0,batch4,80e,LR5e-4 decay.99,WD.012,EMA.9998,no warmup,no clip; same inputs and projections",
+      "seeds": [
+        0
+      ],
+      "budget": "80epochs",
+      "primary_metric": "best EMA P1",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed80",
+        "runtime"
+      ],
+      "acceptance": "Valid controlled evidence, no promised gain",
+      "falsification": "No contribution at single seed, interpret with repeat uncertainty",
+      "stopping_rule": "80epochs/failure/user; no retry or sweep",
+      "dependencies": [
+        "ROUTING_PARITY",
+        "PREFLIGHT"
+      ],
+      "result": null,
+      "id": "ABL-DELTA-ONLY-S0",
+      "hypothesis": "Graph-conditioned timescale contributes",
+      "delta": "graph_conditioning_targets=delta,keep B/C input-dependent on content",
+      "artifacts": {
+        "config": "configs/pose3d/ablation_condition_delta_only_80e.yaml",
+        "train_pid": 2060515,
+        "source": "549493650bce7de5feffeb0839cd6ca9565f3c56",
+        "start_time": "2026-09-11T09:25:51+08:00",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_CONDITIONING_20260911",
+        "log": "launch_logs/delta.log",
+        "checkpoint": "runs/conditioning_20260911/delta_seed0"
+      }
+    },
+    {
+      "track": "ABLATION",
+      "status": "RUNNING",
+      "baseline_id": "FULL-W64D8-SEED0",
+      "controls": "W64D8,seed0,batch4,80e,LR5e-4 decay.99,WD.012,EMA.9998,no warmup,no clip; same inputs and projections",
+      "seeds": [
+        0
+      ],
+      "budget": "80epochs",
+      "primary_metric": "best EMA P1",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed80",
+        "runtime"
+      ],
+      "acceptance": "Valid controlled evidence, no promised gain",
+      "falsification": "No contribution at single seed, interpret with repeat uncertainty",
+      "stopping_rule": "80epochs/failure/user; no retry or sweep",
+      "dependencies": [
+        "ROUTING_PARITY",
+        "PREFLIGHT"
+      ],
+      "result": null,
+      "id": "ABL-BC-ONLY-S0",
+      "hypothesis": "Graph-conditioned write/read contributes",
+      "delta": "graph_conditioning_targets=bc,keep Delta input-dependent on content",
+      "artifacts": {
+        "config": "configs/pose3d/ablation_condition_bc_only_80e.yaml",
+        "train_pid": 2060514,
+        "source": "549493650bce7de5feffeb0839cd6ca9565f3c56",
+        "start_time": "2026-09-11T09:25:51+08:00",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_CONDITIONING_20260911",
+        "log": "launch_logs/bc.log",
+        "checkpoint": "runs/conditioning_20260911/bc_seed0"
+      }
+    },
+    {
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "baseline_id": "FULL-W64D8-SEED0",
+      "controls": "same0.8M training protocol with different model size; not batch-only test versus previous clippedbatch8",
+      "seeds": [
+        0
+      ],
+      "budget": "80epochs",
+      "primary_metric": "best EMA P1",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed80",
+        "runtime"
+      ],
+      "acceptance": "Valid controlled evidence, no promised gain",
+      "falsification": "No contribution at single seed, interpret with repeat uncertainty",
+      "stopping_rule": "80epochs/failure/user; no retry or sweep",
+      "dependencies": [
+        "FT_FINISHED_WITH_LESS_THAN_0.2MM_GAIN",
+        "PREFLIGHT"
+      ],
+      "result": null,
+      "id": "D10-B4-MATCHED-S0",
+      "hypothesis": "0.8M-matched optimization better uses D10 capacity than batch8 recipe",
+      "delta": "W128D10 fresh,batch4,EMA.9998,no clipping,matched0.8M recipe",
+      "artifacts": {
+        "config": "configs/pose3d/graph_posemamba_h36m_w128_d10_b4_matched_80e.yaml",
+        "conditional_state": "PREFLIGHT_PASS_WAITING_FOR_8E_FT_OUTCOME",
+        "launch_if_best_ft_p1_ge": 39.18356650289372,
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_CONDITIONING_20260911",
+        "log": "launch_logs/d10_b4.log",
+        "checkpoint": "runs/conditioning_20260911/d10_b4_seed0"
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "id": "COND-001",
+      "decision": "User authorizes conditional scratch restart if8e FT best>=39.1835665, and parallel delta/bc ablations. SAMA remains paused."
+    }
+  ]
+}
