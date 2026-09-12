@@ -33,7 +33,7 @@
   "experiments": [
     {
       "track": "ABLATION",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "baseline_id": "FULL-W64D8-SEED0",
       "controls": "W64D8,seed0,batch4,80e,LR5e-4 decay.99,WD.012,EMA.9998,no warmup,no clip; same inputs and projections",
       "seeds": [
@@ -53,7 +53,16 @@
         "ROUTING_PARITY",
         "PREFLIGHT"
       ],
-      "result": null,
+      "result": {
+        "epochs": 80,
+        "exit_code": 0,
+        "best_ema_epoch": 51,
+        "best_ema_p1": 39.8968,
+        "best_ema_p2": 33.364117,
+        "fixed80_p1": 40.115673,
+        "fixed80_p2": 33.348317,
+        "replay": "post-training independent replay pending"
+      },
       "id": "ABL-DELTA-ONLY-S0",
       "hypothesis": "Graph-conditioned timescale contributes",
       "delta": "graph_conditioning_targets=delta,keep B/C input-dependent on content",
@@ -69,7 +78,7 @@
     },
     {
       "track": "ABLATION",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "baseline_id": "FULL-W64D8-SEED0",
       "controls": "W64D8,seed0,batch4,80e,LR5e-4 decay.99,WD.012,EMA.9998,no warmup,no clip; same inputs and projections",
       "seeds": [
@@ -89,7 +98,16 @@
         "ROUTING_PARITY",
         "PREFLIGHT"
       ],
-      "result": null,
+      "result": {
+        "epochs": 80,
+        "exit_code": 0,
+        "best_ema_epoch": 39,
+        "best_ema_p1": 40.356147,
+        "best_ema_p2": 33.605826,
+        "fixed80_p1": 40.885352,
+        "fixed80_p2": 33.548741,
+        "replay": "post-training independent replay pending"
+      },
       "id": "ABL-BC-ONLY-S0",
       "hypothesis": "Graph-conditioned write/read contributes",
       "delta": "graph_conditioning_targets=bc,keep Delta input-dependent on content",
@@ -105,7 +123,7 @@
     },
     {
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "baseline_id": "FULL-W64D8-SEED0",
       "controls": "same0.8M training protocol with different model size; not batch-only test versus previous clippedbatch8",
       "seeds": [
@@ -125,7 +143,16 @@
         "FT_FINISHED_WITH_LESS_THAN_0.2MM_GAIN",
         "PREFLIGHT"
       ],
-      "result": null,
+      "result": {
+        "epochs": 80,
+        "exit_code": 0,
+        "best_ema_epoch": 54,
+        "best_ema_p1": 38.483971,
+        "best_ema_p2": 32.382788,
+        "fixed80_p1": 38.677869,
+        "fixed80_p2": 32.42512,
+        "replay": "post-training independent replay pending"
+      },
       "id": "D10-B4-MATCHED-S0",
       "hypothesis": "0.8M-matched optimization better uses D10 capacity than batch8 recipe",
       "delta": "W128D10 fresh,batch4,EMA.9998,no clipping,matched0.8M recipe",

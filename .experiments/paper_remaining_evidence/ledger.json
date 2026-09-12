@@ -526,10 +526,7 @@
     "scope": "User authorizes current MPI plus FINAL-W128 parallel pair, followed by the remaining final-size models and seeds-last repeats; GitHub synchronization continues."
   },
   "execution_order": [
-    "ABL-DELTA-ONLY-S0 (RUNNING PID2060515; conditioning_20260911)",
-    "ABL-BC-ONLY-S0 (RUNNING PID2060514; conditioning_20260911)",
-    "D10-B4-MATCHED-S0 (RUNNING PID2061243; user stopped FT after5 and starts immediately)",
-    "BALANCED-GT-S0-R2 (newly authorized W128D10 GT scratch80e; never resume cancelled initial attempt)",
+    "GT-D10-B4-S0 (RUNNING PID2118071,80epochs scratch; ledger w128_d10_gt_b4_20260912)",
     "R-A0-1",
     "R-A2-1",
     "R-FULL-1",
@@ -540,12 +537,10 @@
   "active_concurrency": {
     "authorized": true,
     "scope": [
-      "D10-B4-MATCHED-S0",
-      "ABL-DELTA-ONLY-S0",
-      "ABL-BC-ONLY-S0"
+      "GT-D10-B4-S0"
     ],
     "max_formal_jobs": 3,
     "external_gpu_process": "No other GPU process at FT preflight; never stop other users' processes",
-    "after_pair": "Delta-only and B/C-only ablations first, then newly authorized W128D10 GT scratch, then seeds. SAMA deferred by user. See PRIORITY_20260910.md; no recurring scheduler."
+    "after_pair": "Previous ablations and detector D10 completed80; SAMA paused; no recurring monitor."
   }
 }

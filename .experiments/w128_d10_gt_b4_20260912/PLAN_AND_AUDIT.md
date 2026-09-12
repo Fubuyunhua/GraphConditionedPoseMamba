@@ -1,5 +1,8 @@
 # D10 GT from scratch, matched batch4 recipe
 
+Runtime PASS: preflight and formal fresh fingerprint verified. PID2118071
+started2026-09-12 13:58:31 Asia/Shanghai; initial2epochs finite, actual4437batches/epoch.
+
 User requests starting next GT experiment2026-09-12. Use W128D10 (3,435,395params)
 and successful latest batch4 detector recipe, not superseded batch8 or GT fine-tune.
 GT-D10-B4-S0 / IMPROVEMENT,random seed0,80epochs,batch4,T243,FP32,all parameters,
