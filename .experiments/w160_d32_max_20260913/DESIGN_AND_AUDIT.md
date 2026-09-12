@@ -1,5 +1,10 @@
 # Depth-oriented maximum candidate — generated, not launched
 
+2026-09-13 user authorizes training. Start MAX160-DET-S0 first; GT remains planned.
+Actual runtime gate additionally compares activation-checkpoint enabled/disabled
+outputs and gradients on training DropPath with preserved RNG; actualB4 compiled
+steps and EMA roundtrip must pass before formal startup. No old checkpoints loaded.
+
 User requests a reasonable maximum accuracy-oriented model, explicitly excluding
 W256D16. Choose W160D32,16,534,531 parameters (CPU counted),rather than claim a
 proven optimum. W128D32=10,917,507; W192D24=17,492,883; W192D28=20,399,755;
