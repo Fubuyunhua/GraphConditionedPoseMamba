@@ -1,0 +1,18 @@
+{
+  "status": "STATIC_PASS",
+  "date": "2026-09-13",
+  "width": 160,
+  "depth": 32,
+  "parameters": 16534531,
+  "ssm_inner": 300,
+  "mlp_inner": 315,
+  "decayed_parameters": 15881731,
+  "no_decay_parameters": 652800,
+  "epochs": 80,
+  "batch_size": 4,
+  "variants": ["det2d", "gt2d"],
+  "initialization": "both fresh seed0; no checkpoint",
+  "checks": ["full inheritance", "CPU model construction", "parameter count", "optimizer coverage", "fresh flags", "GT flags", "checkpointing enabled"],
+  "gpu_checks": "NOT_RUN",
+  "training": "NOT_STARTED"
+}

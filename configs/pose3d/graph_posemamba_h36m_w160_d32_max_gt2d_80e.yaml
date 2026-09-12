@@ -1,0 +1,9 @@
+_base_: graph_posemamba_h36m_w160_d32_max_det2d_80e.yaml
+config: configs/pose3d/graph_posemamba_h36m_w160_d32_max_gt2d_80e.yaml
+checkpoint: runs/w160_d32_max_20260913/gt2d_seed0
+fresh_initialization_manifest: verification/w160_d32_gt2d/PREFLIGHT_PASS.json
+gt_2d: true
+finetune: false
+pretrained: ''
+resume: ''
+evaluate: ''
