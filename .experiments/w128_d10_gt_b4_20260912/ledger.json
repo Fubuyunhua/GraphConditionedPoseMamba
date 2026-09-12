@@ -32,7 +32,7 @@
   "experiments": [
     {
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "baseline_id": "D10-B4-RECIPE",
       "controls": "same0.8M training protocol with different model size; not batch-only test versus previous clippedbatch8",
       "seeds": [
@@ -53,7 +53,16 @@
         "GT_PREFLIGHT",
         "FRESH_FINGERPRINT"
       ],
-      "result": null,
+      "result": {
+        "epochs": 80,
+        "exit_code": 0,
+        "best_ema_epoch": 79,
+        "best_ema_p1": 12.65277,
+        "best_ema_p2": 10.811707,
+        "fixed80_p1": 12.76056,
+        "fixed80_p2": 10.900926,
+        "independent_replay": "pending"
+      },
       "id": "GT-D10-B4-S0",
       "hypothesis": "Medium-capacity GCPM learns GT depth lifting from random initialization",
       "delta": "GTxy+c1 input, matched batch4 recipe, no detector pretraining",

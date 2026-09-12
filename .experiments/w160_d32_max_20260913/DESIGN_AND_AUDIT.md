@@ -1,5 +1,8 @@
 # Depth-oriented maximum candidate — generated, not launched
 
+Runtime PASS2026-09-13: checkpoint parity and B1/B2/B4 verified. Formal detector
+training starts05:02:03,PID2193893,initial random hash confirmed; GT version not started.
+
 2026-09-13 user authorizes training. Start MAX160-DET-S0 first; GT remains planned.
 Actual runtime gate additionally compares activation-checkpoint enabled/disabled
 outputs and gradients on training DropPath with preserved RNG; actualB4 compiled

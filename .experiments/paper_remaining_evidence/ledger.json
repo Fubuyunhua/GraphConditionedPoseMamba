@@ -526,7 +526,7 @@
     "scope": "User authorizes current MPI plus FINAL-W128 parallel pair, followed by the remaining final-size models and seeds-last repeats; GitHub synchronization continues."
   },
   "execution_order": [
-    "GT-D10-B4-S0 (RUNNING PID2118071,80epochs scratch; ledger w128_d10_gt_b4_20260912)",
+    "MAX160-DET-S0 (RUNNING PID2193893; source88d6f59; ledger w160_d32_max_20260913)",
     "R-A0-1",
     "R-A2-1",
     "R-FULL-1",
@@ -537,10 +537,10 @@
   "active_concurrency": {
     "authorized": true,
     "scope": [
-      "GT-D10-B4-S0"
+      "MAX160-DET-S0"
     ],
     "max_formal_jobs": 3,
     "external_gpu_process": "No other GPU process at FT preflight; never stop other users' processes",
-    "after_pair": "Previous ablations and detector D10 completed80; SAMA paused; no recurring monitor."
+    "after_pair": "User starts depth-oriented maximum detector model; GT counterpart generated but not launched; SAMA paused. Existing source runs completed."
   }
 }

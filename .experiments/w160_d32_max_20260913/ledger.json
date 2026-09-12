@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "w160_d32_max_20260913",
+    "created_at": "2026-09-13"
+  },
+  "baseline": {
+    "id": "DEPTH-ORIENTED-CANDIDATE",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w160_d32_max_det2d_80e.yaml",
+    "dataset": "H36M-SH detector T243/S81",
+    "split": "S1,S5,S6,S7,S8 train;S9,S11 test",
+    "primary_metric": "MPJPE",
+    "direction": "min",
+    "checkpoint": "NONE: random seed0",
+    "source_identity": "88d6f59",
+    "seed_policy": [
+      0
+    ],
+    "command": "train.py --config configs/pose3d/graph_posemamba_h36m_w160_d32_max_det2d_80e.yaml --checkpoint runs/w160_d32_max_20260913/det2d_seed0 --seed0"
+  },
+  "audit": {
+    "verdict": "PASS",
+    "report": ".experiments/w160_d32_max_20260913/DESIGN_AND_AUDIT.md",
+    "accepted_risks": [
+      "new depth/width recipe",
+      "single seed",
+      "test-monitored",
+      "checkpoint recomputation cost"
+    ],
+    "runtime_gate": "PASS checkpointing forward/backward parity and realB1/B2/B4,EMA roundtrip,fresh random initializer hash verified"
+  },
+  "experiments": [
+    {
+      "id": "MAX160-DET-S0",
+      "track": "IMPROVEMENT",
+      "status": "RUNNING",
+      "hypothesis": "Moderate width and greater depth improve detector pose accuracy at reasonable capacity",
+      "baseline_id": "DEPTH-ORIENTED-CANDIDATE",
+      "delta": "W160D32 16.53M,checkpointing,batch4,80epochs,R3stability recipe",
+      "controls": "same Full graph/loss/dataset; different optimizer vs legacy means not causal depth-only ablation",
+      "seeds": [
+        0
+      ],
+      "budget": "80epochs from scratch",
+      "primary_metric": "best EMA P1",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed80",
+        "memory",
+        "throughput"
+      ],
+      "acceptance": "valid full run; no guaranteed improvement",
+      "falsification": "no accuracy/cost benefit or failed gates; keep negative result",
+      "stopping_rule": "80epochs/runtime failure/user stop; no auto retry or sweep",
+      "dependencies": [
+        "USER_START",
+        "NUMERICAL_PREFLIGHT",
+        "FRESH_INIT_HASH"
+      ],
+      "artifacts": {
+        "source": "88d6f596e4e0c8aa1c7a2ceabb5216a0f9381a76",
+        "train_pid": 2193893,
+        "start_time": "2026-09-13T05:02:03+08:00",
+        "parameters": 16534531,
+        "config_sha256": "8645c013a12f2642ff4d9837ab8cf7bd2944171edac957e0f96f98d258b9b776",
+        "config": "configs/pose3d/graph_posemamba_h36m_w160_d32_max_det2d_80e.yaml",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_W160_D32_DET_20260913",
+        "log": "launch_logs/train.log",
+        "checkpoint": "runs/w160_d32_max_20260913/det2d_seed0"
+      },
+      "result": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "MAX-001",
+      "decision": "User authorizes start; detector version first, GT counterpart not simultaneously launched."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "job": "w160_d32_det2d",
+  "parameters": 16534531,
+  "initial_model_sha256": "54e3a6df9785667cf559baba3b103d2ab927e9d7d253f110c7ddb2247fcc8683",
+  "config_sha256": "8645c013a12f2642ff4d9837ab8cf7bd2944171edac957e0f96f98d258b9b776",
+  "dataset_sha256": "73b642f2567a8d0b194f88c54a3182c7b635c003c832b48ae6ee559f10232175",
+  "source_commit": "88d6f596e4e0c8aa1c7a2ceabb5216a0f9381a76",
+  "stages": {
+    "B1": {
+      "loss": 1.4769434928894043,
+      "graph_gradient_l1": 1.360959663332789,
+      "peak_reserved_mib": 1782.0,
+      "roundtrip": true,
+      "lr_after_steps": 3.0001901636111366e-05
+    },
+    "B2": {
+      "loss": 1.802268147468567,
+      "graph_gradient_l1": 1.3891444644711513,
+      "peak_reserved_mib": 3264.0,
+      "roundtrip": true,
+      "lr_after_steps": 3.0003803299009732e-05
+    },
+    "B4": {
+      "loss": 1.8580513000488281,
+      "graph_gradient_l1": 1.327319608371809,
+      "peak_reserved_mib": 11612.0,
+      "roundtrip": true,
+      "lr_after_steps": 3.000760670516974e-05
+    }
+  },
+  "activation_checkpoint_parity": "PASS forward/backward with training DropPath and preserved RNG"
+}
