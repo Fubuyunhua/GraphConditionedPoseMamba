@@ -1,0 +1,10 @@
+_base_: graph_posemamba_h36m_w128_d10_b4_matched_80e.yaml
+config: configs/pose3d/graph_posemamba_h36m_w128_d10_gt_b4_scratch_80e.yaml
+checkpoint: runs/w128_d10_gt_b4_20260912/seed0
+fresh_initialization_manifest: verification/gt_d10/PREFLIGHT_PASS.json
+gt_2d: true
+finetune: false
+pretrained: ''
+resume: ''
+evaluate: ''
+require_fresh_initialization: true

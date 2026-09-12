@@ -9,7 +9,7 @@ from lib.utils.tools import get_config
 from train import EMAModel,build_adamw_parameter_groups,train_epoch,set_random_seed
 from tools.benchmark_training import make_meters
 
-CONFIGS={'delta':'ablation_condition_delta_only_80e.yaml','bc':'ablation_condition_bc_only_80e.yaml','d10_b4':'graph_posemamba_h36m_w128_d10_b4_matched_80e.yaml'}
+CONFIGS={'delta':'ablation_condition_delta_only_80e.yaml','bc':'ablation_condition_bc_only_80e.yaml','d10_b4':'graph_posemamba_h36m_w128_d10_b4_matched_80e.yaml','gt_d10':'graph_posemamba_h36m_w128_d10_gt_b4_scratch_80e.yaml'}
 def fingerprint(model):
     h=hashlib.sha256()
     for k,v in model.state_dict().items():h.update(k.encode());h.update(v.detach().cpu().numpy().tobytes())
@@ -17,12 +17,12 @@ def fingerprint(model):
 def main():
     p=argparse.ArgumentParser();p.add_argument('job',choices=CONFIGS);a=p.parse_args()
     config='configs/pose3d/'+CONFIGS[a.job];c=get_config(config)
-    expected=3435395 if a.job=='d10_b4' else 800083
+    expected=3435395 if a.job in ('d10_b4','gt_d10') else 800083
     assert c.batch_size==4 and c.epochs==80 and c.ema_decay==.9998
     assert c.learning_rate==.0005 and c.lr_decay==.99 and c.weight_decay==.012
     assert c.max_grad_norm==0 and not c.enable_linear_warmup and not c.honor_no_weight_decay
-    assert not c.gt_2d and not c.finetune and not c.pretrained and not c.resume
-    assert c.graph_conditioning_targets==('all' if a.job=='d10_b4' else a.job)
+    assert c.gt_2d==(a.job=='gt_d10') and not c.finetune and not c.pretrained and not c.resume
+    assert c.graph_conditioning_targets==('all' if a.job in ('d10_b4','gt_d10') else a.job)
     set_random_seed(0);initial=load_backbone(c)
     assert sum(p.numel() for p in initial.parameters())==expected
     initial_hash=fingerprint(initial);del initial
@@ -34,6 +34,12 @@ def main():
             'config_sha256':hashlib.sha256(Path(config).read_bytes()).hexdigest(),'dataset_sha256':dataset_hash,
             'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'stages':{}}
     c.mask=False;dataset=MotionDataset3D(c,c.subset_list,'train')
+    if c.gt_2d:
+        for split in ('train','test'):
+            probe=MotionDataset3D(c,c.subset_list,split)
+            x,y=probe[0]
+            assert x.shape==y.shape==(243,17,3)
+            assert torch.equal(x[...,:2],y[...,:2]) and torch.all(x[...,2]==1)
     for batch in (1,2,4):
         set_random_seed(0);base=load_backbone(c).cuda()
         assert fingerprint(base)==initial_hash
@@ -61,7 +67,7 @@ def main():
         base.load_state_dict(torch.load(checkpoint,map_location='cpu',weights_only=True),strict=True)
         with torch.no_grad():torch.testing.assert_close(before,base(sample),atol=2e-5,rtol=2e-5)
         peak=torch.cuda.max_memory_reserved()/1024**2
-        assert peak<(11000 if a.job=='d10_b4' else 6000)
+        assert peak<(11000 if a.job in ('d10_b4','gt_d10') else 6000)
         report['stages'][f'B{batch}']={'loss':meters['total'].avg,'graph_gradient_l1':graph_grad,'peak_reserved_mib':peak,'roundtrip':True}
         del gradients,base,model,opt,groups,ema,loader,sample,before,state
         gc.collect();torch.cuda.empty_cache()
