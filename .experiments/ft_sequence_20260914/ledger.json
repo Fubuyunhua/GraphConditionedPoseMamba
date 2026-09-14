@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "ft_sequence_20260914",
+    "created_at": "2026-09-14"
+  },
+  "baseline": {
+    "id": "S1-W128D20-E45",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w128_d20_layerwise_ft_8e.yaml",
+    "dataset": "H36M detector T243/S81",
+    "split": "S1,S5,S6,S7,S8 train;S9,S11 test",
+    "primary_metric": "MPJPE",
+    "direction": "min",
+    "checkpoint": "Original S1 bestEMA45 hash6715a014823ac3b7365b8e8d64625486330f706f87191ddcdef2a313f599cbed",
+    "source_identity": "db58429",
+    "seed_policy": [
+      0
+    ],
+    "command": "tools/run_ft_sequence.py"
+  },
+  "audit": {
+    "verdict": "CONDITIONAL",
+    "report": ".experiments/ft_sequence_20260914/PLAN_AND_AUDIT.md",
+    "accepted_risks": [
+      "multiple test-monitored trials",
+      "single seed",
+      "loss changes can hurt motion quality"
+    ],
+    "runtime_gate": "each strategy independently gated"
+  },
+  "experiments": [
+    {
+      "track": "IMPROVEMENT",
+      "status": "RUNNING",
+      "baseline_id": "S1-W128D20-E45",
+      "controls": "Same sourceEMA,seed0,batch4,8epochs,all parameters,layerwise LR1e-6/3e-6/1e-5,original remaining settings",
+      "seeds": [
+        0
+      ],
+      "budget": "8epochs",
+      "primary_metric": "best EMA P1 vs epoch0",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed8",
+        "all strategy results"
+      ],
+      "acceptance": ">=.2mm provisional meaningful single-seed gain; no significance claim",
+      "falsification": "No gain versus original; retain baseline",
+      "stopping_rule": "fixed8 or technical failure/user; no extra strategies or extensions",
+      "dependencies": [
+        "STRATEGY_PREFLIGHT",
+        "INITIAL_REPLAY"
+      ],
+      "result": null,
+      "id": "FT-NODROPPATH",
+      "hypothesis": "Less stochastic regularization during adaptation helps",
+      "delta": "DropPath.2->0 only",
+      "artifacts": {
+        "config": "configs/pose3d/ft_sequence_no_droppath_8e.yaml",
+        "train_pid": 2396463,
+        "start_time": "2026-09-14T15:15:46+08:00",
+        "initial_p1": 37.65948820453056,
+        "initial_p2": 31.871829735868566,
+        "preflight": "PASS B1/B2/B4,all-layer updates,reset,roundtrip and initial replay",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_FT_SEQUENCE_20260914",
+        "log": "launch_logs/no_droppath.log"
+      }
+    },
+    {
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "baseline_id": "S1-W128D20-E45",
+      "controls": "Same sourceEMA,seed0,batch4,8epochs,all parameters,layerwise LR1e-6/3e-6/1e-5,original remaining settings",
+      "seeds": [
+        0
+      ],
+      "budget": "8epochs",
+      "primary_metric": "best EMA P1 vs epoch0",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed8",
+        "all strategy results"
+      ],
+      "acceptance": ">=.2mm provisional meaningful single-seed gain; no significance claim",
+      "falsification": "No gain versus original; retain baseline",
+      "stopping_rule": "fixed8 or technical failure/user; no extra strategies or extensions",
+      "dependencies": [
+        "STRATEGY_PREFLIGHT",
+        "INITIAL_REPLAY"
+      ],
+      "result": null,
+      "id": "FT-NODIFF",
+      "hypothesis": "Removing target-free motion penalty helps pose precision",
+      "delta": "lambda_diff.5->0 only",
+      "artifacts": {
+        "config": "configs/pose3d/ft_sequence_no_diff_8e.yaml",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_FT_SEQUENCE_20260914",
+        "log": "launch_logs/no_diff.log"
+      }
+    },
+    {
+      "track": "IMPROVEMENT",
+      "status": "PLANNED",
+      "baseline_id": "S1-W128D20-E45",
+      "controls": "Same sourceEMA,seed0,batch4,8epochs,all parameters,layerwise LR1e-6/3e-6/1e-5,original remaining settings",
+      "seeds": [
+        0
+      ],
+      "budget": "8epochs",
+      "primary_metric": "best EMA P1 vs epoch0",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed8",
+        "all strategy results"
+      ],
+      "acceptance": ">=.2mm provisional meaningful single-seed gain; no significance claim",
+      "falsification": "No gain versus original; retain baseline",
+      "stopping_rule": "fixed8 or technical failure/user; no extra strategies or extensions",
+      "dependencies": [
+        "STRATEGY_PREFLIGHT",
+        "INITIAL_REPLAY"
+      ],
+      "result": null,
+      "id": "FT-VELOCITY10",
+      "hypothesis": "Reduced supervised velocity weighting benefits positional error",
+      "delta": "lambda_3d_velocity20->10 only",
+      "artifacts": {
+        "config": "configs/pose3d/ft_sequence_velocity10_8e.yaml",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_FT_SEQUENCE_20260914",
+        "log": "launch_logs/velocity10.log"
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "id": "SEQ-001",
+      "decision": "Run exactly these3 strategies serially,24total epochs; each starts from same original source,not previous output. No app recurring automation."
+    }
+  ]
+}

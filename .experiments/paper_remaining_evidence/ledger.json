@@ -526,7 +526,9 @@
     "scope": "User authorizes current MPI plus FINAL-W128 parallel pair, followed by the remaining final-size models and seeds-last repeats; GitHub synchronization continues."
   },
   "execution_order": [
-    "W128D20-LAYERWISE-FT-S0 (RUNNING PID2339948;8epochs,all parameters; ledger w128_d20_layerwise_ft_20260914)",
+    "FT-NODROPPATH (RUNNING first; serial controller FT_SEQUENCE_20260914)",
+    "FT-NODIFF (next,independent originalEMA)",
+    "FT-VELOCITY10 (third,independent originalEMA)",
     "R-A0-1",
     "R-A2-1",
     "R-FULL-1",
@@ -537,10 +539,10 @@
   "active_concurrency": {
     "authorized": true,
     "scope": [
-      "W128D20-LAYERWISE-FT-S0"
+      "FT_SEQUENCE_20260914"
     ],
     "max_formal_jobs": 3,
     "external_gpu_process": "No other GPU process at FT preflight; never stop other users' processes",
-    "after_pair": "W160D32 user cancelled43/80; W128D20 best detector layerwiseFT now current; no autoextensions or SAMA restart."
+    "after_pair": "Exactly3 serial8e independent strategies. Runtime sequence_state.json authoritative; errors stop. SAMA paused."
   }
 }

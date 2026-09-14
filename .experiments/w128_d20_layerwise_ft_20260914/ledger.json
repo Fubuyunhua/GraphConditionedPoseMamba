@@ -33,7 +33,7 @@
     {
       "id": "W128D20-LAYERWISE-FT-S0",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "COMPLETED",
       "hypothesis": "Layerwise smaller early updates may improve detection generalization without frozen features",
       "baseline_id": "S1-W128D20-E45-EMA",
       "delta": "all-parameter layerwise1e-6/3e-6/1e-5,8epochs,new optimizer,original loss",
@@ -68,7 +68,16 @@
         "log": "launch_logs/finetune.log",
         "checkpoint": "runs/w128_d20_layerwise_ft_20260914/seed0"
       },
-      "result": null
+      "result": {
+        "epochs": 8,
+        "exit_code": 0,
+        "best_ema_epoch": 1,
+        "best_ema_p1": 37.720403,
+        "best_ema_p2": 31.821216,
+        "fixed8_p1": 38.076095,
+        "fixed8_p2": 31.963023,
+        "recommendation": "REJECT as P1 improvement; retain original37.659287"
+      }
     }
   ],
   "decisions": [
