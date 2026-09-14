@@ -6,6 +6,7 @@
   "counting_convention": "fvcore fused multiply-add=1 plus existing selective scan estimate 9*B*L*D*N+B*D*L; MAC-equivalent not hardware FLOPs",
   "scope": "single eval forward; no training",
   "models": [
+    {"model": "PoseMamba-A0-W64D6-M1", "parameters": 790083, "mac_equivalent_per_clip": 6459250944, "mac_equivalent_per_frame": 26581279.604938272, "counted_scan_calls": 12, "identity": "Historical local ~0.8M A0; xy+confidence; legacy forward; not published PoseMamba-S"},
     {"model": "W64D8", "parameters": 800083, "mac_equivalent_per_clip": 5799337024, "mac_equivalent_per_frame": 23865584.46090535, "counted_scan_calls": 16},
     {"model": "W128D10", "parameters": 3435395, "mac_equivalent_per_clip": 21730434688, "mac_equivalent_per_frame": 89425657.15226337, "counted_scan_calls": 20},
     {"model": "W128D20", "parameters": 6836355, "mac_equivalent_per_clip": 43455052928, "mac_equivalent_per_frame": 178827378.30452675, "counted_scan_calls": 40}
