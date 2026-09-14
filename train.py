@@ -959,6 +959,8 @@ def train_with_config(args, opts):
         )
         from lib.utils.selective_finetune import selective_lr_groups
         optimizer_groups = selective_lr_groups(_unwrap_compiled_model(model_pos), optimizer_groups, args)
+        from lib.utils.layerwise_finetune import layerwise_lr_groups
+        optimizer_groups = layerwise_lr_groups(_unwrap_compiled_model(model_pos), optimizer_groups, args)
         optimizer = optim.AdamW(optimizer_groups, lr=lr)
         log.info('INFO: Effective optimizer group learning rates: ' + str([
             (g.get('group_name'), g['lr']) for g in optimizer.param_groups
