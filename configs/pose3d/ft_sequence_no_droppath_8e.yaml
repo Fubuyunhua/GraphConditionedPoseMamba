@@ -1,0 +1,4 @@
+_base_: graph_posemamba_h36m_w128_d20_layerwise_ft_8e.yaml
+config: configs/pose3d/ft_sequence_no_droppath_8e.yaml
+checkpoint: runs/ft_sequence_20260914/no_droppath_seed0
+drop_path_rate: 0.0
