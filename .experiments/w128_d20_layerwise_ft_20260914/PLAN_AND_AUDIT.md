@@ -1,5 +1,8 @@
 # W128/D20 best detector EMA: all-parameter layerwise fine-tuning
 
+Runtime PASS2026-09-14: strict initial replay37.659287/31.871699; unit and actual
+per-layer update/reset/finite B4/roundtrip gates passed. PID2339948 starts11:23:42.
+
 User explicitly authorizes code and training after requesting a considered plan.
 Choose first proposed branch: layerwise learning rates with ORIGINAL losses,
 without an uncalibrated parameter-anchor regularizer. No GT transfer or frozen trunk.

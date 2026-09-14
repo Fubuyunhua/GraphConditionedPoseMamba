@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "w128_d20_layerwise_ft_20260914",
+    "created_at": "2026-09-14"
+  },
+  "baseline": {
+    "id": "S1-W128D20-E45-EMA",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/graph_posemamba_h36m_w128_d20_scale_80e.yaml",
+    "dataset": "H36M-SH detector T243/S81",
+    "split": "S1,S5,S6,S7,S8 train; S9,S11 test",
+    "primary_metric": "MPJPE",
+    "direction": "min",
+    "checkpoint": "S1 best EMA epoch45 SHA6715a014823ac3b7365b8e8d64625486330f706f87191ddcdef2a313f599cbed",
+    "source_identity": "historical S1, new3256b63",
+    "seed_policy": [
+      0
+    ],
+    "command": "initial replay37.6592871863/31.8716994056"
+  },
+  "audit": {
+    "verdict": "PASS",
+    "report": ".experiments/w128_d20_layerwise_ft_20260914/PLAN_AND_AUDIT.md",
+    "accepted_risks": [
+      "single seed",
+      "test-monitored",
+      "added fine-tuning compute"
+    ],
+    "runtime_gate": "all20blocks,input,positions,head update checked; B1/B2/B4 finite gradients; LR groups/reset/EMA/roundtrip/initial replay PASS"
+  },
+  "experiments": [
+    {
+      "id": "W128D20-LAYERWISE-FT-S0",
+      "track": "IMPROVEMENT",
+      "status": "RUNNING",
+      "hypothesis": "Layerwise smaller early updates may improve detection generalization without frozen features",
+      "baseline_id": "S1-W128D20-E45-EMA",
+      "delta": "all-parameter layerwise1e-6/3e-6/1e-5,8epochs,new optimizer,original loss",
+      "controls": "same width/depth,input,loss,DP.20,batch4,EMA.9998; clip1 declared safety delta",
+      "seeds": [
+        0
+      ],
+      "budget": "8epochs plus65historical source epochs",
+      "primary_metric": "best EMA P1 vs original epoch0",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed8",
+        "parameter movement",
+        "runtime"
+      ],
+      "acceptance": ">=.2mm provisional meaningful gain; not statistical significance",
+      "falsification": "No gain after8; keep source",
+      "stopping_rule": "8epochs/failure/user,no auto branches/extensions",
+      "dependencies": [
+        "USER_START",
+        "INITIAL_REPLAY",
+        "PREFLIGHT_PASS"
+      ],
+      "artifacts": {
+        "source": "3256b636aeeb7eff3a38d278acfa54da4237a190",
+        "train_pid": 2339948,
+        "start_time": "2026-09-14T11:23:42+08:00",
+        "parameters": 6836355,
+        "config": "configs/pose3d/graph_posemamba_h36m_w128_d20_layerwise_ft_8e.yaml",
+        "config_sha256": "1731ae0fc8c4fd7d019dd939cf4f4bbeb6ea6c915578bd3f3e6a86121e28269c",
+        "remote_root": "/scratch/home/caiwei/GraphConditionedPoseMamba_W128_D20_LAYERWISE_FT_20260914",
+        "log": "launch_logs/finetune.log",
+        "checkpoint": "runs/w128_d20_layerwise_ft_20260914/seed0"
+      },
+      "result": null
+    }
+  ],
+  "decisions": [
+    {
+      "id": "LAYERWISE-001",
+      "decision": "Execute proposed first branch, full-parameter layerwise LR; no uncalibrated anchor penalty, preserve original best weights."
+    }
+  ]
+}
