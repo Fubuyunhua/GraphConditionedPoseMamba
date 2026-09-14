@@ -34,7 +34,7 @@
     {
       "id": "MAX160-DET-S0",
       "track": "IMPROVEMENT",
-      "status": "RUNNING",
+      "status": "CANCELLED",
       "hypothesis": "Moderate width and greater depth improve detector pose accuracy at reasonable capacity",
       "baseline_id": "DEPTH-ORIENTED-CANDIDATE",
       "delta": "W160D32 16.53M,checkpointing,batch4,80epochs,R3stability recipe",
@@ -69,7 +69,17 @@
         "log": "launch_logs/train.log",
         "checkpoint": "runs/w160_d32_max_20260913/det2d_seed0"
       },
-      "result": null
+      "result": {
+        "reason": "USER_REQUESTED_TERMINATION_20260914",
+        "completed_epochs": 43,
+        "interrupted_epoch": 44,
+        "exit_code": 143,
+        "best_ema_epoch": 27,
+        "best_ema_p1": 38.213697,
+        "best_ema_p2": 32.100067,
+        "last_ema_p1": 38.453001,
+        "last_ema_p2": 32.251326
+      }
     }
   ],
   "decisions": [
