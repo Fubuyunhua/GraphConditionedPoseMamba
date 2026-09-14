@@ -1,0 +1,14 @@
+{
+  "status": "MEASURED",
+  "device": "RTX5090",
+  "torch": "2.11.0+cu128",
+  "input_shape": [1, 243, 17, 3],
+  "counting_convention": "fvcore fused multiply-add=1 plus existing selective scan estimate 9*B*L*D*N+B*D*L; MAC-equivalent not hardware FLOPs",
+  "scope": "single eval forward; no training",
+  "models": [
+    {"model": "W64D8", "parameters": 800083, "mac_equivalent_per_clip": 5799337024, "mac_equivalent_per_frame": 23865584.46090535, "counted_scan_calls": 16},
+    {"model": "W128D10", "parameters": 3435395, "mac_equivalent_per_clip": 21730434688, "mac_equivalent_per_frame": 89425657.15226337, "counted_scan_calls": 20},
+    {"model": "W128D20", "parameters": 6836355, "mac_equivalent_per_clip": 43455052928, "mac_equivalent_per_frame": 178827378.30452675, "counted_scan_calls": 40}
+  ]
+}
+
