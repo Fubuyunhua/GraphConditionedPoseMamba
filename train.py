@@ -553,6 +553,12 @@ def train_epoch(
                 batch_gt[:,:,:,2] = batch_gt[:,:,:,2] - batch_gt[:,0:1,0:1,2] # Place the depth of first frame root to 0.
             if args.mask or args.noise:
                 batch_input = args.aug.augment2D(batch_input, noise=(args.noise and has_gt), mask=args.mask)
+            jitter_std=float(getattr(args,'finetune_jitter_std',0.0))
+            if jitter_std > 0:
+                if not args.finetune or args.gt_2d or not has_3d or args.no_conf:
+                    raise ValueError('Registered jitter is detector-input fine-tuning only')
+                from lib.data.finetune_jitter import jitter_detector_input
+                batch_input=jitter_detector_input(batch_input,jitter_std,float(args.finetune_jitter_probability))
         # Release the previous step's gradients before allocating the next
         # forward activations.  This is numerically equivalent to clearing
         # them after forward because gradients are only consumed by step().

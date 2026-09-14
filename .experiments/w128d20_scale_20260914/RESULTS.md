@@ -1,5 +1,10 @@
 # Goal evidence:37.5mm not yet reached
 
+2026-09-14 23:32 China time: source epoch45 RAW fully evaluated at
+38.06752302741678/32.14069474392708mm. Original EMA remains preferred.
+Entire3-arm sequence confirmed COMPLETED; velocity10 best37.723871,final38.086749,
+no improvement. Next bounded trial: train-only mild detector jitter,not further calibration.
+
 Original W128D20 detector EMA45:37.659287/31.871699. Target remains near37.5,
 not redefined as successful code execution or improved P2.
 
