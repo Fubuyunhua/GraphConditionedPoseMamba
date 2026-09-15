@@ -1,0 +1,56 @@
+[
+  {
+    "protocol": "detector",
+    "model": "w64d8",
+    "parameters": 800083,
+    "config": "configs/gcs_pose/detector/w64d8.yaml",
+    "source": "configs/pose3d/graph_posemamba_h36m_w64_d8_0p8m_memopt_speed.yaml",
+    "epochs": 80,
+    "status": "RECIPE_NOT_NEW_TRAINING_RESULT"
+  },
+  {
+    "protocol": "detector",
+    "model": "w128d10",
+    "parameters": 3435395,
+    "config": "configs/gcs_pose/detector/w128d10.yaml",
+    "source": "configs/pose3d/graph_posemamba_h36m_w128_d10_b4_matched_80e.yaml",
+    "epochs": 80,
+    "status": "RECIPE_NOT_NEW_TRAINING_RESULT"
+  },
+  {
+    "protocol": "detector",
+    "model": "w128d20",
+    "parameters": 6836355,
+    "config": "configs/gcs_pose/detector/w128d20.yaml",
+    "source": "configs/pose3d/graph_posemamba_h36m_w128_d20_scale_80e.yaml",
+    "epochs": 80,
+    "status": "RECIPE_NOT_NEW_TRAINING_RESULT"
+  },
+  {
+    "protocol": "gt2d",
+    "model": "w64d8",
+    "parameters": 800083,
+    "config": "configs/gcs_pose/gt2d/w64d8.yaml",
+    "source": "configs/pose3d/graph_posemamba_h36m_w64_d8_gt2d_80e.yaml",
+    "epochs": 80,
+    "status": "RECIPE_NOT_NEW_TRAINING_RESULT"
+  },
+  {
+    "protocol": "gt2d",
+    "model": "w128d10",
+    "parameters": 3435395,
+    "config": "configs/gcs_pose/gt2d/w128d10.yaml",
+    "source": "configs/pose3d/graph_posemamba_h36m_w128_d10_gt_b4_scratch_80e.yaml",
+    "epochs": 80,
+    "status": "RECIPE_NOT_NEW_TRAINING_RESULT"
+  },
+  {
+    "protocol": "gt2d",
+    "model": "w128d20",
+    "parameters": 6836355,
+    "config": "configs/gcs_pose/gt2d/w128d20.yaml",
+    "source": "configs/pose3d/graph_posemamba_h36m_w128_gt2d_scratch_80e.yaml",
+    "epochs": 80,
+    "status": "RECIPE_NOT_NEW_TRAINING_RESULT"
+  }
+]
