@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "study": {
+    "name": "spatial_joined_20260915",
+    "created_at": "2026-09-15"
+  },
+  "baseline": {
+    "id": "FULL-W64D8-S0",
+    "model": "lib/model/PoseMamba.py:GraphConditionedPoseMamba",
+    "config": "configs/pose3d/conditioning_full_reference_80e.yaml",
+    "dataset": "H36M-SH detector T243",
+    "split": "S1,S5,S6,S7,S8 train;S9,S11 test",
+    "primary_metric": "EMA MPJPE",
+    "direction": "min",
+    "source_identity": "9a80bf63623771c8618dda33d7fad008dd1b14c6",
+    "checkpoint": "NONE: from scratch",
+    "seed_policy": [
+      0
+    ],
+    "command": "Independent run_spatial_joined_80e.py"
+  },
+  "audit": {
+    "verdict": "PASS",
+    "report": ".experiments/spatial_joined_20260915/PLAN_AND_AUDIT.md",
+    "accepted_risks": [
+      "single seed",
+      "test-monitored",
+      "new scan length affects runtime"
+    ],
+    "runtime_gate": "Default Full forward+gradient parity PASS; same seed fingerprint; spatial-only cross-frame effect0.0009985715; temporal independent; B1/B2/B4 train+EMA roundtrip PASS",
+    "initial_model_sha256": "0bacf361b9c26aa810193239e14e8a36c0dcf5e69c1d876f8fc1aef56cd42b20",
+    "b4_peak_reserved_mib": 3012
+  },
+  "experiments": [
+    {
+      "id": "SJOIN-W64D8-S0",
+      "track": "ABLATION",
+      "status": "COMPLETED",
+      "hypothesis": "Spatial frame-boundary reset affects precision",
+      "baseline_id": "FULL-W64D8-S0",
+      "delta": "spatial_recurrence_scope=joined ONLY; temporal remains independent",
+      "controls": "800083params,W64D8,B4,T243,LR5e-4,decay.99,WD.012,EMA.9998,no warmup/no clip,original losses",
+      "seeds": [
+        0
+      ],
+      "budget": "80epochs",
+      "primary_metric": "best EMA P1",
+      "secondary_metrics": [
+        "pairedP2",
+        "fixed80",
+        "latency",
+        "memory"
+      ],
+      "acceptance": "Valid single-factor evidence; no promised gain",
+      "falsification": "Joined does not worsen P1; independence necessity unsupported",
+      "stopping_rule": "80epochs,technical failure,user stop; no accuracy-based interruption",
+      "dependencies": [
+        "old Full parity",
+        "axis isolation",
+        "B1/B2/B4 smoke",
+        "fresh hash"
+      ],
+      "artifacts": {
+        "config": "configs/pose3d/ablation_spatial_joined_temporal_independent_80e.yaml",
+        "log": "launch_logs/train.log",
+        "checkpoint": "runs/spatial_joined_20260915/seed0_2026_09_15_T_05_50_39",
+        "local_log_sha256": "5aa217207dcc9257883cf2a01c2182908cefd9a11ddf6b7917a1f2b0cae459b7",
+        "analysis": ".experiments/spatial_joined_20260915/results/analysis.md",
+        "metrics": ".experiments/spatial_joined_20260915/results/metrics.json"
+      },
+      "result": {
+        "completed_epochs": 80,
+        "exit_code": 0,
+        "best_ema_epoch": 50,
+        "best_ema_p1_mm": 40.045326,
+        "best_ema_p2_mm": 33.42613,
+        "fixed80_ema_p1_mm": 40.57225,
+        "fixed80_ema_p2_mm": 33.438188,
+        "evaluation": "Original per-epoch test-monitored EMA; independent post-run replay NOT performed",
+        "baseline_best_ema_p1_mm": 39.84516172662857,
+        "p1_delta_vs_baseline_mm": 0.20016427337143483,
+        "scope": "single-seed evidence; no statistical significance claim"
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "id": "SJOIN-001",
+      "decision": "User explicitly confirms spatial-only joined, not deletion or both-axis joined; start after gates."
+    },
+    {
+      "id": "SJOIN-002",
+      "decision": "Completed80 epochs normally, exit0 previously read from remote marker. Original80-row log retrieved and parsed for publication; prior preregistration retained. No checkpoint/data publication or fresh training."
+    }
+  ]
+}
