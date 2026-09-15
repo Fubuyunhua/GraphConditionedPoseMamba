@@ -1,0 +1,14 @@
+_base_: conditioning_full_reference_80e.yaml
+config: configs/pose3d/ablation_spatial_joined_temporal_independent_80e.yaml
+checkpoint: runs/spatial_joined_20260915/seed0
+pretrained: ''
+resume: ''
+evaluate: ''
+finetune: false
+seed: 0
+epochs: 80
+recurrence_scope: independent
+spatial_recurrence_scope: joined
+temporal_recurrence_scope: independent
+require_fresh_initialization: true
+fresh_initialization_manifest: verification/spatial_joined/PREFLIGHT_PASS.json
