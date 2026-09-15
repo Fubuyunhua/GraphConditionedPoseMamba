@@ -604,6 +604,8 @@ class GraphConditionedPoseMamba(nn.Module):
     def execution_spec(self):
         return {
             "model": "GraphConditionedPoseMamba",
+            "spatial_recurrence_scope": getattr(self.blocks[0].spatial_ssm, "recurrence_scope", self.recurrence_scope),
+            "temporal_recurrence_scope": getattr(self.blocks[0].temporal_ssm, "recurrence_scope", self.recurrence_scope),
             "graph_injection_mode": self.blocks[0].graph_injection_mode,
             "graph_conditioning_targets": self.blocks[0].graph_conditioning_targets,
             "graph_topology_mode": self.graph_topology_mode,
