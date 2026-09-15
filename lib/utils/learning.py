@@ -50,7 +50,7 @@ def load_backbone(args):
             "This focused release supports PoseMamba and "
             f"GraphConditionedPoseMamba, received {args.backbone!r}"
         )
-    return GraphConditionedPoseMamba(
+    model = GraphConditionedPoseMamba(
         **common,
         use_graph_mixer=getattr(args, "use_graph_mixer", True),
         use_symmetry_edges=getattr(args, "use_symmetry_edges", True),
@@ -82,6 +82,19 @@ def load_backbone(args):
             args, "activation_checkpoint_blocks", False
         ),
     )
+    # Opt-in axis-specific recurrence boundaries. Construction and RNG consumption
+    # remain identical to Full; only the selected scan's state boundary changes.
+    for axis in ('spatial', 'temporal'):
+        scope = getattr(args, axis + '_recurrence_scope', None)
+        if scope is None:
+            continue
+        if not model.factorized_spatial_temporal:
+            raise ValueError('Per-axis recurrence scopes require factorized SSMs')
+        if scope not in ('independent', 'joined'):
+            raise ValueError(f'Invalid {axis}_recurrence_scope: {scope!r}')
+        for block in model.blocks:
+            getattr(block, axis + '_ssm').recurrence_scope = scope
+    return model
 
 
 __all__ = [
