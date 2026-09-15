@@ -1,5 +1,10 @@
 # H36M model sizes and computational cost
 
+> **SUPERSEDED — do not use the historical mixed-counter values below as current MACs.**
+> See [the corrected eight-model results](ALL_MODELS_EFFICIENCY_20260915.md) and [the counting-method audit](COMPLEXITY_REAUDIT_20260915.md).
+> The earlier claim of 10.217% less computation for GCPM W64D8 is withdrawn: under the corrected declared scan-inclusive convention, A0 is 4.551106G and GCPM W64D8 is 4.602397G. Historical values are retained for traceability.
+
+
 Measured in evaluation mode on RTX5090, PyTorch2.11.0+cu128. Input B=1,
 T=243,17 joints,xy+confidence; output243 frames. No training was performed.
 
