@@ -1,4 +1,4 @@
-GraphConditionedPoseMamba research snapshot
+GCS-Pose
 
 This package is derived from a PoseMamba/ReliPose research codebase and keeps
 the original PoseMamba class for baseline comparison.  The selective-scan CUDA
@@ -10,4 +10,16 @@ The package contains research modifications for fixed skeleton graph mixing,
 factorized bidirectional state propagation, graph-conditioned selective-state
 parameters, and a torch.compile-compatible wrapper around the existing CUDA
 kernel.  It does not include datasets, pretrained weights, experiment outputs,
-or third-party assets.
+or third-party assets in the source tree. GCS-Pose model-only checkpoint exports
+are distributed separately through this project's Releases.
+
+Upstream projects:
+PoseMamba: https://github.com/nankingjing/PoseMamba
+Mamba: https://github.com/state-spaces/mamba
+
+GCS-Pose is an independent research extension and is not an official PoseMamba
+release. Inherited Mamba/selective-scan machinery, bidirectional scanning and
+pose-lifting utilities are not claimed as original GCS-Pose contributions.
+GCS-Pose modifications include factorized spatial/temporal recurrence, skeleton
+graph mixing and context-conditioned selection (pose U/Z; graph-enhanced Delta/B/C).
+This project name does not replace any upstream copyright or license notice.

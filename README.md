@@ -9,6 +9,12 @@ content U and output gate Z; skeleton-enhanced context generates selective param
 Δ/B/C. Spatial and temporal recurrences are factorized. The implementation class
 remains `GraphConditionedPoseMamba` for checkpoint compatibility.
 
+**Relationship to PoseMamba.** This implementation builds upon
+[PoseMamba](https://github.com/nankingjing/PoseMamba), rather than being an
+implementation written entirely from scratch. GCS-Pose is a separate research
+extension, not an official PoseMamba release. See [provenance and contribution
+boundaries](docs/THIRD_PARTY_NOTICES.md).
+
 This public repository contains training/evaluation code, model configurations,
 installation checks and checkpoint release metadata. Internal experiment logs,
 job queues, research handoffs and development workflows are not part of the release.
@@ -109,9 +115,28 @@ skip term. Normalization, activations, other pointwise operations, memory traffi
 and backward are excluded. This is a MAC-equivalent convention, not exact hardware
 instructions; vanilla THOP subtotals are not directly comparable.
 
+## Acknowledgements
+
+We thank the authors of [PoseMamba](https://github.com/nankingjing/PoseMamba) and
+[Mamba](https://github.com/state-spaces/mamba) for their open-source implementations.
+Our code inherits the pose-lifting implementation foundation and selective-scan
+machinery, and implements factorized spatial/temporal recurrence with skeleton
+graph context conditioning the selective parameters. In GCS-Pose, pose features
+supply U/Z and skeleton-enhanced context supplies Δ/B/C. We do not claim the
+underlying Mamba formulation, bidirectional scanning, or inherited training/data
+utilities as new contributions. These acknowledgements do not imply endorsement
+by the upstream authors.
+
 ## License and citation
 
 Retain [LICENSE](LICENSE), [NOTICE](NOTICE), and
 [third-party notices](docs/THIRD_PARTY_NOTICES.md). Data and third-party weights have
 separate terms. Author list, DOI and publication metadata will be added when available;
 no publication acceptance is implied by this repository.
+
+If you use GCS-Pose, please also cite the relevant underlying work, including
+[PoseMamba (AAAI 2025)](https://ojs.aaai.org/index.php/AAAI/article/view/32401),
+and follow the [upstream Mamba citation guidance](https://github.com/state-spaces/mamba#citation).
+The PoseMamba authors are Yunlong Huang, Junshuo Liu, Ke Xian, and Robert Caiming Qiu.
+Canonical PoseMamba citation metadata is provided in its
+[official repository](https://github.com/nankingjing/PoseMamba#citation).

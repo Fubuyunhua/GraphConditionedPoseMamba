@@ -5,6 +5,11 @@
 视频二维关键点到三维人体姿态的训练与推理实现。姿态特征生成 U/Z，骨架增强上下文
 生成 Δ/B/C，空间与时间分别递推。代码类名保留 `GraphConditionedPoseMamba`。
 
+**与 PoseMamba 的关系：**本实现建立在
+[PoseMamba](https://github.com/nankingjing/PoseMamba) 的开源代码基础上，并非全部从零编写。
+GCS-Pose 是独立的研究扩展，不是 PoseMamba 官方版本。来源与贡献边界详见
+[第三方说明](docs/THIRD_PARTY_NOTICES.md)。
+
 公开仓库只保留复现所需代码、配置、模型说明和权重发布信息；完整实验日志、内部
 工作流和交接材料不作为公开内容。详细命令见 [英文 README](README.md)。
 
@@ -28,3 +33,18 @@
 
 GT2D 与 Detector 不能混用。当前 GT 评价保留输入 GT XY，属于已知 XY 的深度提升
 协议；详细边界见 [模型卡](docs/MODEL_CARD.md)。[权重发布状态](docs/WEIGHTS.md)。
+
+## 致谢与引用
+
+感谢 [PoseMamba](https://github.com/nankingjing/PoseMamba) 和
+[Mamba](https://github.com/state-spaces/mamba) 作者开放源码。
+本项目继承姿态提升代码基础及 selective-scan 实现；GCS-Pose 实现的扩展包括分解的
+空间/时间递推，以及由骨架增强上下文生成 Δ/B/C、由姿态特征生成 U/Z 的图条件化设计。
+基础 Mamba 公式、双向扫描及继承的数据和训练工具不作为本项目原创贡献。
+致谢不表示上游作者认可或背书本项目。
+
+使用本项目时，请同时引用相关基础工作，特别是
+[PoseMamba（AAAI 2025）](https://ojs.aaai.org/index.php/AAAI/article/view/32401)，
+其正式引用信息见 [原仓库 Citation](https://github.com/nankingjing/PoseMamba#citation)。
+请保留 [LICENSE](LICENSE)、[NOTICE](NOTICE) 和源文件版权声明。
+GCS-Pose 的作者列表、DOI 和正式出版信息待提供，不虚构发表信息。
