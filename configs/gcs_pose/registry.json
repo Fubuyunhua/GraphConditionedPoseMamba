@@ -1,0 +1,50 @@
+[
+  {
+    "protocol": "detector",
+    "model": "w64d8",
+    "parameters": 800083,
+    "config": "configs/gcs_pose/detector/w64d8.yaml",
+    "epochs": 80,
+    "status": "RECIPE_NOT_NEW_TRAINING_RESULT"
+  },
+  {
+    "protocol": "detector",
+    "model": "w128d10",
+    "parameters": 3435395,
+    "config": "configs/gcs_pose/detector/w128d10.yaml",
+    "epochs": 80,
+    "status": "RECIPE_NOT_NEW_TRAINING_RESULT"
+  },
+  {
+    "protocol": "detector",
+    "model": "w128d20",
+    "parameters": 6836355,
+    "config": "configs/gcs_pose/detector/w128d20.yaml",
+    "epochs": 80,
+    "status": "RECIPE_NOT_NEW_TRAINING_RESULT"
+  },
+  {
+    "protocol": "gt2d",
+    "model": "w64d8",
+    "parameters": 800083,
+    "config": "configs/gcs_pose/gt2d/w64d8.yaml",
+    "epochs": 80,
+    "status": "RECIPE_NOT_NEW_TRAINING_RESULT"
+  },
+  {
+    "protocol": "gt2d",
+    "model": "w128d10",
+    "parameters": 3435395,
+    "config": "configs/gcs_pose/gt2d/w128d10.yaml",
+    "epochs": 80,
+    "status": "RECIPE_NOT_NEW_TRAINING_RESULT"
+  },
+  {
+    "protocol": "gt2d",
+    "model": "w128d20",
+    "parameters": 6836355,
+    "config": "configs/gcs_pose/gt2d/w128d20.yaml",
+    "epochs": 80,
+    "status": "RECIPE_NOT_NEW_TRAINING_RESULT"
+  }
+]
